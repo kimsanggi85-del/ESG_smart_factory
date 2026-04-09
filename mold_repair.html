@@ -9,33 +9,33 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a1018;--surface:#0f1923;--border:#1e2d3d;--card:#1a2332;--text:#e8ecf1;--muted:#8892a4;--dim:#5a6a7a;--blue:#2980b9;--blue-light:#5dade2;--orange:#e67e22;--purple:#9b59b6;--green:#27ae60;--red:#e74c3c;--yellow:#f1c40f;--teal:#1abc9c}
+:root{--bg:#f5f6fa;--surface:#ffffff;--border:#e0e3eb;--card:#f0f2f7;--text:#1a1a2e;--muted:#6b7280;--dim:#9ca3af;--blue:#2563eb;--blue-light:#3b82f6;--orange:#ea580c;--purple:#7c3aed;--green:#16a34a;--red:#dc2626;--yellow:#eab308;--teal:#0d9488}
 body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 input,select,textarea,button{font-family:inherit}
-.header{background:linear-gradient(135deg,var(--surface),#162030);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;justify-content:space-between;align-items:center}
+.header{background:linear-gradient(135deg,#1e3a5f,#2563eb);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;justify-content:space-between;align-items:center}
 .logo{display:flex;align-items:center;gap:14}
-.logo-icon{width:36px;height:36px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff}
-.logo-title{font-size:17px;font-weight:800;letter-spacing:-0.5px}
-.logo-sub{font-size:11px;color:var(--dim)}
+.logo-icon{width:36px;height:36px;background:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#2563eb}
+.logo-title{font-size:17px;font-weight:800;letter-spacing:-0.5px;color:#fff}
+.logo-sub{font-size:11px;color:rgba(255,255,255,.6)}
 .header-actions{display:flex;gap:12px;align-items:center}
 .alert-badge{background:var(--red);color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
-.alert-text{font-size:12px;color:var(--red);margin-left:6px;font-weight:600}
+.alert-text{font-size:12px;color:#fff;margin-left:6px;font-weight:600}
 .db-status{font-size:11px;padding:4px 10px;border-radius:10px;font-weight:600}
-.db-online{background:#27ae6033;color:var(--green)}
-.db-offline{background:#e74c3c33;color:var(--red)}
-.db-loading{background:#e67e2233;color:var(--orange)}
+.db-online{background:#dcfce7;color:var(--green)}
+.db-offline{background:#fee2e2;color:var(--red)}
+.db-loading{background:#ffedd5;color:var(--orange)}
 .btn{padding:9px 22px;border:none;border-radius:4px;cursor:pointer;font-weight:600;font-size:13px;color:#fff;transition:opacity .2s}
 .btn:hover{opacity:.85}
 .btn-primary{background:var(--blue)}
-.btn-secondary{background:#2a3a4a}
+.btn-secondary{background:#6b7280}
 .btn-teal{background:var(--teal)}
 .btn-green{background:var(--green)}
 .btn-red{background:var(--red)}
 .btn-sm{padding:5px 14px;font-size:12px}
-.tabs{padding:0 28px;background:#0d1520;border-bottom:1px solid var(--border);display:flex;overflow-x:auto}
+.tabs{padding:0 28px;background:#ffffff;border-bottom:1px solid var(--border);display:flex;overflow-x:auto}
 .tab{padding:10px 20px;cursor:pointer;font-weight:600;font-size:13px;border:none;background:transparent;color:var(--muted);border-radius:4px 4px 0 0;transition:all .2s;white-space:nowrap}
 .tab.active{background:var(--blue);color:#fff}
-.tab:hover:not(.active){color:var(--text)}
+.tab:hover:not(.active){color:var(--text);background:#f0f2f7}
 .content{padding:28px}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
 .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;border-left:3px solid var(--blue)}
@@ -49,28 +49,28 @@ input,select,textarea,button{font-family:inherit}
 .bar-label{width:80px;font-size:12px;color:var(--muted);text-align:right;flex-shrink:0}
 .bar-track{flex:1;height:24px;background:var(--card);border-radius:4px;overflow:hidden}
 .bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:12px;font-weight:700;color:#fff;transition:width .5s}
-.alert-item{padding:8px 0;border-bottom:1px solid var(--card);font-size:13px;display:flex;align-items:center;gap:8px;cursor:pointer}
-.alert-item:hover{color:var(--blue-light)}
+.alert-item{padding:8px 0;border-bottom:1px solid #f0f1f3;font-size:13px;display:flex;align-items:center;gap:8px;cursor:pointer}
+.alert-item:hover{color:var(--blue)}
 .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .filters{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
-.input{padding:8px 10px;background:var(--card);border:1px solid #2a3a4a;border-radius:4px;color:var(--text);font-size:13px}
+.input{padding:8px 10px;background:#fff;border:1px solid #d1d5db;border-radius:4px;color:var(--text);font-size:13px}
 select.input{appearance:auto}
 .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:8px}
 table{width:100%;border-collapse:collapse;font-size:13px}
-thead{background:var(--surface)}
-th{padding:10px 12px;text-align:left;color:var(--muted);font-weight:600;font-size:11px;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:10px 12px;border-bottom:1px solid #141e2a}
-tr.row:hover{background:#162030!important}
+thead{background:#f8f9fb}
+th{padding:10px 12px;text-align:left;color:var(--muted);font-weight:600;font-size:11px;border-bottom:2px solid var(--border);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid #f0f1f3}
+tr.row:hover{background:#eef2ff!important}
 tr.row{cursor:pointer;transition:background .15s}
 .badge{color:#fff;padding:3px 10px;border-radius:3px;font-size:12px;font-weight:600;letter-spacing:.5px;display:inline-block}
-.code-link{font-weight:600;color:var(--blue-light)}
+.code-link{font-weight:600;color:var(--blue)}
 .shot-bar{display:flex;align-items:center;gap:8px}
-.shot-track{width:80px;height:8px;background:#1a1a2e;border-radius:4px;overflow:hidden}
+.shot-track{width:80px;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden}
 .shot-fill{height:100%;border-radius:4px;transition:width .5s}
 .shot-text{font-size:11px;color:var(--muted)}
 .ellipsis{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:8px;width:800px;max-height:88vh;overflow-y:auto;padding:28px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:1000;display:flex;align-items:center;justify-content:center}
+.modal{background:#fff;border:1px solid var(--border);border-radius:12px;width:800px;max-height:88vh;overflow-y:auto;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
 .modal-header{display:flex;justify-content:space-between;margin-bottom:20px}
 .modal-header h3{font-size:18px;font-weight:700}
 .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
@@ -85,17 +85,17 @@ tr.row{cursor:pointer;transition:background .15s}
 .section-title{color:var(--muted);font-size:12px;margin:16px 0 10px;font-weight:600}
 .stat-line{font-size:13px;color:var(--muted);line-height:2}
 .stat-line b{color:var(--text)}
-.alert-full{padding:12px 16px;border-bottom:1px solid var(--card);display:flex;align-items:center;gap:12px;cursor:pointer;font-size:13px}
-.alert-full:hover{background:var(--card)}
+.alert-full{padding:12px 16px;border-bottom:1px solid #f0f1f3;display:flex;align-items:center;gap:12px;cursor:pointer;font-size:13px}
+.alert-full:hover{background:#f0f2f7}
 .alert-arrow{margin-left:auto;font-size:11px;color:var(--dim)}
 .field{margin-bottom:14px}
 .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:600}
-.field input,.field select,.field textarea{width:100%;padding:8px 10px;background:var(--card);border:1px solid #2a3a4a;border-radius:4px;color:var(--text);font-size:13px}
+.field input,.field select,.field textarea{width:100%;padding:8px 10px;background:#fff;border:1px solid #d1d5db;border-radius:4px;color:var(--text);font-size:13px}
 .field textarea{resize:vertical;height:70px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
 .form-actions{margin-top:20px;display:flex;gap:10px;justify-content:flex-end}
-.photo-zone{border:2px dashed #2a3a4a;border-radius:8px;padding:16px;text-align:center;cursor:pointer;transition:border-color .2s;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.photo-zone{border:2px dashed #d1d5db;border-radius:8px;padding:16px;text-align:center;cursor:pointer;transition:border-color .2s;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;background:#fafbfc}
 .photo-zone:hover{border-color:var(--blue)}
 .photo-zone img{max-width:100%;max-height:200px;border-radius:6px;margin-top:8px}
 .photo-zone .ph-label{font-size:13px;color:var(--muted);margin-bottom:4px}
@@ -105,23 +105,23 @@ tr.row{cursor:pointer;transition:background .15s}
 .photo-compare{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .photo-compare img{width:100%;border-radius:6px;border:1px solid var(--border)}
 .mold-status{padding:2px 8px;border-radius:3px;font-size:11px;font-weight:600}
-.mold-active{background:#27ae6033;color:var(--green)}
-.mold-inactive{background:#e74c3c33;color:var(--red)}
-.mold-maintenance{background:#e67e2233;color:var(--orange)}
-.mold-new{background:#1abc9c33;color:var(--teal)}
+.mold-active{background:#dcfce7;color:var(--green)}
+.mold-inactive{background:#fee2e2;color:var(--red)}
+.mold-maintenance{background:#ffedd5;color:var(--orange)}
+.mold-new{background:#ccfbf1;color:var(--teal)}
 .count-badge{background:var(--card);color:var(--muted);padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px}
 .history-item{display:flex;gap:12px;align-items:center;margin-bottom:8px;font-size:13px}
-.export-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
-.export-btn:hover{color:var(--text);border-color:var(--blue)}
+.export-btn{background:#fff;border:1px solid #d1d5db;color:var(--muted);padding:6px 14px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.export-btn:hover{color:var(--text);border-color:var(--blue);background:#eef2ff}
 .settings-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 .setting-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px}
 .setting-card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
 .setting-card-desc{font-size:11px;color:var(--dim);margin-bottom:14px}
-.setting-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--card);border-radius:4px;margin-bottom:6px;font-size:13px}
-.setting-item:hover{background:#1e2d3d}
+.setting-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f8f9fb;border:1px solid #eee;border-radius:4px;margin-bottom:6px;font-size:13px}
+.setting-item:hover{background:#eef2ff}
 .setting-btn{background:none;border:none;cursor:pointer;font-size:12px;padding:2px 6px;border-radius:3px}
-.setting-btn:hover{background:#2a3a4a}
-.setting-btn-add{display:flex;align-items:center;gap:4px;padding:6px 12px;background:var(--card);border:1px dashed var(--border);border-radius:4px;color:var(--muted);font-size:12px;cursor:pointer;width:100%;justify-content:center;margin-top:6px}
+.setting-btn:hover{background:#e5e7eb}
+.setting-btn-add{display:flex;align-items:center;gap:4px;padding:6px 12px;background:#f8f9fb;border:1px dashed #d1d5db;border-radius:4px;color:var(--muted);font-size:12px;cursor:pointer;width:100%;justify-content:center;margin-top:6px}
 .setting-btn-add:hover{border-color:var(--teal);color:var(--teal)}
 .setting-count{font-size:11px;color:var(--dim);font-weight:400}
 .toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:6px;font-size:13px;font-weight:600;z-index:2000;animation:slideIn .3s;color:#fff}
@@ -129,9 +129,23 @@ tr.row{cursor:pointer;transition:background .15s}
 .toast-error{background:var(--red)}
 .toast-info{background:var(--blue)}
 @keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-.loading-overlay{position:fixed;inset:0;background:rgba(10,16,24,.9);z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.spinner{width:40px;height:40px;border:3px solid var(--border);border-top:3px solid var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.95);z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.spinner{width:40px;height:40px;border:3px solid #e5e7eb;border-top:3px solid var(--blue);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
 @keyframes spin{to{transform:rotate(360deg)}}
+.preview-table{max-height:300px;overflow:auto;margin:16px 0;border:1px solid var(--border);border-radius:6px}
+.preview-table table{font-size:12px}
+.preview-table th{position:sticky;top:0;background:#f8f9fb;z-index:1}
+.import-summary{background:#eef2ff;border:1px solid #c7d2fe;border-radius:6px;padding:14px;font-size:13px;margin:12px 0}
+.import-summary .num{color:var(--blue);font-weight:800;font-size:18px}
+.dup-warn{background:#fef3c7;border:1px solid #fbbf24;border-radius:6px;padding:10px 14px;font-size:12px;color:#92400e;margin:10px 0}
+.search-bar{display:flex;gap:10px;padding:16px;background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.search-bar input,.search-bar select{padding:8px 12px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;color:var(--text)}
+.search-btn{padding:8px 20px;background:var(--blue);color:#fff;border:none;border-radius:4px;font-weight:600;font-size:13px;cursor:pointer}
+.search-btn:hover{opacity:.85}
+.alert-card{padding:12px 16px;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;font-size:13px;border:1px solid}
+.alert-card.repair{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+.alert-card.shot{background:#fef3c7;border-color:#fde68a;color:#92400e}
+.alert-card.delay{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
 @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.grid-2,.photo-compare{grid-template-columns:1fr}.modal{width:95%;padding:20px}.settings-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.kpi-grid{grid-template-columns:1fr}.filters{flex-direction:column}.header{flex-direction:column;gap:12px}.settings-grid{grid-template-columns:1fr}}
 </style>
@@ -148,7 +162,7 @@ tr.row{cursor:pointer;transition:background .15s}
     <div class="logo-icon">M</div>
     <div>
       <div class="logo-title">금형 수리관리 시스템</div>
-      <div class="logo-sub">Mold Repair Management System v4.0 — Supabase DB</div>
+      <div class="logo-sub">Mold Repair Management System v5.0</div>
     </div>
   </div>
   <div class="header-actions">
@@ -185,6 +199,7 @@ tr.row{cursor:pointer;transition:background .15s}
 
 <input type="file" id="moldExcelInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleMoldExcel(this)">
 <input type="file" id="repairExcelInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleRepairExcel(this)">
+<input type="file" id="shotUpdateInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleShotUpdate(this)">
 
 <script>
 // ==================== SUPABASE 연결 ====================
@@ -199,16 +214,20 @@ const STAGE_COLORS={"의뢰접수":"#e67e22","작업중":"#3498db","측정검증
 let moldDB=[];
 let repairData=[];
 let repairHistory={};
-let settingsData={
-  moldGroups:{name:"금형그룹 (톤수)",desc:"금형 톤수 분류",items:["100톤","150톤","200톤","250톤","300톤"]},
+const SETTINGS_VERSION='v5.1'; // Change this to force-sync settings to DB
+
+const DEFAULT_SETTINGS={
+  moldGroups:{name:"금형그룹 (톤수)",desc:"금형 톤수 분류",items:["100톤","150톤","200톤","250톤","300톤","800톤"]},
   repairTypes:{name:"수리유형",desc:"수리 종류 분류",items:["부품교체","정밀보전","라이너조정","연마","용접","기타"]},
   moldStatuses:{name:"금형상태",desc:"금형 가동 상태 구분",items:["가동중","보전중","폐기대기","신규"]},
   customers:{name:"고객사",desc:"거래처 / 납품처",items:["현대","기아","GM","FORD"]},
   locations:{name:"위치 / 라인",desc:"금형 설치 위치",items:["A-1라인","A-2라인","A-3라인","B-1라인","B-2라인","C-1라인","C-2라인","D-1라인","D-2라인","창고"]},
-  requesters:{name:"의뢰자",desc:"수리 의뢰 담당자",items:["김철수","이민호","최수진","정하늘"]},
-  assignees:{name:"수리담당자",desc:"금형 수리 작업자",items:["박영희","김대현","이승준","최민수"]},
-  repairReasons:{name:"수리사유 (자주 사용)",desc:"빠른 입력용",items:["내경치수 NG","외경치수 NG","BURR 발생","기즈 발생","라이너 조정","펀치 마모","다이 마모"]}
+  requesters:{name:"의뢰자",desc:"수리 의뢰 담당자",items:["유성환","왕석주","정주은","최민호","강영태","하경자","한영숙","고성신","정승옥","김태주","윤소미","최두연","황복연","박종식","황덕순","구진석","서희정","진민성","황문강","김고은"]},
+  assignees:{name:"수리담당자",desc:"금형 수리 작업자",items:["박영희","김대현","이승준","최민수","임혜종","왕석주","강영태","여혜빈","김동현"]},
+  repairReasons:{name:"수리사유 (자주 사용)",desc:"빠른 입력용",items:["내경치수 NG","외경치수 NG","BURR 발생","기즈 발생","라이너 조정","펀치 마모","다이 마모","높이치수 NG","직각도 NG","평행도 NG"]}
 };
+
+let settingsData=JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
 
 let currentTab="dashboard";
 let filterStage="전체",filterGroup="전체",filterSearch="";
@@ -339,8 +358,20 @@ function fmtDate(v){if(!v)return"";if(typeof v==='number'){const d=new Date((v-2
 
 function getAlerts(){
   const alerts=[];
-  moldDB.forEach(m=>{if(m.status!=="폐기대기"&&(m.shot_count||0)/(m.max_shots||1)>0.8)alerts.push({type:"shot",msg:`${m.mold_code}(${m.mold_name||''}) 샷수 ${((m.shot_count||0)/(m.max_shots||1)*100).toFixed(0)}% - 예방보전 필요`,id:m.id,kind:"mold"})});
-  repairData.forEach(r=>{if(r.stage==="입고완료")return;const hist=getHistory(r.id);const last=hist.length?hist[hist.length-1]:null;if(last){const days=Math.floor((Date.now()-new Date(last.action_date))/86400000);if(days>5)alerts.push({type:"delay",msg:`${r.mold_code} ${r.stage} 상태 ${days}일 경과`,id:r.id,kind:"repair"})}});
+  // 모든 진행중 수리건 (입고완료 전까지 알림 유지)
+  repairData.forEach(r=>{
+    if(r.stage==="입고완료")return;
+    const hist=getHistory(r.id);
+    const last=hist.length?hist[hist.length-1]:null;
+    const days=last?Math.floor((Date.now()-new Date(last.action_date))/86400000):0;
+    const m=getMold(r.mold_code);
+    const moldName=m?m.mold_name||'':'';
+    if(days>5){
+      alerts.push({type:"delay",msg:`⏰ ${r.mold_code}(${moldName}) ${r.stage} - ${days}일 경과 (장기 미처리)`,id:r.id,kind:"repair",stage:r.stage,days:days});
+    }else{
+      alerts.push({type:"repair",msg:`🔧 ${r.mold_code}(${moldName}) - ${r.stage} | ${r.reason||''}`,id:r.id,kind:"repair",stage:r.stage,days:days});
+    }
+  });
   return alerts;
 }
 
@@ -394,7 +425,11 @@ function renderDashboard(stats,alerts){
   stats.byStage.forEach(s=>{h+=`<div class="bar-row"><span class="bar-label">${s.stage}</span><div class="bar-track"><div class="bar-fill" style="width:${s.count/barMax*100}%;background:${STAGE_COLORS[s.stage]}">${s.count}</div></div></div>`});
   h+=`</div><div class="panel"><div class="panel-title">최근 알림</div>`;
   if(!alerts.length)h+=`<div style="color:var(--dim);font-size:13px">알림 없음</div>`;
-  else alerts.slice(0,5).forEach(a=>{h+=`<div class="alert-item" onclick="${a.kind==='repair'?`openRepairDetail(${a.id})`:`openMoldDetail(${a.id})`}"><span class="dot" style="background:${a.type==='shot'?'var(--red)':'var(--orange)'}"></span>${a.msg}</div>`});
+  else alerts.slice(0,8).forEach(a=>{
+    const dotColor=a.type==='shot'?'var(--yellow)':a.type==='delay'?'var(--red)':'var(--orange)';
+    h+=`<div class="alert-item" onclick="${a.kind==='repair'?`openRepairDetail(${a.id})`:`openMoldDetail(${a.id})`}"><span class="dot" style="background:${dotColor}"></span><span style="font-size:12px">${a.msg}</span></div>`;
+  });
+  if(alerts.length>8)h+=`<div style="text-align:center;padding:6px"><a href="#" onclick="switchTab('alerts',document.querySelector('[data-tab=alerts]'));return false" style="color:var(--blue);font-size:12px">전체 ${alerts.length}건 보기 →</a></div>`;
   h+=`</div></div>`;
   document.getElementById("view-dashboard").innerHTML=h;
 }
@@ -412,21 +447,21 @@ function renderMoldDB(){
     <select class="input" style="width:120px" onchange="moldFilterGroup=this.value;render()"><option>전체</option>${getMoldGroups().map(g=>`<option${moldFilterGroup===g?' selected':''}>${g}</option>`).join('')}</select>
     <input class="input" style="width:260px" placeholder="검색..." value="${moldFilterSearch}" oninput="moldFilterSearch=this.value;render()">
     <div style="flex:1"></div>
-    <button class="export-btn" onclick="downloadMoldTemplate()">📋 양식 다운로드</button>
+    <button class="export-btn" onclick="downloadMoldTemplate()">📋 양식</button>
     <button class="export-btn" onclick="document.getElementById('moldExcelInput').click()">📤 엑셀 업로드</button>
     <button class="export-btn" onclick="exportMoldExcel()">📥 엑셀 다운로드</button>
     <button class="btn btn-teal" onclick="openNewMoldForm()">+ 금형 등록</button>
     <span style="color:var(--dim);font-size:12px">${filtered.length}/${moldDB.length}종</span>
   </div>`;
   h+=`<div class="table-wrap"><table><thead><tr>`;
-  ["ID","상태","금형코드","그룹","품명","품번","고객사","제품명","샷수현황","위치","등록일","최종수리","수리횟수"].forEach(c=>{h+=`<th>${c}</th>`});
+  ["ID","상태","금형코드","그룹","품명","품번","고객사","제품명","위치","등록일","최종수리","수리횟수"].forEach(c=>{h+=`<th>${c}</th>`});
   h+=`</tr></thead><tbody>`;
   filtered.forEach((m,i)=>{
     const repCnt=getRepairsForMold(m.mold_code).length;
-    h+=`<tr class="row" style="background:${i%2?'#0c1219':'transparent'}" onclick="openMoldDetail(${m.id})">
+    h+=`<tr class="row" style="background:${i%2?'#f8f9fb':'transparent'}" onclick="openMoldDetail(${m.id})">
       <td>${m.id}</td><td>${statusBadge(m.status||'가동중')}</td><td class="code-link">${m.mold_code}</td><td>${m.mold_group||''}</td>
       <td>${m.mold_name||''}</td><td style="font-size:11px">${m.mold_no||''}</td><td>${m.customer||''}</td><td>${m.product||''}</td>
-      <td>${shotBar(m.shot_count,m.max_shots)}</td><td>${m.location||''}</td><td>${m.reg_date||''}</td><td>${m.last_repair||'-'}</td>
+      <td>${m.location||''}</td><td>${m.reg_date||''}</td><td>${m.last_repair||'-'}</td>
       <td style="text-align:center">${repCnt?`<span class="count-badge">${repCnt}</span>`:'-'}</td></tr>`;
   });
   h+=`</tbody></table></div>`;
@@ -437,13 +472,13 @@ function openMoldDetail(id){
   const m=moldDB.find(x=>x.id===id);if(!m)return;
   const repairs=getRepairsForMold(m.mold_code);const totalCost=repairs.reduce((a,b)=>a+(b.cost||0),0);
   document.getElementById("modalTitle").textContent=`금형 상세 - ${m.mold_code}`;
-  let h=`<div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">${statusBadge(m.status||'')} ${shotBar(m.shot_count,m.max_shots)}</div>`;
+  let h=`<div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">${statusBadge(m.status||'')}</div>`;
   h+=`<div class="grid-2"><div><div class="section-title">기본 정보</div><div class="info-box">
     금형코드: <b>${m.mold_code}</b><br>금형그룹: ${m.mold_group||''}<br>품명: ${m.mold_name||''}<br>품번: ${m.mold_no||''}<br>
     고객사: <b>${m.customer||''}</b><br>제품명: ${m.product||''}<br>위치: ${m.location||''}<br>등록일: ${m.reg_date||''}<br>비고: ${m.note||'-'}
   </div></div><div><div class="section-title">수리 이력 요약</div><div class="info-box">
     총 수리횟수: <b>${repairs.length}건</b><br>총 수리비용: <b>${(totalCost/10000).toFixed(0)}만원</b><br>
-    최종 수리일: ${m.last_repair||'없음'}<br>샷수: <b>${(m.shot_count||0).toLocaleString()}</b> / ${(m.max_shots||300000).toLocaleString()}
+    최종 수리일: ${m.last_repair||'없음'}
   </div></div></div>`;
   if(repairs.length){
     h+=`<div class="section-title">수리 이력</div><div class="table-wrap"><table><thead><tr><th>날짜</th><th>상태</th><th>유형</th><th>사유</th><th>비용</th></tr></thead><tbody>`;
@@ -465,8 +500,6 @@ function openNewMoldForm(){
     <div class="field"><label>제품명</label><input id="mf_prod"></div>
     <div class="field"><label>상태</label><select id="mf_status">${getMoldStatuses().map(s=>`<option>${s}</option>`).join('')}</select></div>
     <div class="field"><label>위치</label><select id="mf_loc"><option value="">-- 선택 --</option>${getLocations().map(l=>`<option>${l}</option>`).join('')}</select></div>
-    <div class="field"><label>현재 샷수</label><input id="mf_shot" type="number" value="0"></div>
-    <div class="field"><label>최대 샷수</label><input id="mf_maxshot" type="number" value="300000"></div>
   </div>
   <div class="field"><label>비고</label><textarea id="mf_note" style="height:50px"></textarea></div>
   <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">취소</button><button class="btn btn-teal" onclick="saveMold()">등록</button></div>`;
@@ -476,7 +509,7 @@ function openNewMoldForm(){
 async function saveMold(){
   const code=document.getElementById("mf_code").value.trim();const name=document.getElementById("mf_name").value.trim();
   if(!code||!name){alert("금형코드와 품명은 필수입니다.");return}
-  const result=await dbInsertMold({mold_code:code,mold_group:document.getElementById("mf_group").value,mold_name:name,mold_no:document.getElementById("mf_no").value,customer:document.getElementById("mf_cust").value,product:document.getElementById("mf_prod").value,status:document.getElementById("mf_status").value,shot_count:parseInt(document.getElementById("mf_shot").value)||0,max_shots:parseInt(document.getElementById("mf_maxshot").value)||300000,location:document.getElementById("mf_loc").value,note:document.getElementById("mf_note").value});
+  const result=await dbInsertMold({mold_code:code,mold_group:document.getElementById("mf_group").value,mold_name:name,mold_no:document.getElementById("mf_no").value,customer:document.getElementById("mf_cust").value,product:document.getElementById("mf_prod").value,status:document.getElementById("mf_status").value,shot_count:0,max_shots:300000,location:document.getElementById("mf_loc").value,note:document.getElementById("mf_note").value});
   if(result){closeModal();await dbLoad()}
 }
 
@@ -492,8 +525,6 @@ function openEditMold(id){
     <div class="field"><label>제품명</label><input id="me_prod" value="${m.product||''}"></div>
     <div class="field"><label>상태</label><select id="me_status">${getMoldStatuses().map(s=>`<option${m.status===s?' selected':''}>${s}</option>`).join('')}</select></div>
     <div class="field"><label>위치</label><select id="me_loc"><option value="">-- 선택 --</option>${getLocations().map(l=>`<option${m.location===l?' selected':''}>${l}</option>`).join('')}</select></div>
-    <div class="field"><label>현재 샷수</label><input id="me_shot" type="number" value="${m.shot_count||0}"></div>
-    <div class="field"><label>최대 샷수</label><input id="me_maxshot" type="number" value="${m.max_shots||300000}"></div>
   </div>
   <div class="field"><label>비고</label><textarea id="me_note" style="height:50px">${m.note||''}</textarea></div>
   <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">취소</button><button class="btn btn-primary" onclick="updateMold(${id})">저장</button></div>`;
@@ -501,12 +532,86 @@ function openEditMold(id){
 }
 
 async function updateMold(id){
-  const ok=await dbUpdateMold(id,{mold_code:document.getElementById("me_code").value,mold_group:document.getElementById("me_group").value,mold_name:document.getElementById("me_name").value,mold_no:document.getElementById("me_no").value,customer:document.getElementById("me_cust").value,product:document.getElementById("me_prod").value,status:document.getElementById("me_status").value,location:document.getElementById("me_loc").value,shot_count:parseInt(document.getElementById("me_shot").value)||0,max_shots:parseInt(document.getElementById("me_maxshot").value)||300000,note:document.getElementById("me_note").value});
+  const ok=await dbUpdateMold(id,{mold_code:document.getElementById("me_code").value,mold_group:document.getElementById("me_group").value,mold_name:document.getElementById("me_name").value,mold_no:document.getElementById("me_no").value,customer:document.getElementById("me_cust").value,product:document.getElementById("me_prod").value,status:document.getElementById("me_status").value,location:document.getElementById("me_loc").value,note:document.getElementById("me_note").value});
   if(ok){closeModal();await dbLoad()}
 }
 
 // ========== REPAIR LIST ==========
 let filterYear="전체";
+
+// 수리이력 조회 모달
+function openRepairSearch(){
+  document.getElementById("modalTitle").textContent="🔍 수리이력 조회";
+  const moldOpts=moldDB.map(m=>`<option value="${m.mold_code}">${m.mold_code} (${m.mold_name||''})</option>`).join('');
+  let h=`<div class="search-bar" style="flex-direction:column;align-items:stretch">
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div class="field" style="flex:1;min-width:180px;margin:0"><label>금형코드</label><select id="rs_mold" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:4px;font-size:13px"><option value="">전체</option>${moldOpts}</select></div>
+      <div class="field" style="flex:1;min-width:120px;margin:0"><label>수리유형</label><select id="rs_type" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:4px;font-size:13px"><option value="">전체</option>${getRepairTypes().map(t=>`<option>${t}</option>`).join('')}</select></div>
+      <div class="field" style="flex:1;min-width:120px;margin:0"><label>상태</label><select id="rs_stage" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:4px;font-size:13px"><option value="">전체</option>${STAGES.map(s=>`<option>${s}</option>`).join('')}</select></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div class="field" style="flex:1;min-width:140px;margin:0"><label>시작일</label><input type="date" id="rs_from" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:4px;font-size:13px"></div>
+      <div class="field" style="flex:1;min-width:140px;margin:0"><label>종료일</label><input type="date" id="rs_to" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:4px;font-size:13px" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="field" style="flex:1;min-width:180px;margin:0"><label>키워드 (사유/설명)</label><input id="rs_keyword" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:4px;font-size:13px" placeholder="예: 내경, BURR, 라이너 등"></div>
+      <div class="field" style="min-width:80px;margin:0;display:flex;align-items:flex-end"><button class="search-btn" onclick="executeRepairSearch()" style="width:100%;padding:10px">🔍 조회</button></div>
+    </div>
+  </div>
+  <div id="repairSearchResult" style="color:var(--dim);text-align:center;padding:30px">조건을 선택한 후 [조회] 버튼을 클릭하세요.</div>`;
+  document.getElementById("modalBody").innerHTML=h;
+  document.getElementById("modalOverlay").style.display="flex";
+}
+
+function executeRepairSearch(){
+  const moldCode=document.getElementById('rs_mold').value;
+  const repType=document.getElementById('rs_type').value;
+  const stage=document.getElementById('rs_stage').value;
+  const from=document.getElementById('rs_from').value;
+  const to=document.getElementById('rs_to').value;
+  const keyword=document.getElementById('rs_keyword').value.toLowerCase();
+
+  const results=repairData.filter(r=>{
+    if(moldCode&&r.mold_code!==moldCode)return false;
+    if(repType&&r.repair_type!==repType)return false;
+    if(stage&&r.stage!==stage)return false;
+    if(from&&(r.request_date||'')<from)return false;
+    if(to&&(r.request_date||'')>to)return false;
+    if(keyword&&!((r.reason||'')+(r.description||'')+(r.mold_code||'')).toLowerCase().includes(keyword))return false;
+    return true;
+  }).sort((a,b)=>(b.request_date||'').localeCompare(a.request_date||''));
+
+  const totalCost=results.reduce((a,b)=>a+(b.cost||0),0);
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <span style="font-size:14px;font-weight:700">조회 결과: ${results.length}건</span>
+    <span style="font-size:12px;color:var(--muted)">총 비용: ${(totalCost/10000).toFixed(0)}만원</span>
+  </div>`;
+
+  if(!results.length){
+    h+=`<div style="color:var(--dim);text-align:center;padding:30px">조건에 맞는 수리이력이 없습니다.</div>`;
+  }else{
+    h+=`<div style="overflow-x:auto;border:1px solid var(--border);border-radius:6px;max-height:400px;overflow-y:auto"><table style="font-size:12px"><thead><tr>
+      <th>ID</th><th>상태</th><th>금형코드</th><th>품명</th><th>유형</th><th>신청일</th><th>담당자</th><th>수리사유</th><th>비용</th>
+    </tr></thead><tbody>`;
+    results.forEach((r,i)=>{
+      const m=getMold(r.mold_code);
+      h+=`<tr class="row" style="background:${i%2?'#f8f9fb':'#fff'}" onclick="openRepairDetail(${r.id})">
+        <td>${r.id}</td><td>${badge(r.stage)}</td><td class="code-link">${r.mold_code}</td><td>${m?m.mold_name||'':'-'}</td>
+        <td>${r.repair_type||''}</td><td>${r.request_date||''}</td><td>${r.assignee||'-'}</td>
+        <td class="ellipsis" style="max-width:250px">${r.reason||''}</td><td style="text-align:right">${r.cost?(r.cost/10000).toFixed(1)+'만':'-'}</td></tr>`;
+    });
+    h+=`</tbody></table></div>`;
+    h+=`<div style="margin-top:10px;text-align:right"><button class="export-btn" onclick="exportSearchResults()">📥 조회결과 엑셀 다운로드</button></div>`;
+  }
+  document.getElementById('repairSearchResult').innerHTML=h;
+  window._lastSearchResults=results;
+}
+
+function exportSearchResults(){
+  if(!window._lastSearchResults||!window._lastSearchResults.length){alert('조회 결과가 없습니다.');return}
+  const rows=window._lastSearchResults.map(r=>{const m=getMold(r.mold_code);return{'금형코드':r.mold_code,'품명':m?m.mold_name:'','상태':r.stage,'수리유형':r.repair_type,'신청일':r.request_date,'의뢰자':r.requester,'담당자':r.assignee,'수리사유':r.reason,'상세설명':r.description,'비용':r.cost,'규격':r.spec,'수리전':r.measure_before,'수리후':r.measure_after}});
+  const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"조회결과");
+  XLSX.writeFile(wb,"수리이력_조회결과_"+new Date().toISOString().slice(0,10)+".xlsx");
+  toast('조회결과 다운로드 완료','info');
+}
 
 function renderList(){
   // Extract unique years
@@ -525,10 +630,11 @@ function renderList(){
   repairData.forEach(r=>{const y=(r.request_date||'').slice(0,4);if(y){yearStats[y]=(yearStats[y]||0)+1}});
 
   let h=`<div class="filters">
+    <button class="search-btn" onclick="openRepairSearch()" style="margin-right:4px">🔍 수리이력 조회</button>
     <select class="input" style="width:110px" onchange="filterYear=this.value;render()"><option value="전체">연도 전체</option>${years.map(y=>`<option${filterYear===y?' selected':''}>${y} (${yearStats[y]||0})</option>`).join('')}</select>
     <select class="input" style="width:120px" onchange="filterStage=this.value;render()"><option>전체</option>${STAGES.map(s=>`<option${filterStage===s?' selected':''}>${s}</option>`).join('')}</select>
     <select class="input" style="width:120px" onchange="filterGroup=this.value;render()"><option>전체</option>${getMoldGroups().map(g=>`<option${filterGroup===g?' selected':''}>${g}</option>`).join('')}</select>
-    <input class="input" style="width:220px" placeholder="검색..." value="${filterSearch}" oninput="filterSearch=this.value;render()">
+    <input class="input" style="width:200px" placeholder="검색..." value="${filterSearch}" oninput="filterSearch=this.value;render()">
     <div style="flex:1"></div>
     <button class="export-btn" onclick="downloadRepairTemplate()">📋 양식</button>
     <button class="export-btn" onclick="document.getElementById('repairExcelInput').click()">📤 업로드</button>
@@ -573,7 +679,7 @@ function renderList(){
     h+=`</tr></thead><tbody>`;
     items.forEach((item,i)=>{
       const m=getMold(item.mold_code);const hasP=item.before_img||item.after_img;
-      h+=`<tr class="row" style="background:${i%2?'#0c1219':'transparent'}" onclick="openRepairDetail(${item.id})">
+      h+=`<tr class="row" style="background:${i%2?'#f8f9fb':'transparent'}" onclick="openRepairDetail(${item.id})">
         <td>${item.id}</td><td>${badge(item.stage)}</td><td class="code-link">${item.mold_code}</td><td>${m?m.mold_name||'':'-'}</td>
         <td>${item.repair_type||''}</td><td>${item.request_date||''}</td><td>${item.requester||''}</td><td>${item.assignee||'-'}</td>
         <td class="ellipsis">${item.reason||''}</td><td style="text-align:right">${item.cost?(item.cost/10000).toFixed(1)+'만':'-'}</td>
@@ -592,8 +698,8 @@ function openRepairDetail(id){
   document.getElementById("modalTitle").textContent=`수리 상세 - ${item.mold_code}${m?' ('+m.mold_name+')':''}`;
   let h=`<div class="stage-progress">`;
   STAGES.forEach((s,i)=>{const active=STAGES.indexOf(item.stage)>=i;const cur=item.stage===s;
-    h+=`<div class="stage-step"><div class="stage-node"><div class="stage-circle" style="background:${active?STAGE_COLORS[s]:'#2a3a4a'};${cur?'border:2px solid #fff':''}">${active?'✓':i+1}</div><span class="stage-name" style="color:${active?'var(--text)':'var(--dim)'};${cur?'font-weight:700':''}">${s}</span></div>`;
-    if(i<STAGES.length-1)h+=`<div class="stage-line" style="background:${STAGES.indexOf(item.stage)>i?STAGE_COLORS[s]:'#2a3a4a'}"></div>`;h+=`</div>`});
+    h+=`<div class="stage-step"><div class="stage-node"><div class="stage-circle" style="background:${active?STAGE_COLORS[s]:'#d1d5db'};${cur?'border:2px solid #fff':''}">${active?'✓':i+1}</div><span class="stage-name" style="color:${active?'var(--text)':'var(--dim)'};${cur?'font-weight:700':''}">${s}</span></div>`;
+    if(i<STAGES.length-1)h+=`<div class="stage-line" style="background:${STAGES.indexOf(item.stage)>i?STAGE_COLORS[s]:'#d1d5db'}"></div>`;h+=`</div>`});
   h+=`</div>`;
   if(item.stage!=="입고완료"){const ns=STAGES[STAGES.indexOf(item.stage)+1];h+=`<button class="btn" style="background:${STAGE_COLORS[ns]};margin-bottom:20px" onclick="advanceStage(${item.id},'${ns}')">→ ${ns}(으)로 진행</button>`}
   h+=`<div class="grid-2"><div><div class="section-title">기본 정보</div><div class="info-box">금형코드: <b>${item.mold_code}</b><br>`;
@@ -698,17 +804,17 @@ function openVerificationChoice(repairId){
   h+=`<div style="font-size:13px;color:var(--muted);margin-bottom:16px">검증 방법을 선택하세요:</div>`;
 
   h+=`<div style="display:flex;gap:16px;margin-bottom:20px">
-    <div onclick="openMeasurementForm(${repairId})" style="flex:1;padding:24px;border:2px solid var(--purple);background:#9b59b622;border-radius:12px;cursor:pointer;text-align:center;transition:all .2s">
+    <div onclick="openMeasurementForm(${repairId})" style="flex:1;padding:24px;border:2px solid var(--purple);background:#f3e8ff;border-radius:12px;cursor:pointer;text-align:center;transition:all .2s">
       <div style="font-size:32px">📐</div>
       <div style="font-size:15px;font-weight:800;color:var(--purple);margin-top:8px">정밀측정 검증</div>
       <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5">3차원측정기, 하이트게이지 등<br>치수 데이터 기록 필요 시</div>
     </div>
-    <div onclick="openProductionVerification(${repairId})" style="flex:1;padding:24px;border:2px solid var(--teal);background:#1abc9c22;border-radius:12px;cursor:pointer;text-align:center;transition:all .2s">
+    <div onclick="openProductionVerification(${repairId})" style="flex:1;padding:24px;border:2px solid var(--teal);background:#ccfbf1;border-radius:12px;cursor:pointer;text-align:center;transition:all .2s">
       <div style="font-size:32px">🏭</div>
       <div style="font-size:15px;font-weight:800;color:var(--teal);margin-top:8px">생산검증 완료</div>
       <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5">생산 트라이얼 후 양품 확인<br>측정 의뢰 없이 진행</div>
     </div>
-    <div onclick="openSimpleJudgment(${repairId})" style="flex:1;padding:24px;border:2px solid var(--green);background:#27ae6022;border-radius:12px;cursor:pointer;text-align:center;transition:all .2s">
+    <div onclick="openSimpleJudgment(${repairId})" style="flex:1;padding:24px;border:2px solid var(--green);background:#dcfce7;border-radius:12px;cursor:pointer;text-align:center;transition:all .2s">
       <div style="font-size:32px">👁️</div>
       <div style="font-size:15px;font-weight:800;color:var(--green);margin-top:8px">육안확인 OK/NG</div>
       <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5">단순 연마/래핑/교체<br>육안 확인으로 충분한 경우</div>
@@ -731,7 +837,7 @@ function openProductionVerification(repairId){
     <b>수리내용:</b> ${item.description||'-'}
   </div>`;
 
-  h+=`<div style="background:#1abc9c22;border:1px solid var(--teal);border-radius:6px;padding:12px;margin-bottom:20px;font-size:12px;color:var(--teal)">
+  h+=`<div style="background:#ccfbf1;border:1px solid var(--teal);border-radius:6px;padding:12px;margin-bottom:20px;font-size:12px;color:var(--teal)">
     🏭 정밀측정 없이 생산 트라이얼로 검증합니다.
   </div>`;
 
@@ -750,11 +856,11 @@ function openProductionVerification(repairId){
   <div class="field"><label>비고</label><input id="pv_note" class="input" placeholder="특이사항"></div>`;
 
   h+=`<div style="display:flex;gap:16px;margin:20px 0">
-    <button onclick="saveProductionVerification(${repairId},'OK')" style="flex:1;padding:20px;border:2px solid var(--green);background:#27ae6022;border-radius:10px;cursor:pointer;text-align:center">
+    <button onclick="saveProductionVerification(${repairId},'OK')" style="flex:1;padding:20px;border:2px solid var(--green);background:#dcfce7;border-radius:10px;cursor:pointer;text-align:center">
       <div style="font-size:28px">✅</div>
       <div style="font-size:16px;font-weight:800;color:var(--green);margin-top:6px">생산검증 OK</div>
     </button>
-    <button onclick="saveProductionVerification(${repairId},'NG')" style="flex:1;padding:20px;border:2px solid var(--red);background:#e74c3c22;border-radius:10px;cursor:pointer;text-align:center">
+    <button onclick="saveProductionVerification(${repairId},'NG')" style="flex:1;padding:20px;border:2px solid var(--red);background:#fee2e2;border-radius:10px;cursor:pointer;text-align:center">
       <div style="font-size:28px">❌</div>
       <div style="font-size:16px;font-weight:800;color:var(--red);margin-top:6px">생산검증 NG</div>
     </button>
@@ -804,7 +910,7 @@ function openSimpleJudgment(repairId){
     <b>수리내용:</b> ${item.description||'-'}
   </div>`;
 
-  h+=`<div style="background:#1abc9c22;border:1px solid var(--teal);border-radius:6px;padding:12px;margin-bottom:20px;font-size:12px;color:var(--teal)">
+  h+=`<div style="background:#ccfbf1;border:1px solid var(--teal);border-radius:6px;padding:12px;margin-bottom:20px;font-size:12px;color:var(--teal)">
     단순 수리(연마/래핑/교체/조정) 건입니다. 육안 확인 후 판정해주세요.<br>
     <span style="font-size:11px;color:var(--dim)">정밀측정이 필요하면 아래 [정밀측정 전환] 버튼을 누르세요.</span>
   </div>`;
@@ -817,12 +923,12 @@ function openSimpleJudgment(repairId){
   h+=`<div class="field"><label>확인 내용</label><input id="sj_note" class="input" placeholder="예: 연마면 상태 양호, 래핑 완료 확인 등"></div>`;
 
   h+=`<div style="display:flex;gap:16px;margin:24px 0">
-    <button onclick="saveSimpleJudgment(${repairId},'OK')" style="flex:1;padding:24px;border:2px solid var(--green);background:#27ae6022;border-radius:12px;cursor:pointer;text-align:center;transition:all .2s">
+    <button onclick="saveSimpleJudgment(${repairId},'OK')" style="flex:1;padding:24px;border:2px solid var(--green);background:#dcfce7;border-radius:12px;cursor:pointer;text-align:center;transition:all .2s">
       <div style="font-size:36px">✅</div>
       <div style="font-size:18px;font-weight:800;color:var(--green);margin-top:8px">OK</div>
       <div style="font-size:12px;color:var(--muted);margin-top:4px">수리 상태 양호</div>
     </button>
-    <button onclick="saveSimpleJudgment(${repairId},'NG')" style="flex:1;padding:24px;border:2px solid var(--red);background:#e74c3c22;border-radius:12px;cursor:pointer;text-align:center;transition:all .2s">
+    <button onclick="saveSimpleJudgment(${repairId},'NG')" style="flex:1;padding:24px;border:2px solid var(--red);background:#fee2e2;border-radius:12px;cursor:pointer;text-align:center;transition:all .2s">
       <div style="font-size:36px">❌</div>
       <div style="font-size:18px;font-weight:800;color:var(--red);margin-top:8px">NG</div>
       <div style="font-size:12px;color:var(--muted);margin-top:4px">재수리 필요</div>
@@ -897,7 +1003,7 @@ function openMeasurementForm(repairId){
     h+=`</tbody></table></div>`;
   }
 
-  h+=`<div style="background:#9b59b622;border:1px solid var(--purple);border-radius:6px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--purple)">
+  h+=`<div style="background:#f3e8ff;border:1px solid var(--purple);border-radius:6px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--purple)">
     📐 정밀측정 데이터를 입력한 후 [측정검증 완료] 버튼을 누르세요.
   </div>`;
 
@@ -1224,7 +1330,7 @@ function openNewRepairFormWith(code){
     <div class="field"><label>담당자</label><select id="rf_assign"><option value="">-- 선택 --</option>${getAssignees().map(a=>`<option>${a}</option>`).join('')}</select></div>
   </div>
   <div class="field"><label>수리사유 *</label>
-    <div style="display:flex;gap:8px"><select style="width:200px;padding:8px;background:var(--card);border:1px solid #2a3a4a;border-radius:4px;color:var(--text);font-size:13px" onchange="if(this.value)document.getElementById('rf_reason').value=this.value"><option value="">빠른선택...</option>${reasonOpts}</select><input id="rf_reason" style="flex:1;padding:8px;background:var(--card);border:1px solid #2a3a4a;border-radius:4px;color:var(--text);font-size:13px"></div>
+    <div style="display:flex;gap:8px"><select style="width:200px;padding:8px;background:var(--card);border:1px solid #d1d5db;border-radius:4px;color:var(--text);font-size:13px" onchange="if(this.value)document.getElementById('rf_reason').value=this.value"><option value="">빠른선택...</option>${reasonOpts}</select><input id="rf_reason" style="flex:1;padding:8px;background:var(--card);border:1px solid #d1d5db;border-radius:4px;color:var(--text);font-size:13px"></div>
   </div>
   <div class="field"><label>상세설명</label><textarea id="rf_desc"></textarea></div>
   <div class="form-grid">
@@ -1403,6 +1509,168 @@ function exportRepairExcel(){
   XLSX.writeFile(wb,"수리내역_"+new Date().toISOString().slice(0,10)+".xlsx");
 }
 
+// ========== 샷수 업데이트 ==========
+const SHOT_COL_MAP={'금형코드':'code','도번':'code','코드':'code','moldCode':'code','mold_code':'code',
+  '타발수':'shots','샷수':'shots','현재샷수':'shots','누적샷수':'shots','shot_count':'shots','shotCount':'shots','shots':'shots','타수':'shots','생산수량':'shots',
+  '한계수명':'maxShots','최대샷수':'maxShots','max_shots':'maxShots','한계타수':'maxShots'};
+
+async function handleShotUpdate(input){
+  const file=input.files[0];if(!file)return;input.value='';
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
+
+    // Try to parse - could be list format or single-mold MES format
+    let updates=[];
+
+    // Check all sheets
+    for(const sheetName of wb.SheetNames){
+      const ws=wb.Sheets[sheetName];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:""});
+
+      if(rows.length>0){
+        // Try list format first (columns: 금형코드, 타발수)
+        const mapped=rows.map(row=>{
+          const m={};
+          Object.keys(row).forEach(key=>{
+            const clean=key.replace(/\s/g,'');
+            const target=SHOT_COL_MAP[clean]||SHOT_COL_MAP[key];
+            if(target)m[target]=row[key];
+          });
+          return m;
+        }).filter(r=>r.code&&r.shots!==undefined&&r.shots!=='');
+
+        if(mapped.length>0){
+          updates=updates.concat(mapped);
+          continue;
+        }
+      }
+
+      // Try MES single-mold format (vertical layout)
+      const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+      let code='',shots=0,maxShots=0;
+      for(const row of raw){
+        if(!row||!Array.isArray(row))continue;
+        const rowStr=row.map(c=>String(c||'').trim());
+        for(let i=0;i<rowStr.length;i++){
+          const cell=rowStr[i];
+          // Find mold code
+          if(cell==='도번'||cell==='금형코드'){
+            for(let j=i+1;j<row.length;j++){
+              const v=row[j];
+              if(v!==null&&v!==undefined&&String(v).trim()&&String(v).trim()!=='0'){
+                code=String(v).trim();break;
+              }
+            }
+          }
+          // Find shot count
+          if(cell==='타발수'||cell==='샷수'||cell==='누적샷수'||cell==='현재타발수'||cell==='누적타수'){
+            for(let j=i+1;j<row.length;j++){
+              const v=parseFloat(row[j]);
+              if(!isNaN(v)&&v>0){shots=Math.round(v);break;}
+            }
+          }
+          // Find max shots
+          if(cell==='한계수명'||cell==='최대샷수'||cell==='한계타수'){
+            for(let j=i+1;j<row.length;j++){
+              const v=parseFloat(row[j]);
+              if(!isNaN(v)&&v>0){maxShots=Math.round(v);break;}
+            }
+          }
+        }
+      }
+      if(code&&shots>0){
+        updates.push({code,shots,maxShots:maxShots||undefined});
+      }
+    }
+
+    if(!updates.length){
+      alert('샷수 데이터를 찾을 수 없습니다.\n\n엑셀에 "금형코드"와 "타발수(또는 샷수)" 컬럼이 필요합니다.\nMES 금형관리 화면에서 추출한 파일도 지원합니다.');
+      return;
+    }
+
+    // Show preview
+    showShotUpdatePreview(updates);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function showShotUpdatePreview(updates){
+  document.getElementById("modalTitle").textContent="🔄 샷수 업데이트 미리보기";
+  let matched=0,notFound=[];
+  updates.forEach(u=>{
+    const m=moldDB.find(x=>x.mold_code===u.code);
+    if(m)matched++;else notFound.push(u.code);
+  });
+
+  let h=`<div class="import-summary">
+    업데이트 대상: <span class="num">${updates.length}</span>건 &nbsp;|&nbsp;
+    DB 매칭: <span style="color:var(--green);font-weight:700">${matched}</span>건 &nbsp;|&nbsp;
+    미등록: <span style="color:var(--orange);font-weight:700">${notFound.length}</span>건
+  </div>`;
+
+  if(notFound.length){
+    h+=`<div class="dup-warn">⚠️ DB에 없는 금형코드: ${notFound.join(', ')}</div>`;
+  }
+
+  h+=`<div class="preview-table"><table><thead><tr><th>금형코드</th><th>품명</th><th>현재 샷수</th><th>→</th><th>업데이트 샷수</th><th>변화량</th><th>상태</th></tr></thead><tbody>`;
+  updates.forEach(u=>{
+    const m=moldDB.find(x=>x.mold_code===u.code);
+    const current=m?m.shot_count||0:'-';
+    const diff=m?(u.shots-current):'-';
+    const pct=m?((u.shots/(m.max_shots||300000))*100).toFixed(0):'-';
+    const warn=pct>80;
+    h+=`<tr style="${!m?'opacity:.5':''}${warn?';background:#e74c3c11':''}">
+      <td class="code-link">${u.code}</td>
+      <td>${m?m.mold_name||'':'-'}</td>
+      <td style="text-align:right">${typeof current==='number'?current.toLocaleString():current}</td>
+      <td style="text-align:center;color:var(--muted)">→</td>
+      <td style="text-align:right;font-weight:700;color:var(--blue-light)">${u.shots.toLocaleString()}</td>
+      <td style="text-align:right;color:${diff>0?'var(--green)':'var(--muted)'}">${typeof diff==='number'?(diff>0?'+':'')+diff.toLocaleString():diff}</td>
+      <td>${!m?'<span style="color:var(--orange)">미등록</span>':warn?'<span style="color:var(--red)">⚠️'+pct+'%</span>':'<span style="color:var(--green)">'+pct+'%</span>'}</td>
+    </tr>`;
+  });
+  h+=`</tbody></table></div>`;
+
+  h+=`<div class="form-actions">
+    <button class="btn btn-secondary" onclick="closeModal()">취소</button>
+    <button class="export-btn" onclick="downloadShotTemplate()">📋 샷수 양식 다운로드</button>
+    <button class="btn" style="background:var(--orange)" onclick="executeShotUpdate(${JSON.stringify(updates).replace(/"/g,'&quot;')})">🔄 ${matched}건 업데이트 실행</button>
+  </div>`;
+
+  document.getElementById("modalBody").innerHTML=h;
+  document.getElementById("modalOverlay").style.display="flex";
+}
+
+async function executeShotUpdate(updates){
+  let cnt=0,added=0;
+  for(const u of updates){
+    let m=moldDB.find(x=>x.mold_code===u.code);
+    if(!m){
+      // Auto-register unknown mold
+      const{data}=await sb.from('mold_db').insert({mold_code:u.code,mold_group:'',mold_name:'',mold_no:'',customer:'',product:'',status:'가동중',shot_count:u.shots,max_shots:u.maxShots||300000,location:'',note:'샷수 업데이트 시 자동등록'}).select();
+      if(data&&data[0]){added++;cnt++}
+      continue;
+    }
+    const upd={shot_count:u.shots};
+    if(u.maxShots)upd.max_shots=u.maxShots;
+    const{error}=await sb.from('mold_db').update(upd).eq('id',m.id);
+    if(!error)cnt++;
+  }
+  closeModal();
+  await dbLoad();
+  toast(`🔄 ${cnt}건 업데이트 완료${added?' (신규 '+added+'건 자동등록)':''}`,'success');
+}
+
+function downloadShotTemplate(){
+  const rows=moldDB.map(m=>({'금형코드':m.mold_code,'품명':m.mold_name||'','현재샷수':m.shot_count||0,'타발수(업데이트)':'','최대샷수':m.max_shots||300000}));
+  const ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[{wch:16},{wch:22},{wch:12},{wch:16},{wch:12}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"샷수업데이트");
+  XLSX.writeFile(wb,"샷수업데이트_양식_"+new Date().toISOString().slice(0,10)+".xlsx");
+  toast('샷수 양식 다운로드 완료','info');
+}
+
 // ========== STATS ==========
 function renderStats(stats){
   const colors=["var(--blue)","var(--orange)","var(--purple)","var(--green)","var(--red)","var(--yellow)"];
@@ -1414,10 +1682,13 @@ function renderStats(stats){
   h+=`</div><div class="panel"><div class="panel-title">수리유형별 분포</div>`;
   stats.byType.forEach(([type,cnt],i)=>{h+=`<div class="bar-row"><span class="bar-label">${type}</span><div class="bar-track"><div class="bar-fill" style="width:${cnt/typeMax*100}%;background:${colors[i%colors.length]};justify-content:flex-end;padding-right:8px">${cnt}</div></div></div>`});
   if(!stats.byType.length)h+=`<div style="color:var(--dim)">데이터 없음</div>`;
-  h+=`</div><div class="panel"><div class="panel-title">샷수 위험 금형</div>`;
-  const risky=moldDB.filter(m=>m.status!=="폐기대기"&&(m.shot_count||0)/(m.max_shots||1)>0.6).sort((a,b)=>(b.shot_count/b.max_shots)-(a.shot_count/a.max_shots));
-  risky.forEach(m=>{const c=(m.shot_count/m.max_shots)>0.8?"var(--red)":"var(--orange)";h+=`<div class="bar-row" style="cursor:pointer" onclick="openMoldDetail(${m.id})"><span class="bar-label" style="width:100px;font-weight:600;color:${c}">${m.mold_code}</span>${shotBar(m.shot_count,m.max_shots)}</div>`});
-  if(!risky.length)h+=`<div style="color:var(--dim)">위험 금형 없음</div>`;
+  h+=`</div><div class="panel"><div class="panel-title">월별 수리 추이</div>`;
+  const monthCounts={};
+  repairData.forEach(r=>{const ym=(r.request_date||'').slice(0,7);if(ym)monthCounts[ym]=(monthCounts[ym]||0)+1});
+  const months=Object.entries(monthCounts).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,12).reverse();
+  const monthMax=Math.max(...months.map(m=>m[1]),1);
+  months.forEach(([ym,cnt])=>{h+=`<div class="bar-row"><span class="bar-label" style="width:70px;font-size:11px">${ym}</span><div class="bar-track"><div class="bar-fill" style="width:${cnt/monthMax*100}%;background:var(--teal);justify-content:flex-end;padding-right:8px">${cnt}</div></div></div>`});
+  if(!months.length)h+=`<div style="color:var(--dim)">데이터 없음</div>`;
   h+=`</div><div class="panel"><div class="panel-title">비용 분석</div><div class="stat-line">`;
   h+=`총 수리비용: <b>${(stats.totalCost/10000).toFixed(0)}만원</b><br>건당 평균: <b>${stats.total?(stats.totalCost/stats.total/10000).toFixed(1):0}만원</b><br>`;
   const sorted=[...repairData].sort((a,b)=>(b.cost||0)-(a.cost||0));
@@ -1427,10 +1698,42 @@ function renderStats(stats){
 }
 
 function renderAlerts(alerts){
-  let h=`<div class="panel"><div class="panel-title">전체 알림</div>`;
-  if(!alerts.length)h+=`<div style="color:var(--dim)">알림이 없습니다.</div>`;
-  else alerts.forEach(a=>{h+=`<div class="alert-full" onclick="${a.kind==='repair'?`openRepairDetail(${a.id})`:`openMoldDetail(${a.id})`}"><span style="font-size:16px">${a.type==='shot'?'⚠️':'⏰'}</span><span>${a.msg}</span><span class="alert-arrow">상세보기 →</span></div>`});
-  h+=`</div>`;document.getElementById("view-alerts").innerHTML=h;
+  const repairAlerts=alerts.filter(a=>a.type==='repair');
+  const delayAlerts=alerts.filter(a=>a.type==='delay');
+
+  let h=`<div style="display:flex;gap:12px;margin-bottom:20px">
+    <div style="flex:1;background:#fee2e2;border:1px solid #fecaca;border-radius:8px;padding:14px;text-align:center">
+      <div style="font-size:24px;font-weight:800;color:#dc2626">${repairAlerts.length+delayAlerts.length}</div>
+      <div style="font-size:12px;color:#991b1b">수리 진행중</div>
+    </div>
+    <div style="flex:1;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:14px;text-align:center">
+      <div style="font-size:24px;font-weight:800;color:#ea580c">${delayAlerts.length}</div>
+      <div style="font-size:12px;color:#9a3412">장기 미처리 (5일+)</div>
+    </div>
+  </div>`;
+
+  if(delayAlerts.length){
+    h+=`<div class="panel" style="margin-bottom:16px;border-left:3px solid var(--red)"><div class="panel-title">⏰ 장기 미처리 (5일 이상 경과)</div>`;
+    delayAlerts.forEach(a=>{h+=`<div class="alert-card delay" onclick="${a.kind==='repair'?`openRepairDetail(${a.id})`:`openMoldDetail(${a.id})`}">${a.msg}<span class="alert-arrow">상세보기 →</span></div>`});
+    h+=`</div>`;
+  }
+
+  if(repairAlerts.length){
+    h+=`<div class="panel" style="margin-bottom:16px;border-left:3px solid var(--orange)"><div class="panel-title">🔧 수리 진행중 (입고완료 전)</div>`;
+    // Group by stage
+    STAGES.forEach(stage=>{
+      if(stage==='입고완료')return;
+      const stageItems=repairAlerts.filter(a=>a.stage===stage);
+      if(!stageItems.length)return;
+      h+=`<div style="font-size:12px;font-weight:700;color:${STAGE_COLORS[stage]};margin:10px 0 6px;padding-left:4px">${stage} (${stageItems.length}건)</div>`;
+      stageItems.forEach(a=>{h+=`<div class="alert-card repair" onclick="openRepairDetail(${a.id})">${a.msg}<span class="alert-arrow">→</span></div>`});
+    });
+    h+=`</div>`;
+  }
+
+  if(!alerts.length) h+=`<div class="panel"><div style="color:var(--dim);text-align:center;padding:40px 0">✅ 알림이 없습니다.</div></div>`;
+
+  document.getElementById("view-alerts").innerHTML=h;
 }
 
 // ========== SETTINGS ==========
@@ -1485,7 +1788,7 @@ async function moveSetting(key,idx,dir){
 // ========== INIT ==========
 
 // ==================== 초기 데이터 (회사 금형수리이력) ====================
-const SEED_MOLDS=[{"mold_code":"10DHA248A","mold_group":"200톤","mold_name":"LY","mold_no":"1869-621","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"19DHA204A","mold_group":"150톤","mold_name":"CN7","mold_no":"1960-0031-21","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"14DHA212A","mold_group":"200톤","mold_name":"GAMMA","mold_no":"1551-189","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"18TJA209A","mold_group":"200톤","mold_name":"MD-FRT","mold_no":"1958-365-2(2호)","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"15DHA209A","mold_group":"200톤","mold_name":"HI OPEN SEAL","mold_no":"1972-383","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"18DHA214A","mold_group":"200톤","mold_name":"JA PACK SEAL(IN/S)","mold_no":"1952-0056-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA210A","mold_group":"200톤","mold_name":"SACC(가공품)","mold_no":"1657-130","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"20DHA204A","mold_group":"200톤","mold_name":"FORD V713 OPEN SEAL","mold_no":"1862-0042-21","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"13DHA205A","mold_group":"200톤","mold_name":"GM31XXN","mold_no":"1970-372-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA208A","mold_group":"150톤","mold_name":"KIA","mold_no":"1755-296","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA250A","mold_group":"200톤","mold_name":"LY","mold_no":"C873-622-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA209A","mold_group":"150톤","mold_name":"KIA","mold_no":"1752-297","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"18DHA215A","mold_group":"150톤","mold_name":"JA","mold_no":"1952-0056-21","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"18DHA227A","mold_group":"200톤","mold_name":"UM F/L","mold_no":"1974-0023-21","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"16DHA206A","mold_group":"250톤","mold_name":"IK/CK","mold_no":"1967-391","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"19DHA203A","mold_group":"250톤","mold_name":"CN7 FRT ECD SEAL","mold_no":"1960-0031-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"20DHA202A","mold_group":"250톤","mold_name":"FORD V713 (IN)","mold_no":"1862-0041-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"1DHA105","mold_group":"200톤","mold_name":"FLINGER","mold_no":"1654-119-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"13DHA204A","mold_group":"150톤","mold_name":"GM31XXN","mold_no":"1970-372-1","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"15DHA207A","mold_group":"150톤","mold_name":"MP(가공품)","mold_no":"1862-651","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"15DHA214A","mold_group":"150톤","mold_name":"퓨트로닉","mold_no":"1807-653","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA213A","mold_group":"200톤","mold_name":"L38","mold_no":"1660-131","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"19DHA201A","mold_group":"150톤","mold_name":"RG3 ENCODER RING","mold_no":"1976-0004-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"16DHA205A","mold_group":"150톤","mold_name":"X69F","mold_no":"1515-196","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA203A","mold_group":"150톤","mold_name":"MD-FRT","mold_no":"1958-365-1","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA211A","mold_group":"200톤","mold_name":"MD-FRT","mold_no":"1958-365-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA212A","mold_group":"200톤","mold_name":"MX-FRT","mold_no":"1952-367-2(2호)","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"17DHA207A","mold_group":"150톤","mold_name":"LF-FRT-FLINGER","mold_no":"1968-0016-02","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"6DHA039","mold_group":"250톤","mold_name":"0177","mold_no":"1973-325","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"20DHA211A","mold_group":"250톤","mold_name":"US4 RR OPEN SEAL","mold_no":"1979-0051-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA215A","mold_group":"200톤","mold_name":"BH-FRT","mold_no":"1968-362","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA209","mold_group":"150톤","mold_name":"GM GAMMA (O/S)","mold_no":"1549-156","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA201A","mold_group":"150톤","mold_name":"DM-FRT","mold_no":"1968-364-1","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA240","mold_group":"150톤","mold_name":"YF","mold_no":"1952-346-1","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA214A","mold_group":"200톤","mold_name":"BMW PL7","mold_no":"1861-596","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"20DHA203A","mold_group":"200톤","mold_name":"FORD V713","mold_no":"1862-0041-21","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"1DHA088","mold_group":"150톤","mold_name":"0092","mold_no":"1547-102-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"16DHA207A","mold_group":"200톤","mold_name":"IK/CK","mold_no":"1967-392","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"19DHA206A","mold_group":"250톤","mold_name":"BI3 OPEN SEAL","mold_no":"1946-0053-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"18DHA226A","mold_group":"250톤","mold_name":"UM PACK SEAL","mold_no":"1974-0023-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"6DHA038A","mold_group":"200톤","mold_name":"0187","mold_no":"1965-326-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"18DHA202A","mold_group":"250톤","mold_name":"SU2 RR OPEN SEAL","mold_no":"1962-0030","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA207A","mold_group":"200톤","mold_name":"L43","mold_no":"1664-128-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"11DHA213A","mold_group":"150톤","mold_name":"FLINGER","mold_no":"1952-346-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"18IGA203A","mold_group":"300톤","mold_name":"9BUX","mold_no":"AB3248-SC-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"13DHA202A","mold_group":"150톤","mold_name":"DH(가공품)","mold_no":"1973-370(375)","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA235A","mold_group":"150톤","mold_name":"RB","mold_no":"1945-349-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"16DHA209A","mold_group":"300톤","mold_name":"VS30","mold_no":"1888-0005","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"13DHA206A","mold_group":"150톤","mold_name":"GM31XXN","mold_no":"1982-371","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"13DHA201A","mold_group":"150톤","mold_name":"L38(가공품)","mold_no":"1660-132","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"11DHA216","mold_group":"150톤","mold_name":"비대칭베어링","mold_no":"1970-363","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"19DHA205A","mold_group":"250톤","mold_name":"CN7 RR OPEN SEAL","mold_no":"1969-0030-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"7DHA051A","mold_group":"200톤","mold_name":"0176","mold_no":"C657-127","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"7DHA051","mold_group":"150톤","mold_name":"SHIELD","mold_no":"1657-127","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA249A","mold_group":"150톤","mold_name":"LY(가공품)","mold_no":"1874-623","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"20DHA209A","mold_group":"250톤","mold_name":"US4 RR (IN)","mold_no":"1967-0052-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"20DHA207A","mold_group":"200톤","mold_name":"VX1 SLINGER","mold_no":"1873-0044-21","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"20DHA206A","mold_group":"200톤","mold_name":"VX1","mold_no":"1871-0043-21","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA239","mold_group":"150톤","mold_name":"PACK SEAL","mold_no":"1858-618-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA206A","mold_group":"150톤","mold_name":"L43","mold_no":"1664-128-1","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA205A","mold_group":"150톤","mold_name":"RB","mold_no":"1945-349-1","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"17DHA205A","mold_group":"250톤","mold_name":"SK OPEN SEAL","mold_no":"1781-0001-00","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"14DFA209A","mold_group":"300톤","mold_name":"Raceway(CA/CB)","mold_no":"IW/OW-BDA-1106-1","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"14DFA209B","mold_group":"300톤","mold_name":"Raceway CA/CB","mold_no":"IW/OW-BDA-1106-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""}];
+const SEED_MOLDS=[{"mold_code":"10DHA248A","mold_group":"200톤","mold_name":"LY","mold_no":"1869-621","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"19DHA204A","mold_group":"150톤","mold_name":"CN7","mold_no":"1960-0031-21","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"14DHA212A","mold_group":"200톤","mold_name":"GAMMA","mold_no":"1551-189","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"18TJA209A","mold_group":"200톤","mold_name":"MD-FRT","mold_no":"1958-365-2(2호)","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"15DHA209A","mold_group":"200톤","mold_name":"HI OPEN SEAL","mold_no":"1972-383","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"18DHA214A","mold_group":"200톤","mold_name":"JA PACK SEAL(IN/S)","mold_no":"1952-0056-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA210A","mold_group":"200톤","mold_name":"SACC(가공품)","mold_no":"1657-130","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"20DHA204A","mold_group":"200톤","mold_name":"FORD V713 OPEN SEAL","mold_no":"1862-0042-21","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"13DHA205A","mold_group":"200톤","mold_name":"GM31XXN","mold_no":"1970-372-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA208A","mold_group":"150톤","mold_name":"KIA","mold_no":"1755-296","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA250A","mold_group":"200톤","mold_name":"LY","mold_no":"C873-622-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA209A","mold_group":"150톤","mold_name":"KIA","mold_no":"1752-297","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"18DHA215A","mold_group":"150톤","mold_name":"JA","mold_no":"1952-0056-21","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"18DHA227A","mold_group":"200톤","mold_name":"UM F/L","mold_no":"1974-0023-21","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"16DHA206A","mold_group":"250톤","mold_name":"IK/CK","mold_no":"1967-391","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"19DHA203A","mold_group":"250톤","mold_name":"CN7 FRT ECD SEAL","mold_no":"1960-0031-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"20DHA202A","mold_group":"250톤","mold_name":"FORD V713 (IN)","mold_no":"1862-0041-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"1DHA105","mold_group":"200톤","mold_name":"FLINGER","mold_no":"1654-119-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"13DHA204A","mold_group":"150톤","mold_name":"GM31XXN","mold_no":"1970-372-1","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"15DHA207A","mold_group":"150톤","mold_name":"MP(가공품)","mold_no":"1862-651","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"15DHA214A","mold_group":"150톤","mold_name":"퓨트로닉","mold_no":"1807-653","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA213A","mold_group":"200톤","mold_name":"L38","mold_no":"1660-131","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"19DHA201A","mold_group":"150톤","mold_name":"RG3 ENCODER RING","mold_no":"1976-0004-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"16DHA205A","mold_group":"150톤","mold_name":"X69F","mold_no":"1515-196","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA203A","mold_group":"150톤","mold_name":"MD-FRT","mold_no":"1958-365-1","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA211A","mold_group":"200톤","mold_name":"MD-FRT","mold_no":"1958-365-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA212A","mold_group":"200톤","mold_name":"MX-FRT","mold_no":"1952-367-2(2호)","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"17DHA207A","mold_group":"150톤","mold_name":"LF-FRT-FLINGER","mold_no":"1968-0016-02","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"6DHA039","mold_group":"250톤","mold_name":"0177","mold_no":"1973-325","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"20DHA211A","mold_group":"250톤","mold_name":"US4 RR OPEN SEAL","mold_no":"1979-0051-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA215A","mold_group":"200톤","mold_name":"BH-FRT","mold_no":"1968-362","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA209","mold_group":"150톤","mold_name":"GM GAMMA (O/S)","mold_no":"1549-156","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA201A","mold_group":"150톤","mold_name":"DM-FRT","mold_no":"1968-364-1","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA240","mold_group":"150톤","mold_name":"YF","mold_no":"1952-346-1","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA214A","mold_group":"200톤","mold_name":"BMW PL7","mold_no":"1861-596","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"20DHA203A","mold_group":"200톤","mold_name":"FORD V713","mold_no":"1862-0041-21","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"1DHA088","mold_group":"150톤","mold_name":"0092","mold_no":"1547-102-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"16DHA207A","mold_group":"200톤","mold_name":"IK/CK","mold_no":"1967-392","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"19DHA206A","mold_group":"250톤","mold_name":"BI3 OPEN SEAL","mold_no":"1946-0053-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"18DHA226A","mold_group":"250톤","mold_name":"UM PACK SEAL","mold_no":"1974-0023-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"6DHA038A","mold_group":"200톤","mold_name":"0187","mold_no":"1965-326-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"18DHA202A","mold_group":"250톤","mold_name":"SU2 RR OPEN SEAL","mold_no":"1962-0030","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA207A","mold_group":"200톤","mold_name":"L43","mold_no":"1664-128-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"11DHA213A","mold_group":"150톤","mold_name":"FLINGER","mold_no":"1952-346-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"18IGA203A","mold_group":"300톤","mold_name":"9BUX","mold_no":"AB3248-SC-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"13DHA202A","mold_group":"150톤","mold_name":"DH(가공품)","mold_no":"1973-370(375)","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA235A","mold_group":"150톤","mold_name":"RB","mold_no":"1945-349-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"16DHA209A","mold_group":"300톤","mold_name":"VS30","mold_no":"1888-0005","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"13DHA206A","mold_group":"150톤","mold_name":"GM31XXN","mold_no":"1982-371","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"13DHA201A","mold_group":"150톤","mold_name":"L38(가공품)","mold_no":"1660-132","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"11DHA216","mold_group":"150톤","mold_name":"비대칭베어링","mold_no":"1970-363","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"19DHA205A","mold_group":"250톤","mold_name":"CN7 RR OPEN SEAL","mold_no":"1969-0030-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"7DHA051A","mold_group":"200톤","mold_name":"0176","mold_no":"C657-127","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"7DHA051","mold_group":"150톤","mold_name":"SHIELD","mold_no":"1657-127","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA249A","mold_group":"150톤","mold_name":"LY(가공품)","mold_no":"1874-623","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"20DHA209A","mold_group":"250톤","mold_name":"US4 RR (IN)","mold_no":"1967-0052-01","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"20DHA207A","mold_group":"200톤","mold_name":"VX1 SLINGER","mold_no":"1873-0044-21","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"20DHA206A","mold_group":"200톤","mold_name":"VX1","mold_no":"1871-0043-21","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA239","mold_group":"150톤","mold_name":"PACK SEAL","mold_no":"1858-618-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"12DHA206A","mold_group":"150톤","mold_name":"L43","mold_no":"1664-128-1","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"10DHA205A","mold_group":"150톤","mold_name":"RB","mold_no":"1945-349-1","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"17DHA205A","mold_group":"250톤","mold_name":"SK OPEN SEAL","mold_no":"1781-0001-00","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"14DFA209A","mold_group":"300톤","mold_name":"Raceway(CA/CB)","mold_no":"IW/OW-BDA-1106-1","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"14DFA209B","mold_group":"300톤","mold_name":"Raceway CA/CB","mold_no":"IW/OW-BDA-1106-2","customer":"","product":"","status":"가동중","shot_count":0,"max_shots":300000,"location":"","note":""},{"mold_code":"25SDA203A","mold_group":"800톤","mold_name":"MAIN PLATE (MQ4)","mold_no":"B171000-0013-00","customer":"","product":"","status":"가동중","shot_count":160435,"max_shots":300000,"location":"","note":"MES 금형관리 등록"}];
 const SEED_REPAIRS=[{"mold_code":"10DHA248A","stage":"입고완료","request_date":"2022-01-22","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG / 내경치수 NG","description":"피어싱 펀치, 다이 교체, 포밍 2차 다이 교체, 교정펀치 라이너 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA248A","stage":"입고완료","request_date":"2022-01-25","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수 NG","description":"교정펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA248A","stage":"입고완료","request_date":"2022-01-26","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG","description":"피어싱펀치, 다이 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-01-28","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"평탄 NG / 제품 펀치쪽 달라붙는 현상 / 외경기즈","description":"밴딩펀치 라이너 조정 / 펀치 입자 래핑 / 외경다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-02-03","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"가루찍힘발생 / 내경기즈 / 내경치수 NG","description":"하프펀치,다이 연마 / 내경다이 래핑 / 교정펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"14DHA212A","stage":"입고완료","request_date":"2022-02-04","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수 NG","description":"버링 펀치, 다이 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-02-07","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"실린더파손 / 내경기즈","description":"알루미늄판 교체 / 내경다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18TJA209A","stage":"입고완료","request_date":"2022-02-08","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"면취 쪽 BURR 발생 / 외경기즈","description":"면취펀치연마 / 피어싱펀치,다이연마 / 외경다이래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA209A","stage":"입고완료","request_date":"2022-02-11","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"내,외경 BURR","description":"내경펀치 연마 / 외경펀치,다이 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18TJA209A","stage":"입고완료","request_date":"2022-02-11","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경기즈","description":"외경다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA214A","stage":"입고완료","request_date":"2022-02-11","requester":"","assignee":"하경자","repair_type":"정기보전","reason":"기즈 / 볼트부러짐(내경펀치) / 높이 편차 심함(안착문제)","description":"U밴딩래핑 / 상판볼트 전체 교체 / 실린더 볼트 교체,조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA210A","stage":"입고완료","request_date":"2022-02-14","requester":"","assignee":"임혜","repair_type":"정기보전","reason":"제품 안쪽 걸림현상 / 내경치수 NG / 내경날부손상","description":"포밍펀치(리스트라이킹) / 1차 포밍라이너 0.3mm , 2차 포밍라이너 X, 펀치파이 90 치수교체 / 피어싱 펀치,다이 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA210A","stage":"입고완료","request_date":"2022-02-14","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"평행도 NG","description":"2차 포밍펀치라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA204A","stage":"입고완료","request_date":"2022-02-14","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"바깥쪽 높이 NG / 내외측기즈","description":"밴딩펀치 R부 래핑 / 교정펀치 라이너 조정 / 밴딩펀치 래핑 / 피어싱펀치, 다이연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-02-16","requester":"","assignee":"왕석주/임혜종","repair_type":"정기보전","reason":"외경기즈 / 내경기즈 / 하프탈선, 높이수정","description":"외경다이교체 / 내경다이래핑 / 하프다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA205A","stage":"입고완료","request_date":"2022-02-16","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경 BURR 발생","description":"외경펀치, 다이 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA208A","stage":"입고완료","request_date":"2022-02-17","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"찍힘발생 / 피어싱 펀치 날부 손상","description":"피어싱 펀치 0.5 연마 → 라이너 수정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA250A","stage":"입고완료","request_date":"2022-02-19","requester":"","assignee":"임혜","repair_type":"정기보전","reason":"내경치수NG / 내경다이 코팅벗겨짐으로 인해 내경쪽 기즈 발생","description":"교정라이너 조정 / 버링펀치 교체 / 내경다이 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-02-23","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경기즈","description":"내경다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA209A","stage":"입고완료","request_date":"2022-02-23","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"소재교환으로 인한 평면도 NG","description":"밴딩 구간 라이너 0.05 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA250A","stage":"입고완료","request_date":"2022-02-24","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내외측기즈 / 내경치수 NG / 높이치수 NG","description":"버링다이 래핑 / 교정펀치라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA248A","stage":"입고완료","request_date":"2022-02-26","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수NG","description":"교정펀치 라이너 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA204A","stage":"입고완료","request_date":"2022-02-26","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"제품 달라붙는 현상 / 높이치수NG","description":"밴딩펀치 탈착 및 래핑 / 내경다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA248A","stage":"입고완료","request_date":"2022-02-28","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이 NG","description":"피어싱 펀치 다이 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2022-02-28","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"내경BURR","description":"피어싱 펀치 다이 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA204A","stage":"입고완료","request_date":"2022-03-02","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"밴딩펀치 파손 / 높이치수 NG","description":"밴딩펀치각도1→1.3 부품교체 / 피어싱펀치,다이 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-03-05","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"하프떨어짐 / 높이치수 NG / 가루찍힘","description":"하프펀치,다이 연마 / 밴딩다이 교체 / 피어싱 펀치다이연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA227A","stage":"입고완료","request_date":"2022-03-05","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"하프떨어짐 / 외경기즈","description":"하프펀치 연마 후 라이너 조정 / 외경다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"16DHA206A","stage":"입고완료","request_date":"2022-03-05","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"내경 BURR /피어싱 다이 날이 죽음","description":"피어싱 다이 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA209A","stage":"입고완료","request_date":"2022-03-08","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"제품 쏠림","description":"내경다이교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA227A","stage":"입고완료","request_date":"2022-03-08","requester":"","assignee":"박하경","repair_type":"정기보전","reason":"내경부위 BURR 발생 / 하프떨어짐 / 외경기즈래핑","description":"면취다이래핑 / 하프펀치 라이너 조정 / 외경기즈래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA204A","stage":"입고완료","request_date":"2022-03-08","requester":"","assignee":"이정우","repair_type":"정기보전","reason":"내경, 높이, 직각도 NG","description":"밴딩펀치교체 / 피어싱펀치다이교체 / 교정펀치라이너 2.15mm 투입","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA203A","stage":"입고완료","request_date":"2022-03-08","requester":"","assignee":"정주은","repair_type":"정기보전","reason":"형상불량","description":"내경피어싱펀치다이0.1mm연마 / 하프펀치다이 0.1mm연마 / 알루미늄판 0.5라이너 삽입","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA202A","stage":"입고완료","request_date":"2022-03-10","requester":"","assignee":"하경자","repair_type":"정기보전","reason":"외경NG / 높이NG","description":"라이너조정 / 스토퍼핀수리","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA209A","stage":"입고완료","request_date":"2022-03-11","requester":"","assignee":"한영숙","repair_type":"정기보전","reason":"내경BURR","description":"내경다이교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA202A","stage":"입고완료","request_date":"2022-03-11","requester":"","assignee":"하경자","repair_type":"정기보전","reason":"단조형상NG / 탈착이상 / 제품씹힘 / 기즈 / 안착NG","description":"라이너 높이조정 / 실린더교체 / 슬라이드조정(496.1→496.0) / U밴딩래핑 / 스토퍼핀 조정 / 실린더조정 / 외경상한치조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2022-03-12","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"내경기즈 / 하프탈선 / 높이NG","description":"내경교정펀치래핑 / 스크랩상승으로 하프탈선(스크랩제거) / 피어싱펀치교체 / 라이너조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"1DHA105","stage":"입고완료","request_date":"2022-03-12","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수NG","description":"피어싱펀치다이교체 / 버링다이라이너조정 / 포밍다이라이너조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"1DHA105","stage":"입고완료","request_date":"2022-03-14","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"원통도NG / 가루찍힘발생","description":"슬라이더조정 / 피어싱펀치다이연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA204A","stage":"입고완료","request_date":"2022-03-15","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"높이NG","description":"1차 피어싱펀치다이 56.20 → 56.30 변경","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"1DHA105","stage":"입고완료","request_date":"2022-03-15","requester":"","assignee":"박하경","repair_type":"정기보전","reason":"내경치수NG","description":"교정다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-03-15","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"하프떨어짐 / 직각도NG","description":"하프펀치다이연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2022-03-16","requester":"","assignee":"왕석주,이동윤","repair_type":"정기보전","reason":"내경기즈 / 하프탈선 / 외경기즈(하프탈선으로 발생) / 내경치수NG","description":"내경다이래핑 / 교정다이라이너,교정펀치라이너 -0.5 / 하프다이펀치래핑,하프펀치교환 / 외경다이래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"1DHA105","stage":"입고완료","request_date":"2022-03-16","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG","description":"포밍다이라이너조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA204A","stage":"입고완료","request_date":"2022-03-17","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"높이치수높음(소재교환 시)","description":"외경펀치 위 부분 라이너 0.2 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-03-17","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG","description":"내경다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"임혜","repair_type":"정기보전","reason":"높이치수NG","description":"내경다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA204A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"소재교환으로 인해 높이치수 높음","description":"외경 펀치 위 부분 라이너 0.2 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"왕석주.이동윤","repair_type":"정기보전","reason":"내경기즈 / 하프탈선 / 외경기즈(하프탈선으로 발생) / 내경치수 NG","description":"내경다이 래핑 / 교정다이라이너 -0.5/하프다이펀치래핑 / 외경다이래핑 / 교정펀치라이너 -0.05 / 하프펀치교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"하프떨어짐 / 직각도 NG","description":"하프펀치다이연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA204A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"높이NG","description":"1차 피어싱펀치다이 56.20→56.30 변경","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"1DHA105","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수NG","description":"교정다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"1DHA105","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수NG","description":"포밍다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"1DHA105","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"원통도NG / 가루찍힘발생","description":"슬라이더 조정 / 피어싱펀치다이연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA204A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"높이치수높음","description":"외경 펀치 위 전체 라이너 -0.1 / 부분라이너만 0.2 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"바깥쪽 높이 NG","description":"밴딩펀치라이너조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA204A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"소재교환으로 인해 높이치수낮음","description":"아래쪽 핀 2개 뺌","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"하프떨어짐 / 바깥쪽 높이치수 NG","description":"하프펀치 라이너 조정 / 하프다이연마 / 밴딩펀치R수정 (밴딩높이 하향치)","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA207A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경치수NG / 외경기즈","description":"외경펀치 교체 / 외경펀치 라이너 추가 / 외경펀치 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내외측기즈 / 내경기즈","description":"밴딩펀치 래핑 / 내경다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA207A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경기즈","description":"외경펀치래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA204A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"센서기오작동으로 인해 라이너 찌그러짐","description":"라이너 교체 / 센서기 청소","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA214A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"내경펀치/다이 날 상함으로 인해 내경 BURR","description":"내경펀치/다이 0.2 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2022-04-01","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"외경기즈 / 내외측기즈","description":"외경밴딩다이래핑 / 외경밴딩펀치래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA213A","stage":"입고완료","request_date":"2022-04-04","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"평탄도NG / 높이NG","description":"트리밍펀치다이 -0.2연마 / 하형스트리퍼라이어 +0.2 / 버링펀치부분라이너+0.1 / 슬라이드 조절","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA205A","stage":"입고완료","request_date":"2022-04-05","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경기즈","description":"내경다이래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA248A","stage":"입고완료","request_date":"2022-04-07","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수NG / 높이치수NG","description":"교정펀치라이너 조정 / 피어싱펀치다이교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA248A","stage":"입고완료","request_date":"2022-04-08","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수NG","description":"교정펀치라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA201A","stage":"입고완료","request_date":"2022-04-09","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"직각도 NG / 내측기즈","description":"교정펀치라이너 조정 / 내경펀치 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"16DHA205A","stage":"입고완료","request_date":"2022-04-12","requester":"","assignee":"임헤종","repair_type":"정기보전","reason":"동심도 NG / 외경치수상한치","description":"상형스프링조정 / 아우터블랭킹펀치다이 1EA씩 교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA203A","stage":"입고완료","request_date":"2022-04-16","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내측외경NG / 높이치수NG / 면취쪽 날부마모","description":"내측외경펀치교체 / 피어싱펀치다이교체 / 내경다이라이너조정 / 피어싱펀치다이연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA211A","stage":"입고완료","request_date":"2022-04-18","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"직각도 NG / 형상NG / 외경기즈","description":"교정펀치라이너조정 / 밴딩펀치라이너조정 / 외경다이래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA209A","stage":"입고완료","request_date":"2022-04-19","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"외경치수NG","description":"포밍2차다이교체(85.59→85.60)","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA211A","stage":"입고완료","request_date":"2022-04-19","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경기즈","description":"외경다이래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-04-20","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"하프떨어짐","description":"하프펀치다이연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA211A","stage":"입고완료","request_date":"2022-04-20","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경기즈 / 밴딩펀치파손","description":"외경다이래핑 / 밴딩펀치교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA250A","stage":"입고완료","request_date":"2022-04-22","requester":"","assignee":"이정우","repair_type":"정기보전","reason":"내경치수NG / 높이NG / 1차밴딩다이크랙","description":"1차밴딩다이교체 / 1차밴딩펀치라이너0.6mm / 리스트라이킹펀치라이너0.6mm","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2022-04-27","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"직각도 NG","description":"밴딩다이패드교체 / 밴딩펀치각도 1.3 →0 연마 / 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA250A","stage":"입고완료","request_date":"2022-04-28","requester":"","assignee":"이정우","repair_type":"정기보전","reason":"내경치수상한치 / 원통도NG","description":"1차밴딩펀치라이너 1.0투입 / 리스트라이킹펀치다이교체 / 교정펀치라이너 0.6투입","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-04-29","requester":"","assignee":"이정우","repair_type":"정기보전","reason":"밴딩다이파손 / 밀핀파손","description":"밴딩다이교체 / 밀핀교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-05-03","requester":"","assignee":"박하경","repair_type":"정기보전","reason":"높이치수NG / 외경치수NG","description":"외경다이조각라이너조정 / 교정펀치라이너조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA250A","stage":"입고완료","request_date":"2022-05-04","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수NG","description":"2차 버링펀치조각 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-05-04","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경날부손상","description":"하프펀치다이래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"17DHA207A","stage":"입고완료","request_date":"2022-05-06","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG / R치수 NG","description":"피어싱펀치다이교체 / 밴딩펀치패드 R부 가공","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-05-07","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내외측기즈","description":"밴딩 펀치 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"6DHA039","stage":"입고완료","request_date":"2022-05-10","requester":"","assignee":"임혜","repair_type":"정기보전","reason":"외경치수 NG","description":"포밍펀치 2차 라이너 조정\n1차 포밍 다시 교체, 슬라이더 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA203A","stage":"입고완료","request_date":"2022-05-11","requester":"","assignee":"이정우","repair_type":"정기보전","reason":"제품유입(2EA) NG로 인한 금형파손\n(밴딩 펀치, 가이드 핀 2EA, 가이드 부싱 6EA)","description":"밴딩펀치, 가이드핀 2EA, 가이드 부싱 6EA 교체, 밴딩 다이 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"6DHA039","stage":"입고완료","request_date":"2022-05-11","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경치수 NG","description":"포밍 1차 라이너 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA211A","stage":"입고완료","request_date":"2022-05-11","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경 치수 NG","description":"포밍펀치 1차, 2차 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"17DHA207A","stage":"입고완료","request_date":"2022-05-13","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경 BURR 발생\n높이 치수 NG","description":"피어싱 펀치, 다이 연마, 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-05-16","requester":"","assignee":"임혜","repair_type":"정기보전","reason":"동심도 NG","description":"교정펀치 라이너 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA204A","stage":"입고완료","request_date":"2022-05-17","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"직각도 NG","description":"교정펀치 라이너 조정, 밴딩 펀치 라이너 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA215A","stage":"입고완료","request_date":"2022-05-19","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG","description":"하프펀치, 다이, 패드 부품교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-05-19","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"금형파손(밴딩펀치)","description":"금형교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA209","stage":"입고완료","request_date":"2022-05-20","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수 NG / 외경기즈","description":"밴딩다이펀치교환 / 밴딩포밍펀치라이너추가 / 외경펀치래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA204A","stage":"입고완료","request_date":"2022-05-20","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"직각도 NG","description":"교정펀치라이조정 / 밴딩펀치라이너추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-05-20","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"내경 BURR","description":"피어싱 펀치다이 연삭","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-05-23","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"금형파손 / 거리NG / 평행도 NG","description":"금형교체 / 라이너조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA201A","stage":"입고완료","request_date":"2022-05-23","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수 NG","description":"피어싱펀치다이교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA201A","stage":"입고완료","request_date":"2022-05-26","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG","description":"밴딩다이 조각라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA207A","stage":"입고완료","request_date":"2022-05-26","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경 BURR / 내경치수 NG","description":"내경펀치라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-05-27","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경치수 NG / 평행도 NG","description":"교정펀치라이너조정 / 슬라이더 조정 및 밴딩펀치 조각라이너 위치 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA205A","stage":"입고완료","request_date":"2022-05-27","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG","description":"포밍다이 조각라이너 조정 / 피어싱펀치다이교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA209A","stage":"입고완료","request_date":"2022-05-27","requester":"","assignee":"이정우","repair_type":"정기보전","reason":"내.외경 BURR / 외경치수 NG","description":"내경펀치 0.2연마 / 외경펀치.다이 0.2연마 / 슬라이드 410.8 →410.7 변경","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-05-30","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"면취쪽 날부 손상, 거리 높이 치수 NG","description":"면취쪽 펀치 연마, 밴딩펀치 조각라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-05-30","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"하프 떨어짐, 높이 치수 NG","description":"하프펀치, 다이 라이너 조정, 밴딩펀치 조각 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA209A","stage":"입고완료","request_date":"2022-05-31","requester":"","assignee":"이정우","repair_type":"정기보전","reason":"내경비 2회, 형상불량, 제품박힘, 내경실버","description":"내경다이 교체, 내경피어싱다이 2EA 0.2 mm 연마 후 가공의뢰\n내경다이 라이너 0.5mm 투입\n내경피어싱다이래핑, 내경피어싱 펀치 0.2mm 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-05-31","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경기즈, 외경 밑단 BURR 발생","description":"내경다일 래핑, 하프펀치 연마, 하프다이 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-06-02","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내외측 기즈","description":"밴딩펀치 안쪽 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"14DHA212A","stage":"입고완료","request_date":"2022-06-02","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"펀치 파손","description":"펀치 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"14DHA212A","stage":"입고완료","request_date":"2022-06-03","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"높이치수 NG","description":"리스트 라이킹 라이너 0.08 삽입","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA203A","stage":"입고완료","request_date":"2022-06-04","requester":"","assignee":"임헤종","repair_type":"정기보전","reason":"높이치수 NG, 내경치수 NG","description":"내경다이 핀 조정 및 라이너 추가\n밴딩펀치, 다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA207A","stage":"입고완료","request_date":"2022-06-04","requester":"","assignee":"이정우","repair_type":"정기보전","reason":"내경/외경 치수 NG\n내경 BURR","description":"피어싱펀치 라이너 0.6mm / 패드 라이너 0.1mm / 밴딩 다이 교체 / 라이너 0.16mm\n블랭킹 펀치 0.4mm 연마 / 라이너 0.8mm / 코일 스프링 / 가스 스프링 점검\n금형 분해 후 청소 / 다이하이트 348.8 → 349.0","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"14DHA212A","stage":"입고완료","request_date":"2022-06-04","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"높이 치수 NG / 내경 치수 NG","description":"","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA207A","stage":"입고완료","request_date":"2022-06-08","requester":"","assignee":"이정우","repair_type":"정기보전","reason":"스크랩이 피치 위로 올라탐\n제품에 스크랩이 겹쳐져 찍힘 발생","description":"피어싱 펀치 교체 및 밀핀, 스프링 교체\n피어싱 펀치 패드 교체, 라이너 0.2mm 삽입\n피어싱 다이 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA240","stage":"입고완료","request_date":"2022-06-08","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"거리, 직각도, 평행도 NG","description":"라이너 추가, 연마, 연삭","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-06-10","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"외경치수NG, 면취부 NG","description":"라이너추가, 면취부 펀치 라이너 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA214A","stage":"입고완료","request_date":"2022-06-11","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"내경치수 NG, 높이치수 NG","description":"슬라이드 조절, 펀치교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-06-13","requester":"","assignee":"왕석주","repair_type":"20220611","reason":"다이고정, 볼트 파손","description":"볼트교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA207A","stage":"입고완료","request_date":"2022-06-13","requester":"","assignee":"이정우","repair_type":"정기보전","reason":"내경, 외경, 높이 치수 NG","description":"내경 피어싱 펀치 64.20 파이 → 64.15 가공 / 라이너 2.2mm 투입\n외경 밴딩 펀치, 다이 75.167파이 교체 / 다이하이트 349.0 → 348.6 변경\n블랭킹 펀치,다이 76.15파이 교체/라이너 0.05mm 투입 → 스페어 2EA 가공의뢰","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2022-06-14","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수/외경치수 NG","description":"밴딩펀치 조각 라이너 조정, 외경다이 R부 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA203A","stage":"입고완료","request_date":"2022-06-15","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수/내외측외경 NG","description":"내경다이 라이너 조정 \n버링다이 래핑 3회","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA203A","stage":"입고완료","request_date":"2022-06-16","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG","description":"밴딩펀치 라이너 조정, 밴딩다이 라이너 위치조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA214A","stage":"입고완료","request_date":"2022-06-16","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경 기즈","description":"외경 다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-06-17","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"고정다이 볼트 파손, 평행도 NG","description":"볼트교체, 라이너 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA203A","stage":"입고완료","request_date":"2022-06-17","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"면취부 각도, 내경, 높이 NG","description":"라이너 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"1DHA088","stage":"입고완료","request_date":"2022-06-17","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수 NG, 높이치수 NG","description":"교정펀치 라이너 조정\n피어싱 펀치, 다이 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA203A","stage":"입고완료","request_date":"2022-06-20","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"하프 깨짐 직각도/내경 NG","description":"하프펀치 다이 연삭, 직각도 라이너 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-06-21","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경 기즈","description":"버링다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA203A","stage":"입고완료","request_date":"2022-06-21","requester":"","assignee":"이정우","repair_type":"정기보전","reason":"직각도, 면취부, 내경, 내경높이, 동심도 NG","description":"피어싱 펀치 56.10 파이 → 56.15 파이 교체\n밴딩 펀치 라이너 0.6mm, 교정 펀치 라이너 2.5mm 삽입\n다이하이트 387.6 → 387.5","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-06-22","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"각도 NG, 면취 거리 NG","description":"교정펀치 라이너 조정\n면취부 펀치, 다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA208A","stage":"입고완료","request_date":"2022-06-23","requester":"","assignee":"이정우","repair_type":"정기보전","reason":"내경치수/각도 NG","description":"내경피어싱 펀치/다이 68.8 파이 → 68.7 파이 교체\n패드 0.1mm 연마/라이너 0.2mm, 피어싱펀치, 패드 사이 라이너 1.2mm\n피어싱 펀치 라이너 1.8mm, 밴딩 펀치 라이너 0.1mm 제거, 밴딩 패드 라이너 0.05mm 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA204A","stage":"입고완료","request_date":"2022-06-24","requester":"","assignee":"임혜","repair_type":"정기보전","reason":"높이치수/내경치수 NG","description":"피어싱 펀치, 다이 교체, 교정 펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-06-24","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG","description":"밴딩펀치 조각 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"1DHA088","stage":"입고완료","request_date":"2022-06-27","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"높이치수 NG","description":"슬라이드 조절","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2022-06-28","requester":"","assignee":"임혜","repair_type":"정기보전","reason":"외경기즈","description":"외경다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-06-28","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"높이/면취거리/안쪽 R NG\n내측 기즈","description":"높이/면취 라이너 조정\n래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-06-30","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"높이치수 NG, \n금형 깨짐","description":"펀치다이 교체, 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA250A","stage":"입고완료","request_date":"2022-06-30","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이 치수 NG","description":"교정펀치 스트리퍼 연삭","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA250A","stage":"입고완료","request_date":"2022-07-01","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"흔들림 NG","description":"교정스트리퍼 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA248A","stage":"입고완료","request_date":"2022-07-02","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경 치수 NG","description":"교정펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA205A","stage":"입고완료","request_date":"2022-07-12","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"피어싱 펀치/다이 날부 손상으로 가루 찍힘 발생\n밑단 스크래치 발생","description":"피어싱 펀치/다이 연마 \n피어싱 다이 경밀 사상","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18TJA209A","stage":"입고완료","request_date":"2022-07-19","requester":"","assignee":"임헤종","repair_type":"정기보전","reason":"각도 NG","description":"면취부 펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-07-21","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"면취거리 NG, 내측 스크래치","description":"0.1 라이너 추가, 다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-07-23","requester":"","assignee":"박하경","repair_type":"정기보전","reason":"면취거리/진원도/직각도 NG, 외측기즈","description":"라이너 조정, 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA209A","stage":"입고완료","request_date":"2022-07-25","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"내경 BURR","description":"내경 피어싱 다이 교체\n내경 펀치 0.3mm 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-07-26","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"스크래치, 외측 기즈","description":"래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA209","stage":"입고완료","request_date":"2022-07-29","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경 치수 NG","description":"내경다이 라이너 조정 및 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-08-04","requester":"","assignee":"박하경","repair_type":"정기보전","reason":"외측 기즈","description":"부품래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA250A","stage":"입고완료","request_date":"2022-08-08","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 / 흔들림 NG","description":"내경다이 라이너 조정, 내경다이 링 래핑, 슬라이더 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18TJA209A","stage":"입고완료","request_date":"2022-08-09","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"금형 깨짐","description":"금형 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18TJA209A","stage":"입고완료","request_date":"2022-08-11","requester":"","assignee":"박하경","repair_type":"정기보전","reason":"내측 단면 스크래치","description":"래핑, 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18TJA209A","stage":"입고완료","request_date":"2022-08-11","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"내측 단면 스크래치","description":"래핑, 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA203A","stage":"입고완료","request_date":"2022-08-12","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"하프 떨어짐, 높이 치수 NG","description":"래핑, 연마\n슬라이드 조절","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA203A","stage":"입고완료","request_date":"2022-08-13","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"높이/내측 외경 잦은 치수 변화, 평행도/내측외경 / 높이 NG","description":"래핑, 라이너 조정, 다이하이트 (380.7 → 387.8) 변경","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA203A","stage":"입고완료","request_date":"2022-08-16","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"높이 NG(잦은 치수 변화)","description":"라이너 조정, 다이하이트 380.4 →  380. 6 변경","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18TJA209A","stage":"입고완료","request_date":"2022-08-16","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"내측 단면 스크래치","description":"래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-08-17","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"거리/평행도/직각도 NG","description":"라이너 조정, 다이하이트 조정(460.3 → 460.2), 다이편 교체(Button Die)","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-08-18","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"내측 기즈,  R 형상 수리","description":"부품 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-08-19","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"면취각도 NG","description":"포밍 다이 교체, 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-08-20","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"평행도/각도/거리 NG","description":"라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-08-23","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"직각도 NG, 외경 기즈","description":"교정 펀치 라이너 조정, 외경 다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-08-24","requester":"","assignee":"왕석","repair_type":"정기보전","reason":"평행도 NG, 외경 치수 하향, 거리 NG","description":"라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-08-25","requester":"","assignee":"박경림","repair_type":"정기보전","reason":"평행도 NG","description":"슬라이드 조절 (460.5→460.3)","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA211A","stage":"입고완료","request_date":"2022-09-01","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"평행도 NG, 직각도 NG","description":"외경다이 조각라이너 조정, 교정펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA250A","stage":"입고완료","request_date":"2022-09-01","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"소재교환 이후 내경치수 NG","description":"슬라이드 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA211A","stage":"입고완료","request_date":"2022-09-02","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"직각도 NG","description":"교정펀치 라이너 조정, 슬라이더 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-09-05","requester":"","assignee":"임혜","repair_type":"정기보전","reason":"거리치수 NG, 평행도 NG, 면취 NG","description":"면취부 펀치 라이너 추가, 밴딩 펀치 조각라이너 조정, 슬라이더 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-09-06","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경 BURR 발생","description":"연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-09-07","requester":"","assignee":"박경림","repair_type":"정기보전","reason":"평행도 NG 수리리","description":"슬라이드 조정. 460.2→460.3","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA250A","stage":"입고완료","request_date":"2022-09-13","requester":"","assignee":"왕석","repair_type":"정기보전","reason":"높이 NG, 흔들림 NG","description":"슬라이드 조정, 라이너 조정, 연삭","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-09-15","requester":"","assignee":"왕석주,임혜종","repair_type":"정기보전","reason":"평행도 치수 NG","description":"라이너 조정\n슬라이드 조정 (460.3→6 / 460.6→7)","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA215A","stage":"입고완료","request_date":"2022-09-16","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG, R값수정","description":"하프펀치다이 교체 / 밴딩펀치,다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA250A","stage":"입고완료","request_date":"2022-09-16","requester":"","assignee":"박경림","repair_type":"정기보전","reason":"흔들림 NG","description":"슬라이드 조정 (375.8→9)","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"16DHA207A","stage":"입고완료","request_date":"2022-09-16","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경기즈","description":"내경펀치 래핑 2회","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-09-17","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"평행도 NG","description":"라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-09-21","requester":"","assignee":"김예인","repair_type":"정기보전","reason":"스크랩 자주 올라탐","description":"1차 피어싱 다이 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2022-09-23","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"하프떨어짐→스크랩 상승","description":"하프 펀치, 다이 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"17DHA207A","stage":"입고완료","request_date":"2022-09-24","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"바깥 높이 NG, 안쪽 높이 NG","description":"외경다이 밑 조각라이너 조정, 피어싱 펀치/다이 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-09-28","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내측기즈","description":"래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA204A","stage":"입고완료","request_date":"2022-09-28","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"내측기즈, 내경치수NG","description":"래핑, 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA204A","stage":"입고완료","request_date":"2022-09-29","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"버링부 외측 기즈","description":"래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18TJA209A","stage":"입고완료","request_date":"2022-09-30","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"직각도 NG, 거리높이 NG, 외경기즈","description":"내경, 외경다이 교체. 밴딩펀치 조각라이너 조정. 외경 다이 래핑 2회","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18TJA209A","stage":"입고완료","request_date":"2022-10-01","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경기즈","description":"외경다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2022-10-05","requester":"","assignee":"임혜","repair_type":"정기보전","reason":"스크랩 상승. 내측기즈.","description":"1차 피어싱 연마, 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18TJA209A","stage":"입고완료","request_date":"2022-10-05","requester":"","assignee":"임혜","repair_type":"정기보전","reason":"직각도 NG","description":"교정펀치 라이너 조정, 외경다이 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18TJA209A","stage":"입고완료","request_date":"2022-10-06","requester":"","assignee":"임혜","repair_type":"정기보전","reason":"외경기즈, 직각도,R값 NG","description":"외경다이 래핑 5회, 교정펀치라이너조정, 밴딩펀치라이너조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA203A","stage":"입고완료","request_date":"2022-10-07","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"외경 끝단부 찍힘","description":"래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-10-11","requester":"","assignee":"강영","repair_type":"정기보전","reason":"외경기즈","description":"래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA206A","stage":"입고완료","request_date":"2022-10-12","requester":"","assignee":"임혜","repair_type":"정기보전","reason":"내경펀치 파손, 내경 burr 발생","description":"내경펀치 부품교체, 내경펀치-다이 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-10-13","requester":"","assignee":"왕석","repair_type":"정기보전","reason":"외경기즈, 평행도 NG","description":"래핑(밴딩다이교체), 슬라이드조절 (460.3→460.2)","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-10-14","requester":"","assignee":"이정우","repair_type":"정기보전","reason":"다이파손 / 거리, 평행도, 진원도 NG","description":"래핑 / 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-10-17","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"직각도 NG, 거리 높이 NG","description":"교정펀치 라이너 조정, 밴딩 펀치 조각라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-10-18","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"금형파손","description":"피어싱 펀치, 다이 연삭","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-10-19","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"금형파손","description":"면취펀치 연삭","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA226A","stage":"입고완료","request_date":"2022-10-21","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수 NG","description":"교정펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA203A","stage":"입고완료","request_date":"2022-10-26","requester":"","assignee":"임혜","repair_type":"정기보전","reason":"외경 BURR 발생","description":"하프펀치, 다이 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA206A","stage":"입고완료","request_date":"2022-10-27","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경치수 NG, 형상NG","description":"1차 포밍 펀치 연마, 1차 포밍 펀치 라이너 추가, 슬라이드 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-10-27","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"평행도, 직각도 NG\n높이 NG, 금형파손(내경)","description":"라이너조정, 다이연삭, 면취펀치 연삭","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA203A","stage":"입고완료","request_date":"2022-10-27","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경 BURR 발생","description":"하프펀치, 다이 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2022-11-01","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"거리, 각도, 직각도 NG\n진원도 평행도 NG, 평행도 NG, 높이 NG, 면취펀치 파손(2회), 외경NG\n평행도, 외경 NG","description":"면취펀치 라이너 조정, 벤딩다이 라이너 조정, 벤딩펀치 연삭, 벤딩펀치 라이너 조정\n면취펀치 연삭(2회), 교정펀치 라이너 조정(2회)","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"6DHA038A","stage":"입고완료","request_date":"2022-11-01","requester":"","assignee":"임혜종왕석주","repair_type":"정기보전","reason":"높이치수 NG, 내측기즈, 피어싱 펀치-다이 깨짐, 동심도NG, 내측기즈","description":"슬라이더 조정. 펀치연삭. 피어싱 펀치,다이 연삭. 피어싱,포밍펀치 래핑.","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA206A","stage":"입고완료","request_date":"2022-11-02","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경(G/A IN) 치수 NG","description":"1차포밍펀치라이너조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA202A","stage":"입고완료","request_date":"2022-11-04","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경 BURR 발생","description":"내경 다이 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA207A","stage":"입고완료","request_date":"2022-11-05","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수 NG","description":"교정펀치 라이너 조정, 1차 포밍 다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA207A","stage":"입고완료","request_date":"2022-11-07","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내외측기즈 발생, 내경치수 NG","description":"내경펀치링 래핑, 포밍 1차다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"11DHA213A","stage":"입고완료","request_date":"2022-11-08","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수 NG","description":"교정펀치 라이너조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"6DHA039","stage":"입고완료","request_date":"2022-11-14","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경치수 NG","description":"슬라이더 조정, 1차 포밍 펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA248A","stage":"입고완료","request_date":"2022-11-15","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수 NG","description":"교정펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA248A","stage":"입고완료","request_date":"2022-11-17","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG","description":"내경 버링다이 라이너조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18IGA203A","stage":"입고완료","request_date":"2022-11-24","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내외측기즈, 제품박힘현상, 내경안쪽기즈발생","description":"내경1차펀치 래핑, 내경포밍 2차다이 래핑, 내경 1차다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"17DHA207A","stage":"입고완료","request_date":"2022-12-14","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경기즈즈","description":"내경다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"14DHA212A","stage":"입고완료","request_date":"2022-12-16","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경, 높이 치수 NG","description":"밴딩 펀치 교환 / 밴딩펀치,패드 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"17DHA207A","stage":"입고완료","request_date":"2023-01-06","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG, R값치수 NG","description":"피어싱펀치 다이 교체, 밴딩펀치, 다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA202A","stage":"입고완료","request_date":"2023-01-09","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경치수 NG","description":"외경펀치 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"17DHA207A","stage":"입고완료","request_date":"2023-01-11","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"R값 NG, 높이치수 NG","description":"밴딩펀치 연마 후 R래핑, 밴딩펀치 조각라이너 조정 및 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"1DHA088","stage":"입고완료","request_date":"2023-01-12","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수 NG","description":"내경다이 라이너 조정, 슬라이더 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2023-01-17","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"직각도 NG","description":"교정펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA248A","stage":"입고완료","request_date":"2023-01-17","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"내경(G/A IN) NG","description":"내경다이 0.02 가공","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA209A","stage":"입고완료","request_date":"2023-01-18","requester":"","assignee":"왕석주","repair_type":"정기보전","reason":"높이 NG","description":"2차 포밍다이 라이너 수정 0.09+-0.05 → 0.89~0.96상한치 (0.05 추가)","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA248A","stage":"입고완료","request_date":"2023-01-18","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG","description":"피어싱펀치, 다이 교체\n내경포밍다이 2차 조각라이너 조정 4.71→4.74\n슬라이더 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA209","stage":"입고완료","request_date":"2023-01-30","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG","description":"버링펀치 1차 라이너 조정, 버링펀치 2차 래핑, 버링펀치 2차 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA209A","stage":"입고완료","request_date":"2023-01-30","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"내경 버","description":"내경 다이, 펀치 부품 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA211A","stage":"입고완료","request_date":"2023-02-01","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG","description":"외경다이 2차 조각 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA209A","stage":"입고완료","request_date":"2023-02-06","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"외경치수 NG","description":"1차 포밍 펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA213A","stage":"입고완료","request_date":"2023-02-09","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"면취 각도 NG","description":"슬라이더 조정, 면취부 펀치, 다이 래핑후 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA207A","stage":"입고완료","request_date":"2023-02-13","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"형상높이ng","description":"슬라이더조정, 1차 포밍다이 라이더조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2023-02-13","requester":"","assignee":"임혜","repair_type":"정기보전","reason":"거리, 각도 NG","description":"면취부 다이 라이너 조정, 면취부 펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2023-02-14","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"교정 펀치 라이너조정","description":"교정펀치 라이너조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA235A","stage":"입고완료","request_date":"2023-02-17","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수NG ->포밍1차,2차펀치, 다이라이너 조정정","description":"농피치수NG->포밍1차,2차펀치,다이라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA235A","stage":"입고완료","request_date":"2023-02-20","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수NG->포밍다이 라이너 조정","description":"높이치수NG->포밍다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA250A","stage":"입고완료","request_date":"2023-03-10","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경기즈 -> 내경다이 래핑 2회","description":"내경기즈 -> 내경다이 래핑 2","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA214A","stage":"입고완료","request_date":"2023-03-27","requester":"","assignee":"김예인","repair_type":"정기보전","reason":"피어싱펀치,다이 날이 상함으로 인한 내경 버 -> 피어싱펀치, 다이 0.5 연마","description":"피어싱펀치,다이 날이 상함으로 인한 내경 버 -> 피어싱펀치, 다이 0.5 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"16DHA209A","stage":"입고완료","request_date":"2023-03-27","requester":"","assignee":"ADMIN","repair_type":"정기보전","reason":"높이치수 ng -> 2차 포밍다이 라이너 조정","description":"높이치수 ng -> 2차 포밍다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA235A","stage":"입고완료","request_date":"2023-03-31","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내외측 기스 -> 2차 펀치 외경펀치 래핑 \n높이치수 ng -> 2차펀치 외경펀치 교환","description":"내외측 기스 -> 2차 펀치 외경펀치 래핑 \n높이치수 ng -> 2차펀치 외경펀치 교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA205A","stage":"입고완료","request_date":"2023-04-05","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 ng -> 피어싱펀치 다이교체 63.10ø -> 63.05ø","description":"높이치수 ng -> 피어싱펀치 다이교체 63.10ø -> 63.05ø","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA206A","stage":"입고완료","request_date":"2023-04-10","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외측기즈->외경펀치래핑","description":"외경기즈->외경펀치래","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2023-04-10","requester":"","assignee":"한영숙","repair_type":"정기보전","reason":"높이수정(3.91~3.98) -> 피어싱 펀치다이교체 46.40->46.30 -> 3.94~4.03","description":"높이수정(3.91~3.98) -> 피어싱 펀치다이교체 46.40->46.30 -> 3.94~4.03","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA206A","stage":"입고완료","request_date":"2023-04-12","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경(G/ASO) 치수NG, 외경 버 발생 -> 외경펀치 래핑 2회, 트리밍다이 연마","description":"내경(G/ASO) 치수NG, 외경 버 발생 -> 외경펀치 래핑 2회, 트리밍다이 연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA235A","stage":"입고완료","request_date":"2023-04-18","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"평형도 NG -> 버링다이 2차 조각 라이너 조정","description":"평형도 NG -> 버링다이 2차 조각 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA209A","stage":"입고완료","request_date":"2023-04-18","requester":"","assignee":"한영숙","repair_type":"정기보전","reason":"스크랩 상승 -> 피어싱 펀치 다이교체 (각2 EA)","description":"스크랩 상승 -> 피어싱 펀치 다이교체 (각2 EA)","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA201A","stage":"입고완료","request_date":"2023-04-20","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경치수 GNG -> 외경파이 가공","description":"외경치수 GNG -> 외경파이 가공","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA201A","stage":"입고완료","request_date":"2023-04-24","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"진원도 NG -> 외경 다이 라이너 교체, 슬라이더 조정","description":"진원도 NG -> 외경 다이 라이너 교체, 슬라이더 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA206A","stage":"입고완료","request_date":"2023-04-24","requester":"","assignee":"ADMIN","repair_type":"정기보전","reason":"소재교환으로 인한 외경치수 크게 나옴 -> 외경 펀치 R 부위 래핑","description":"","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA209A","stage":"입고완료","request_date":"2023-04-25","requester":"","assignee":"한영숙","repair_type":"정기보전","reason":"외경치수조정(ø85.53~85.59)\n높이 NG (0.85~0.95)->0.96","description":"외경치수조정(ø85.53~85.59) -> 외경다이 ø85.58->85.63교체\n높이 NG (0.85~0.95)->0.96                      (85.597->85.588 / 85.585->85.539)\n->2차포밍다이라이너 조정(0.96->0.93), 2차포밍펀치 내측단높이가공(-0.03)","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA201A","stage":"입고완료","request_date":"2023-04-26","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"스크랩이 빠졌다가 안빠졌다가 함 ->라이너가 튀어나와서 걸림","description":"스크랩이 빠졌다가 안빠졌다가 함 ->라이너가 튀어나와서 걸림\n-> 라이너 안쪽을 깎아서 넓힘","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA206A","stage":"입고완료","request_date":"2023-05-04","requester":"","assignee":"손권","repair_type":"정기보전","reason":"소재교환 후 외경치수NG","description":"소재교환 후 외경치수NG ->외경펀치 0.1 연마 후 R 부위 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"11DHA216","stage":"입고완료","request_date":"2023-05-10","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"소재교환으로 인한 높이 치수 낮음","description":"소재교환으로 인한 높이치수낮음 -> 높이치수 낮은쪽 핀 제거","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA203A","stage":"입고완료","request_date":"2023-05-10","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경치수 NG","description":"외경치수 NG -> 교정쪽 외경펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2023-05-11","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"형상 NG, 면취 각도 NG","description":"형상 NG, 면취 각도 NG  -> 밴딩 펀치 라이너 조정, 면취부 펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"16DHA209A","stage":"입고완료","request_date":"2023-05-15","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG 외경치수 NG","description":"높이치수 NG 외경치수 NG -> 1차 내경다이 라이어 조정 , 1차 외경다이 부품교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA205A","stage":"입고완료","request_date":"2023-05-24","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"거리높이 NG","description":"거리높이 NG -> 포밍 2차 내경다이 라이너 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA202A","stage":"입고완료","request_date":"2023-05-24","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수NG","description":"높이치수NG -> 밴딩 외경다이 조각 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"7DHA051A","stage":"입고완료","request_date":"2023-05-24","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이 치수 NG","description":"높이 치수 NG -> 2차 내경 다이 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"7DHA051","stage":"입고완료","request_date":"2023-05-30","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 하향치 NG, 면취거리 NG","description":"높이치수 하향치 NG, 면취거리 NG -> 피어싱 펀치다이교체 , 피어싱 펀치 1차 부품교체 및 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"7DHA051","stage":"입고완료","request_date":"2023-05-31","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG, 테이퍼 거리 NG","description":"높이치수 NG, 테이퍼 거리 NG -> 피어싱 펀치 교체, 피어싱 펀치 1차 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA248A","stage":"입고완료","request_date":"2023-06-02","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG","description":"높이치수 NG -> 피어싱 펀치 , 다이 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA249A","stage":"입고완료","request_date":"2023-06-07","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"소재교환으로 인한 외경 치수 89.04 이상","description":"소재교환으로 인한 외경 치수 89.04 이상->외경다이 큰걸로 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA202A","stage":"입고완료","request_date":"2023-06-08","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경치수 ng, 거리치수 상향치","description":"외경치수 ng, 거리치수 상향치 -> 내경다이 r 부 래핑, 내경펀치 0.2mm연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"13DHA202A","stage":"입고완료","request_date":"2023-06-09","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경 버 발생","description":"내경 버 발생 -> 내경 다이 교체, 내경펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA209A","stage":"입고완료","request_date":"2023-06-23","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경치수 NG","description":"외경치수 NG -> 교정외경 펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"17DHA207A","stage":"입고완료","request_date":"2023-06-26","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경기즈, 내외측기즈, 높이치수NG","description":"외경기즈, 내외측기즈, 높이치수NG \n-> 외경다이 래핑, 내경펀치 래핑, 내경펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA209A","stage":"입고완료","request_date":"2023-06-29","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"제품의 각도가 안쪽으로 굽어서 외경 치수 측정이 불가함","description":"제품의 각도가 안쪽으로 굽어서 외경 치수 측정이 불가함 \n-> 펀치 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"17DHA207A","stage":"입고완료","request_date":"2023-06-30","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"외경기즈 발생","description":"외경기즈 발생 ->외경다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA207A","stage":"입고완료","request_date":"2023-06-30","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"R값 NG","description":"R값 NG -> 슬라이더 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA207A","stage":"입고완료","request_date":"2023-07-03","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"바깥쪽 높이 상향치","description":"바깥쪽 높이 상향치  -> 밴딩펀치 조각 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA207A","stage":"입고완료","request_date":"2023-07-04","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"안쪽높이 하향치","description":"안쪽높이 하향치 -> 밴딩펀치 조각 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA214A","stage":"입고완료","request_date":"2023-07-12","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경버-날 부위가 상함","description":"내경버-날 부위가 상함 -> \n피어싱 펀치, 다이 0.5연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"15DHA214A","stage":"입고완료","request_date":"2023-07-26","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"피어싱 펀치, 다이 파손","description":"피어싱 펀치, 다이 파손 -> 피어싱 펀치, 다이교체, (센서기오작동)","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA206A","stage":"입고완료","request_date":"2023-07-27","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수ng, 안쪽높이치수 ng","description":"내경치수ng, 안쪽높이치수 ng -> 교정펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA206A","stage":"입고완료","request_date":"2023-08-09","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"실버발생","description":"실버발생 -> 하프펀치 다이 연마, 밴딩 펀치 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA239","stage":"입고완료","request_date":"2023-08-11","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"직각도 NG","description":"직각도 NG->슬라이더 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA203A","stage":"입고완료","request_date":"2023-08-25","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"직각도NG,거리치수NG","description":"직각도NG,거리치수NG -> 교정펀치 라이너 조정, 교정펀치 부품 선반 가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA203A","stage":"입고완료","request_date":"2023-08-28","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경기즈,외경버발생","description":"내경기즈 외경버발생 -> 내경다이 래핑, 하프펀치 다이연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA203A","stage":"입고완료","request_date":"2023-08-29","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수조정, 내경기즈","description":"높이치수조정, 내경기즈 ->밴딩다이 조각라이너 조정, 내경다이 래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18DHA215A","stage":"입고완료","request_date":"2023-09-07","requester":"","assignee":"임혜쫑","repair_type":"정기보전","reason":"직각도NG, 거리치수NG","description":"직각도NG, 거리치수NG -> 교정펀치 라이너 조정, 면취펀치 라이너 추가","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA240","stage":"입고완료","request_date":"2023-09-11","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수NG","description":"높이치수NG->외경다이연마","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18TJA209A","stage":"입고완료","request_date":"2023-09-12","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"직각도 ng, 외경기즈","description":"직각도 ng, 외경기즈 -> 슬라이더 조정, 외경다이래핑","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"11DHA216","stage":"입고완료","request_date":"2023-09-14","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"금형 아래쪽 핀 빠짐-높이치수 높음.","description":"핀 재조립","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA206A","stage":"입고완료","request_date":"2023-09-19","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"소재교환 후 외경치수 78.76 기준치 초과해서 78.77 나옴","description":"외경펀치, 다이교체, 슬라이드 2칸 내림","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA204A","stage":"입고완료","request_date":"2023-09-23","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"내경치수 ng","description":"교정펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA206A","stage":"입고완료","request_date":"2023-10-05","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG, 직각도 NG","description":"높이치수 NG, 직각도 NG \n->포밍2차 다이 라이너 조정 \n  포밍1차 펀치 라이너 조정","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA205A","stage":"입고완료","request_date":"2023-10-10","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"외경치수 58.995 나옴\n직각도 0.11나옴","description":"외경치수 58.995 나옴\n직각도 0.11나옴 \n-> 다이 작은걸로 교체, 다이 위에 부서진 라이너 교체","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA205A","stage":"입고완료","request_date":"2023-10-10","requester":"","assignee":"손권식","repair_type":"정기보전","reason":"높이 치수 3.86 나옴","description":"높이 치수 3.86 나옴 \n-> 아래쪽 핀 빠져서 다시 넣음","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"17DHA205A","stage":"입고완료","request_date":"2023-10-12","requester":"","assignee":"임혜종","repair_type":"정기보전","reason":"높이치수 NG","description":"높이치수 NG \n-> 2차 펀치 0.03 연삭","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA203A","stage":"입고완료","request_date":"2024-03-19","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"밴딩다이 가스스프리(PX170-15) 가스없음6개\n밴딩펀치 일반 스프링 녹색 10*65 6개 마모 \n\n가스스프링 밴딩펀치 일반 스프링 교환","description":"가스스프링 밴딩 펀치 일반 스프링 교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"14DFA209A","stage":"입고완료","request_date":"2025-03-25","requester":"","assignee":"여혜빈","repair_type":"정기보전","reason":"가이드 포스트 마모 \n가이드 부쉬 파손 4개 \n가이드ㅗ스트6개교환 가이드부쉬 12개교환 가이드펀치 12개교환","description":"","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"14DFA209B","stage":"입고완료","request_date":"2025-03-26","requester":"","assignee":"김동현","repair_type":"정기보전","reason":"포스트마모 부쉬파손 (가이드) - 포스트 6개교환 부쉬가이드 2개교환","description":"","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"16DHA209A","stage":"입고완료","request_date":"2025-07-04","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"상형 2 ,3차 포밍공정 가스스프링 가스소진 과다사용 \n2개 PX320-19","description":"가스스프링 교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA213A","stage":"입고완료","request_date":"2025-07-04","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"상형 일반 스프링 22*60 녹색 파손 2개 -과다사용","description":"일반 스프링 교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"16DHA205A","stage":"입고완료","request_date":"2025-07-04","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"다이 리프트 마모 2개 -과다사용","description":"다이리프트 교화","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"17DHA205A","stage":"입고완료","request_date":"2025-07-04","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"블랭킹 펀치 다이 마모 -과다사용","description":"블랭킹 펀치 다이 교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"19DHA205A","stage":"입고완료","request_date":"2025-07-04","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"파일럿 핀 마모 2개 \n포밍펀치 마모 과다사용","description":"파일럿 핀 교환\n포밍펀치 교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"17DHA207A","stage":"입고완료","request_date":"2025-07-04","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"상형 밴딩 공정 부시 20*25 파손 2개 \n연삭을 하지않아 힘을 많이 받음","description":"신규 부시 연삭 후 교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"14DHA212A","stage":"입고완료","request_date":"2025-07-04","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"노칭 다이 공정 리프트 스프링 파손 3개 -교환주기","description":"스프링 교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"10DHA235A","stage":"입고완료","request_date":"2025-07-04","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"상형 일반 스프링 22*50 녹색 파손 3개 \n상형 포밍 공정 파일럿 핀 마모 2개 과다사용","description":"일반 스프링 교환3개\n파일럿 핀 교환 2개","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"11DHA216","stage":"입고완료","request_date":"2025-07-04","requester":"","assignee":"깅영태","repair_type":"정기보전","reason":"상형 일반 스프링 22*60 녹색 5개 파손-과다사용\n상현 밀핀 2개 파손-힘을 많이 받음\n피어싱 펀치 다이 마모 단 높이 0.8-소재이송중 피더기이상이중타발","description":"일반 스프링교환6개\n밀핀 교환\n신작 피어싱 펀치 다이 단높이 0.75 교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2025-07-04","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"상형 교정 밴딩 스트리퍼 스텐볼트 12*100 파손3개 \n볼트 체결부위가 많은 힘을 받음","description":"스텐볼트 교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"20DHA204A","stage":"입고완료","request_date":"2025-07-07","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"상형 밴딩부 스트리퍼 크랙 \n상형 하프 펀치 공정 부시 20*25 파손1개","description":"신규 스트리퍼 입고 후 교체\n신규 부시 연삭 후 교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"18IGA203A","stage":"입고완료","request_date":"2025-07-07","requester":"","assignee":"여혜빈","repair_type":"정기보전","reason":"1차 밴딩 다이 가스스프링px170-13 1개 가스소진-교환주기\n블랭킹 다이 과다 연마 -폐기 84.00파이-제품외경버 발생\n피어싱 펀치 마모 - 교환주기","description":"가스스피링 교환\n블랭킹 다이 신작 교환\n피어싱 펀치 교환","cost":0,"spec":"","measure_before":"","measure_after":""},{"mold_code":"12DHA212A","stage":"입고완료","request_date":"2025-07-07","requester":"","assignee":"강영태","repair_type":"정기보전","reason":"상형 교정밴딩 스트리퍼 스텐볼트 파손 6개 12*100","description":"스텐볼트 교환","cost":0,"spec":"","measure_before":"","measure_after":""}];
 
 
@@ -1541,8 +1844,37 @@ async function seedDatabase(){
 // Auto-seed if DB is empty
 async function initApp(){
   await dbLoad();
+  // Settings version sync: force-update DB settings when HTML version changes
+  const{data:verData}=await sb.from('settings').select('items').eq('category','_version').maybeSingle();
+  const dbVer=(verData?.items)?verData.items[0]||'':'';
+  if(dbVer!==SETTINGS_VERSION){
+    toast('설정 동기화 중...','info');
+    settingsData=JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+    await saveAllSettings();
+    await sb.from('settings').upsert({category:'_version',name:'버전',description:'설정 버전',items:[SETTINGS_VERSION]},{onConflict:'category'});
+    toast('설정 동기화 완료','success');
+  }
   if(moldDB.length===0 && repairData.length===0){
     await seedDatabase();
+  } else {
+    const missing=SEED_MOLDS.filter(sm=>!moldDB.some(m=>m.mold_code===sm.mold_code));
+    if(missing.length){
+      toast(`신규 금형 ${missing.length}건 추가 중...`,'info');
+      await sb.from('mold_db').insert(missing.map(m=>({
+        mold_code:m.mold_code,mold_group:m.mold_group,mold_name:m.mold_name,mold_no:m.mold_no,
+        customer:m.customer,product:m.product,status:m.status,
+        shot_count:m.shot_count,max_shots:m.max_shots,location:m.location,note:m.note
+      })));
+      toast(`신규 금형 ${missing.length}건 등록 완료`,'success');
+    }
+    const toUpdate=SEED_MOLDS.filter(sm=>sm.shot_count>0);
+    for(const sm of toUpdate){
+      const existing=moldDB.find(m=>m.mold_code===sm.mold_code);
+      if(existing&&(existing.shot_count||0)!==sm.shot_count){
+        await sb.from('mold_db').update({shot_count:sm.shot_count}).eq('mold_code',sm.mold_code);
+      }
+    }
+    if(missing.length||toUpdate.length) await dbLoad();
   }
   setupRealtime();
 }
