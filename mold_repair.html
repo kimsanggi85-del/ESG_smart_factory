@@ -1305,7 +1305,7 @@ function openEditRepair(id){
   let h=`<div class="form-grid">
     <div class="field"><label>금형</label><select id="re_mold">${opts}</select></div>
     <div class="field"><label>수리유형</label><select id="re_type">${getRepairTypes().map(t=>`<option${item.repair_type===t?' selected':''}>${t}</option>`).join('')}</select></div>
-    <div class="field"><label>의뢰자</label><input id="re_req" class="input" value="${item.requester||''}"></div>
+    <div class="field"><label>의뢰자</label><select id="re_req"><option value="">-- 선택 --</option>${getRequesters().map(r=>`<option${item.requester===r?' selected':''}>${r}</option>`).join('')}<option value="__custom"${!getRequesters().includes(item.requester)&&item.requester?' selected':''}>직접입력...</option></select></div>
     <div class="field"><label>담당자</label><select id="re_assign"><option value="">-- 선택 --</option>${getAssignees().map(a=>`<option${item.assignee===a?' selected':''}>${a}</option>`).join('')}</select></div>
     <div class="field"><label>신청일</label><input type="date" id="re_date" class="input" value="${item.request_date||''}"></div>
     <div class="field"><label>비용 (원)</label><input type="number" id="re_cost" class="input" value="${item.cost||0}"></div>
@@ -1323,10 +1323,12 @@ function openEditRepair(id){
 }
 
 async function saveEditRepair(id){
+  let reqVal=document.getElementById('re_req').value;
+  if(reqVal==='__custom')reqVal=prompt('의뢰자 이름:')||'';
   const updates={
     mold_code:document.getElementById('re_mold').value,
     repair_type:document.getElementById('re_type').value,
-    requester:document.getElementById('re_req').value,
+    requester:reqVal,
     assignee:document.getElementById('re_assign').value,
     request_date:document.getElementById('re_date').value,
     cost:parseInt(document.getElementById('re_cost').value)||0,
