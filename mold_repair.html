@@ -334,8 +334,6 @@ async function dbAdvanceStage(repairId,newStage){
   const today=new Date().toISOString().slice(0,10);
   const{error:e1}=await sb.from('repair_data').update({stage:newStage}).eq('id',repairId);
   if(e1){toast('단계변경 실패','error');return false}
-  // 동일 단계 기존 이력 삭제 후 재등록 (수정 시 중복 방지)
-  await sb.from('repair_history').delete().eq('repair_id',repairId).eq('action',newStage);
   await sb.from('repair_history').insert({repair_id:repairId,action:newStage,action_date:today});
   if(newStage==='입고완료'){
     const rep=repairData.find(r=>r.id===repairId);
@@ -753,7 +751,18 @@ function openRepairDetail(id){
     }
   }
   h+=`</div></div></div>`;
-  h+=`<div class="section-title">수리사유 / 상세설명</div><div class="info-box"><b>사유:</b> ${item.reason||''}<br><b>설명:</b> ${item.description||''}</div>`;
+  // 상세설명에서 검증 블록 중복 제거 (최신 1개만 표시)
+  const cleanDesc=(desc=>{
+    if(!desc)return '';
+    const TAG_RE=/【(?:확인검증|측정검증|정밀측정검증|생산검증|간이검증)】[^【]*/g;
+    const matches=[...desc.matchAll(TAG_RE)];
+    if(matches.length<=1)return desc;
+    // 검증 블록이 여러 개면 마지막 것만 남기고 나머지 제거
+    const last=matches[matches.length-1][0];
+    let cleaned=desc.replace(TAG_RE,'').trim();
+    return (cleaned+' '+last).trim();
+  })(item.description||'');
+  h+=`<div class="section-title">수리사유 / 상세설명</div><div class="info-box"><b>사유:</b> ${item.reason||''}<br><b>설명:</b> ${cleanDesc}</div>`;
   // Photos
   h+=`<div class="section-title">수리 전 / 후 사진</div><div class="photo-compare">
     <div><div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600">📷 수리 전</div>
@@ -761,13 +770,8 @@ function openRepairDetail(id){
     <div><div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600">📷 수리 후</div>
       <div class="photo-zone">${item.after_img?`<img src="${item.after_img}"><button class="photo-remove" onclick="event.stopPropagation();removeImg(${item.id},'after')">✕</button>`:`<div class="ph-label">클릭하여 사진 첨부</div><div class="ph-hint">JPG, PNG (최대 5MB)</div>`}<input type="file" accept="image/*" onchange="uploadImg(this,${item.id},'after')"></div></div></div>`;
   h+=`<div class="section-title">진행 이력</div><div class="info-box" style="line-height:1.6">`;
-  // 동일 단계 중복 이력은 최신 날짜만 표시
-  const dedupHist=Object.values(hist.reduce((acc,hi)=>{
-    if(!acc[hi.action]||hi.action_date>acc[hi.action].action_date)acc[hi.action]=hi;
-    return acc;
-  },{})).sort((a,b)=>(a.action_date||'').localeCompare(b.action_date||''));
-  dedupHist.forEach(hi=>{h+=`<div class="history-item"><span class="dot" style="background:${STAGE_COLORS[hi.action]||'#555'}"></span><span style="color:var(--muted);width:90px">${hi.action_date||''}</span>${badge(hi.action)}</div>`});
-  if(!dedupHist.length)h+=`<div style="color:var(--dim)">이력 없음</div>`;
+  hist.forEach(hi=>{h+=`<div class="history-item"><span class="dot" style="background:${STAGE_COLORS[hi.action]||'#555'}"></span><span style="color:var(--muted);width:90px">${hi.action_date||''}</span>${badge(hi.action)}</div>`});
+  if(!hist.length)h+=`<div style="color:var(--dim)">이력 없음</div>`;
   h+=`</div>`;
   // Action buttons
   h+=`<div class="form-actions" style="margin-top:20px"><button class="btn btn-red btn-sm" onclick="deleteRepair(${item.id})">🗑 삭제</button><div style="flex:1"></div><button class="btn btn-secondary" onclick="openEditRepair(${item.id})">✏️ 수정</button></div>`;
@@ -944,10 +948,10 @@ async function saveProductionVerification(repairId,result){
   const note=document.getElementById('pv_note').value;
 
   const item=repairData.find(r=>r.id===repairId);
-  const desc_append=`\n\n【생산검증】판정: ${result} | 라인: ${line} | 확인자: ${inspector} | 검증일: ${date} | 트라이얼: ${qty||'-'}EA | 양품: ${okQty||'-'}EA | 확인항목: ${check}${note?' | 비고: '+note:''}`;
+  const newBlock=`【생산검증】판정: ${result} | 라인: ${line} | 확인자: ${inspector} | 검증일: ${date} | 트라이얼: ${qty||'-'}EA | 양품: ${okQty||'-'}EA | 확인항목: ${check}${note?' | 비고: '+note:''}`;
 
   await dbUpdateRepair(repairId,{
-    description:(item.description||'')+desc_append,
+    description:replaceVerifyBlock(item.description,newBlock),
     spec:result==='OK'?'생산검증 OK':'생산검증 NG'
   });
 
@@ -1007,6 +1011,12 @@ function openSimpleJudgment(repairId){
   document.getElementById("modalBody").innerHTML=h;
 }
 
+// 검증 블록 교체 헬퍼 (기존 검증 내용 제거 후 신규 블록으로 대체)
+function replaceVerifyBlock(desc,newBlock){
+  const cleaned=(desc||'').replace(/\n*【(?:확인검증|측정검증|정밀측정검증|생산검증|간이검증)】[^\n]*/g,'').trimEnd();
+  return cleaned+(cleaned?'\n\n':'')+newBlock;
+}
+
 async function saveSimpleJudgment(repairId,result){
   let inspector=document.getElementById('sj_inspector').value;
   if(inspector==='__custom')inspector=prompt('확인자 이름:')||'';
@@ -1014,10 +1024,10 @@ async function saveSimpleJudgment(repairId,result){
   const note=document.getElementById('sj_note').value;
 
   const item=repairData.find(r=>r.id===repairId);
-  const desc_append=`\n\n【확인검증】판정: ${result} | 확인자: ${inspector} | 확인일: ${date}${note?' | 내용: '+note:''}`;
+  const newBlock=`【확인검증】판정: ${result} | 확인자: ${inspector} | 확인일: ${date}${note?' | 내용: '+note:''}`;
 
   await dbUpdateRepair(repairId,{
-    description:(item.description||'')+desc_append,
+    description:replaceVerifyBlock(item.description,newBlock),
     spec:result==='OK'?'육안확인 OK':'육안확인 NG'
   });
 
@@ -1232,14 +1242,12 @@ async function saveMeasurement(repairId){
   const part=document.getElementById('mv_part')?.value||'';
   const points=document.getElementById('mv_points')?.value||'';
 
-  const desc_append=`\n\n【정밀측정검증】판정: ${judgmentText} | 검사자: ${inspector} | 검사일: ${inspDate} | 장비: ${equip} | 목적: ${purpose} | 방법: ${method} | 부위: ${part} | 포인트: ${points}${note?' | 비고: '+note:''}`;
-
   const item=repairData.find(r=>r.id===repairId);
   const updates={
     spec:specSummary||item.spec||'',
     measure_before:beforeSummary||item.measure_before||'',
     measure_after:afterSummary||item.measure_after||'',
-    description:(item.description||'')+desc_append
+    description:replaceVerifyBlock(item.description||'',`【정밀측정검증】판정: ${judgmentText} | 검사자: ${inspector} | 검사일: ${inspDate} | 장비: ${equip} | 목적: ${purpose} | 방법: ${method} | 부위: ${part} | 포인트: ${points}${note?' | 비고: '+note:''}`)
   };
 
   await dbUpdateRepair(repairId,updates);
@@ -1874,7 +1882,9 @@ function renderSettings(){
   h+=`<div class="settings-grid">`;
   Object.keys(settingsData).forEach(key=>{
     const s=settingsData[key];
-    h+=`<div class="setting-card"><div class="setting-card-title">${s.name} <span class="setting-count">${s.items.length}개</span></div><div class="setting-card-desc">${s.desc}</div>`;
+    if(!s||typeof s!=='object')return;
+    if(!Array.isArray(s.items))s.items=[];
+    h+=`<div class="setting-card"><div class="setting-card-title">${s.name||key} <span class="setting-count">${s.items.length}개</span></div><div class="setting-card-desc">${s.desc||''}</div>`;
     s.items.forEach((item,idx)=>{
       h+=`<div class="setting-item"><span style="flex:1">${item}</span>
         <button class="setting-btn" onclick="editSetting('${key}',${idx})" title="수정">✏️</button>
