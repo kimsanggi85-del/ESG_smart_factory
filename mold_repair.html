@@ -169,12 +169,12 @@ tr.row{cursor:pointer;transition:background .15s}
   <div class="header-actions">
     <span id="dbStatus" class="db-status db-loading">⏳ 연결중</span>
     <div id="alertBadgeArea"></div>
+    <button class="btn btn-primary" onclick="openNewRepairForm()">+ 수리의뢰</button>
   </div>
 </div>
 
 <div class="tabs">
   <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard',this)">대시보드</button>
-  <button class="tab" data-tab="register" onclick="switchTab('register',this)">수리의뢰</button>
   <button class="tab" data-tab="molddb" onclick="switchTab('molddb',this)">금형 DB</button>
   <button class="tab" data-tab="list" onclick="switchTab('list',this)">수리내역</button>
   <button class="tab" data-tab="stats" onclick="switchTab('stats',this)">통계분석</button>
@@ -184,7 +184,6 @@ tr.row{cursor:pointer;transition:background .15s}
 
 <div class="content">
   <div id="view-dashboard"></div>
-  <div id="view-register" style="display:none"></div>
   <div id="view-molddb" style="display:none"></div>
   <div id="view-list" style="display:none"></div>
   <div id="view-stats" style="display:none"></div>
@@ -205,8 +204,8 @@ tr.row{cursor:pointer;transition:background .15s}
 
 <script>
 // ==================== SUPABASE 연결 ====================
-const SUPABASE_URL=localStorage.getItem('sb_url')||'https://ebthltdmxpzlkfwvdloz.supabase.co';
-const SUPABASE_KEY=localStorage.getItem('sb_key')||'sb_publishable_ZSgcZapb7cTgFezGmOV_ow_9MT15SnS';
+const SUPABASE_URL='https://ebthltdmxpzlkfwvdloz.supabase.co';
+const SUPABASE_KEY='sb_publishable_ZSgcZapb7cTgFezGmOV_ow_9MT15SnS';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 // ==================== DATA ====================
@@ -242,16 +241,7 @@ function debounceRender(val,target){
   if(target==='mold')moldFilterSearch=val;
   else filterSearch=val;
   clearTimeout(_searchTimer);
-  _searchTimer=setTimeout(()=>{
-    render();
-    // 렌더링 후 검색 입력란에 포커스 복원
-    requestAnimationFrame(()=>{
-      let sel;
-      if(target==='mold') sel=document.querySelector('[placeholder*=금형코드]');
-      else sel=document.querySelector('[placeholder*=사유]');
-      if(sel){sel.focus();sel.setSelectionRange(sel.value.length,sel.value.length);}
-    });
-  },300);
+  _searchTimer=setTimeout(()=>render(),300);
 }
 
 function S(key){return settingsData[key]?settingsData[key].items:[]}
@@ -294,7 +284,7 @@ async function dbLoad(){
     const{data:sets,error:e4}=await sb.from('settings').select('*');
     if(e4)throw e4;
     if(sets&&sets.length){
-      sets.forEach(s=>{if(Array.isArray(s.items))settingsData[s.category]={name:s.name||s.category,desc:s.description||'',items:s.items||[]}});
+      sets.forEach(s=>{settingsData[s.category]={name:s.name||s.category,desc:s.description||'',items:s.items||[]}});
     }else{
       // First time: save default settings
       await saveAllSettings();
@@ -304,8 +294,6 @@ async function dbLoad(){
     document.getElementById('dbStatus').textContent='🟢 DB 연결됨';
     document.getElementById('loadingScreen').style.display='none';
     render();
-    // 고아 수리내역 자동 감지 (금형DB에 없는 금형코드)
-    checkOrphanRepairs();
   }catch(err){
     console.error('DB Load Error:',err);
     document.getElementById('dbStatus').className='db-status db-offline';
@@ -327,39 +315,6 @@ async function dbUpdateMold(id,updates){
   toast('수정 완료','success');return true;
 }
 
-function checkOrphanRepairs(){
-  const moldCodes=new Set(moldDB.map(m=>m.mold_code));
-  const orphanCodes=[...new Set(repairData.map(r=>r.mold_code).filter(c=>c&&!moldCodes.has(c)))];
-  if(!orphanCodes.length)return;
-  orphanCodes.forEach(oldCode=>{
-    const count=repairData.filter(r=>r.mold_code===oldCode).length;
-    const banner=document.createElement('div');
-    banner.style.cssText='position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#fff;border:2px solid var(--orange);border-radius:10px;padding:16px 24px;z-index:3000;box-shadow:0 8px 32px rgba(0,0,0,.2);max-width:500px;width:90%;font-size:13px;animation:slideIn .3s';
-    banner.innerHTML=`<div style="font-weight:700;color:var(--orange);margin-bottom:10px">⚠️ 금형코드 불일치 감지</div>
-      <div style="margin-bottom:10px">수리내역에 <b>"${oldCode}"</b> (${count}건)이 있으나 금형DB에 해당 코드가 없습니다.</div>
-      <div style="margin-bottom:12px"><label style="font-size:12px;color:var(--muted)">변경할 금형코드 선택:</label>
-        <select id="orphanFix_${oldCode.replace(/[^a-zA-Z0-9]/g,'')}" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:4px;margin-top:4px">
-          ${moldDB.map(m=>`<option value="${m.mold_code}">${m.mold_code} (${m.mold_name||''})</option>`).join('')}
-        </select>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button onclick="this.closest('div[style]').remove()" style="padding:6px 16px;border:1px solid #d1d5db;border-radius:4px;background:#fff;cursor:pointer;font-size:12px">무시</button>
-        <button onclick="fixOrphanCode('${oldCode}','orphanFix_${oldCode.replace(/[^a-zA-Z0-9]/g,'')}')" style="padding:6px 16px;border:none;border-radius:4px;background:var(--blue);color:#fff;cursor:pointer;font-weight:600;font-size:12px">일괄 변경</button>
-      </div>`;
-    document.body.appendChild(banner);
-  });
-}
-
-async function fixOrphanCode(oldCode,selectId){
-  const newCode=document.getElementById(selectId).value;
-  if(!newCode)return;
-  const{error}=await sb.from('repair_data').update({mold_code:newCode}).eq('mold_code',oldCode);
-  if(error){toast('일괄변경 실패: '+error.message,'error');return}
-  document.getElementById(selectId).closest('div[style]').remove();
-  toast(`"${oldCode}" → "${newCode}" 일괄변경 완료`,'success');
-  await dbLoad();
-}
-
 async function dbInsertRepair(repair){
   const row={mold_code:repair.mold_code,stage:repair.stage||'의뢰접수',request_date:repair.request_date||new Date().toISOString().slice(0,10),requester:repair.requester,assignee:repair.assignee||'',repair_type:repair.repair_type,reason:repair.reason,description:repair.description||'',cost:repair.cost||0,spec:repair.spec||'',measure_before:repair.measure_before||'',measure_after:repair.measure_after||'',before_img:repair.before_img||null,after_img:repair.after_img||null};
   const{data,error}=await sb.from('repair_data').insert(row).select();
@@ -379,6 +334,8 @@ async function dbAdvanceStage(repairId,newStage){
   const today=new Date().toISOString().slice(0,10);
   const{error:e1}=await sb.from('repair_data').update({stage:newStage}).eq('id',repairId);
   if(e1){toast('단계변경 실패','error');return false}
+  // 동일 단계 기존 이력 삭제 후 재등록 (수정 시 중복 방지)
+  await sb.from('repair_history').delete().eq('repair_id',repairId).eq('action',newStage);
   await sb.from('repair_history').insert({repair_id:repairId,action:newStage,action_date:today});
   if(newStage==='입고완료'){
     const rep=repairData.find(r=>r.id===repairId);
@@ -451,7 +408,7 @@ function getStats(){
 function switchTab(tab,el){
   currentTab=tab;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   if(el)el.classList.add('active');
-  ["dashboard","register","molddb","list","stats","alerts","settings"].forEach(v=>{document.getElementById("view-"+v).style.display=v===tab?"":"none"});
+  ["dashboard","molddb","list","stats","alerts","settings"].forEach(v=>{document.getElementById("view-"+v).style.display=v===tab?"":"none"});
   render();
 }
 
@@ -463,7 +420,6 @@ function render(){
   document.getElementById("alertBadgeArea").innerHTML=alerts.length?`<span class="alert-badge">${alerts.length}</span><span class="alert-text">알림</span>`:"";
   document.getElementById("alertTabCount").textContent=`(${alerts.length})`;
   if(currentTab==="dashboard")renderDashboard(stats,alerts);
-  if(currentTab==="register")renderRegister();
   if(currentTab==="molddb")renderMoldDB();
   if(currentTab==="list")renderList();
   if(currentTab==="stats")renderStats(stats);
@@ -589,21 +545,8 @@ function openEditMold(id){
 }
 
 async function updateMold(id){
-  const oldMold=moldDB.find(x=>x.id===id);
-  const newCode=document.getElementById("me_code").value;
-  const ok=await dbUpdateMold(id,{mold_code:newCode,mold_group:document.getElementById("me_group").value,mold_name:document.getElementById("me_name").value,mold_no:document.getElementById("me_no").value,customer:document.getElementById("me_cust").value,product:document.getElementById("me_prod").value,status:document.getElementById("me_status").value,location:document.getElementById("me_loc").value,note:document.getElementById("me_note").value});
-  if(ok){
-    // 금형코드 변경 시 수리내역 일괄 업데이트
-    if(oldMold&&oldMold.mold_code!==newCode){
-      const affected=repairData.filter(r=>r.mold_code===oldMold.mold_code);
-      if(affected.length){
-        const{error}=await sb.from('repair_data').update({mold_code:newCode}).eq('mold_code',oldMold.mold_code);
-        if(error)toast('수리내역 일괄수정 실패: '+error.message,'error');
-        else toast(`금형코드 변경: 수리내역 ${affected.length}건 일괄 수정 완료`,'success');
-      }
-    }
-    closeModal();await dbLoad();
-  }
+  const ok=await dbUpdateMold(id,{mold_code:document.getElementById("me_code").value,mold_group:document.getElementById("me_group").value,mold_name:document.getElementById("me_name").value,mold_no:document.getElementById("me_no").value,customer:document.getElementById("me_cust").value,product:document.getElementById("me_prod").value,status:document.getElementById("me_status").value,location:document.getElementById("me_loc").value,note:document.getElementById("me_note").value});
+  if(ok){closeModal();await dbLoad()}
 }
 
 // ========== REPAIR LIST ==========
@@ -818,8 +761,13 @@ function openRepairDetail(id){
     <div><div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600">📷 수리 후</div>
       <div class="photo-zone">${item.after_img?`<img src="${item.after_img}"><button class="photo-remove" onclick="event.stopPropagation();removeImg(${item.id},'after')">✕</button>`:`<div class="ph-label">클릭하여 사진 첨부</div><div class="ph-hint">JPG, PNG (최대 5MB)</div>`}<input type="file" accept="image/*" onchange="uploadImg(this,${item.id},'after')"></div></div></div>`;
   h+=`<div class="section-title">진행 이력</div><div class="info-box" style="line-height:1.6">`;
-  hist.forEach(hi=>{h+=`<div class="history-item"><span class="dot" style="background:${STAGE_COLORS[hi.action]||'#555'}"></span><span style="color:var(--muted);width:90px">${hi.action_date||''}</span>${badge(hi.action)}</div>`});
-  if(!hist.length)h+=`<div style="color:var(--dim)">이력 없음</div>`;
+  // 동일 단계 중복 이력은 최신 날짜만 표시
+  const dedupHist=Object.values(hist.reduce((acc,hi)=>{
+    if(!acc[hi.action]||hi.action_date>acc[hi.action].action_date)acc[hi.action]=hi;
+    return acc;
+  },{})).sort((a,b)=>(a.action_date||'').localeCompare(b.action_date||''));
+  dedupHist.forEach(hi=>{h+=`<div class="history-item"><span class="dot" style="background:${STAGE_COLORS[hi.action]||'#555'}"></span><span style="color:var(--muted);width:90px">${hi.action_date||''}</span>${badge(hi.action)}</div>`});
+  if(!dedupHist.length)h+=`<div style="color:var(--dim)">이력 없음</div>`;
   h+=`</div>`;
   // Action buttons
   h+=`<div class="form-actions" style="margin-top:20px"><button class="btn btn-red btn-sm" onclick="deleteRepair(${item.id})">🗑 삭제</button><div style="flex:1"></div><button class="btn btn-secondary" onclick="openEditRepair(${item.id})">✏️ 수정</button></div>`;
@@ -1435,70 +1383,6 @@ function setupRealtime(){
 }
 
 // ========== NEW REPAIR ==========
-function renderRegister(){
-  let opts=moldDB.map(m=>`<option value="${m.mold_code}">${m.mold_code} (${m.mold_name||''})</option>`).join('');
-  let reasonOpts=S('repairReasons').map(r=>`<option value="${r}">${r}</option>`).join('');
-  let h=`<div class="panel" style="max-width:900px">
-    <h3 style="margin-bottom:20px;font-size:16px;font-weight:700">🔧 수리의뢰 등록</h3>
-    <div class="form-grid">
-      <div class="field"><label>금형 선택 *</label><select id="rg_mold"><option value="">-- 선택 --</option>${opts}</select></div>
-      <div class="field"><label>수리유형</label><select id="rg_type">${getRepairTypes().map(t=>`<option>${t}</option>`).join('')}</select></div>
-      <div class="field"><label>의뢰자 *</label><select id="rg_req"><option value="">-- 선택 --</option>${getRequesters().map(r=>`<option>${r}</option>`).join('')}<option value="__custom">직접입력...</option></select></div>
-      <div class="field"><label>담당자</label><select id="rg_assign"><option value="">-- 선택 --</option>${getAssignees().map(a=>`<option>${a}</option>`).join('')}</select></div>
-    </div>
-    <div class="field"><label>수리사유 *</label>
-      <div style="display:flex;gap:8px"><select style="width:200px;padding:8px;background:var(--card);border:1px solid #d1d5db;border-radius:4px;color:var(--text);font-size:13px" onchange="if(this.value)document.getElementById('rg_reason').value=this.value"><option value="">빠른선택...</option>${reasonOpts}</select><input id="rg_reason" style="flex:1;padding:8px;background:var(--card);border:1px solid #d1d5db;border-radius:4px;color:var(--text);font-size:13px"></div>
-    </div>
-    <div class="field"><label>상세설명</label><textarea id="rg_desc"></textarea></div>
-    <div class="form-grid">
-      <div class="field"><label>비용 (원)</label><input id="rg_cost" type="number" value="0"></div>
-      <div class="field"><label>측정 규격</label><input id="rg_spec"></div>
-    </div>
-    <div class="form-grid">
-      <div class="field"><label>수리 전 측정값</label><input id="rg_mb"></div>
-      <div class="field"><label>수리 후 측정값</label><input id="rg_ma"></div>
-    </div>
-    <div class="section-title">사진 첨부</div>
-    <div class="photo-compare">
-      <div><div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600">📷 수리 전</div><div class="photo-zone" id="rg_b"><div class="ph-label">클릭하여 사진 첨부</div><input type="file" accept="image/*" onchange="previewRG(this,'rg_b','before')"></div></div>
-      <div><div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600">📷 수리 후</div><div class="photo-zone" id="rg_a"><div class="ph-label">클릭하여 사진 첨부</div><input type="file" accept="image/*" onchange="previewRG(this,'rg_a','after')"></div></div>
-    </div>
-    <div class="form-actions"><button class="btn btn-secondary" onclick="switchTab('dashboard',document.querySelector('[data-tab=dashboard]'))">취소</button><button class="btn btn-primary" onclick="saveRegister()">등록</button></div>
-  </div>`;
-  document.getElementById("view-register").innerHTML=h;
-  window._rg={before:null,after:null};
-}
-
-function previewRG(input,zid,key){const f=input.files[0];if(!f)return;if(f.size>10*1024*1024){alert("10MB 이하만");return}toast('사진 압축 중...','info');compressImage(f,50).then(compressed=>{window._rg[key]=compressed;document.getElementById(zid).innerHTML=`<img src="${compressed}"><input type="file" accept="image/*" onchange="previewRG(this,'${zid}','${key}')">`;const sizeKB=(compressed.length*0.73/1024).toFixed(1);toast(`압축 완료 (${sizeKB}KB)`,'success')})}
-
-async function saveRegister(){
-  const code=document.getElementById("rg_mold").value;
-  let req=document.getElementById("rg_req").value;
-  if(req==='__custom')req=prompt('의뢰자 이름:')||'';
-  const reason=document.getElementById("rg_reason").value.trim();
-  if(!code){alert("금형을 선택해주세요.");return}
-  if(!req){alert("의뢰자를 선택해주세요.");return}
-  if(!reason){alert("수리사유를 입력해주세요.");return}
-  const result=await dbInsertRepair({
-    mold_code:code,requester:req,assignee:document.getElementById("rg_assign").value,
-    repair_type:document.getElementById("rg_type").value,reason:reason,
-    description:document.getElementById("rg_desc").value,
-    cost:parseInt(document.getElementById("rg_cost").value)||0,
-    spec:document.getElementById("rg_spec").value,
-    measure_before:document.getElementById("rg_mb").value,
-    measure_after:document.getElementById("rg_ma").value,
-    before_img:window._rg?window._rg.before:null,
-    after_img:window._rg?window._rg.after:null
-  });
-  if(result){
-    const mold=moldDB.find(m=>m.mold_code===code);
-    if(mold&&mold.status==='가동중')await dbUpdateMold(mold.id,{status:'보전중'});
-    toast('수리의뢰 등록 완료','success');
-    await dbLoad();
-    switchTab('list',document.querySelector('[data-tab=list]'));
-  }
-}
-
 function openNewRepairForm(){openNewRepairFormWith("")}
 function openNewRepairFormWith(code){
   document.getElementById("modalTitle").textContent="수리의뢰 등록";
@@ -1990,7 +1874,6 @@ function renderSettings(){
   h+=`<div class="settings-grid">`;
   Object.keys(settingsData).forEach(key=>{
     const s=settingsData[key];
-    if(!s||!Array.isArray(s.items))return;
     h+=`<div class="setting-card"><div class="setting-card-title">${s.name} <span class="setting-count">${s.items.length}개</span></div><div class="setting-card-desc">${s.desc}</div>`;
     s.items.forEach((item,idx)=>{
       h+=`<div class="setting-item"><span style="flex:1">${item}</span>
@@ -2003,61 +1886,25 @@ function renderSettings(){
   });
   h+=`</div>`;
 
-  // ========== 3. Supabase 설정 ==========
+  // ========== 3. Supabase 연결 ==========
   h+=`<div class="panel" style="margin-top:24px;margin-bottom:20px;border-left:3px solid var(--teal)">
-    <div class="panel-title" style="font-size:16px;font-weight:800">🔧 Supabase 설정</div>
-    <div class="field"><label>URL</label>
-      <input id="sb_url" class="input" style="width:100%" value="${localStorage.getItem('sb_url')||SUPABASE_URL}" placeholder="https://xxx.supabase.co">
+    <div class="panel-title" style="font-size:16px;font-weight:800">🔗 Supabase 연결</div>
+    <div class="field"><label>Supabase URL</label>
+      <div style="display:flex;gap:8px">
+        <input id="sb_url" type="password" class="input" style="flex:1" value="${SUPABASE_URL}" placeholder="https://xxx.supabase.co">
+        <button class="btn btn-sm btn-secondary" onclick="const el=document.getElementById('sb_url');el.type=el.type==='password'?'text':'password'">👁</button>
+      </div>
     </div>
-    <div class="field"><label>Anon Key</label>
-      <input id="sb_key" type="password" class="input" style="width:100%" value="${localStorage.getItem('sb_key')||SUPABASE_KEY}" placeholder="sb_publishable_xxx...">
+    <div class="field"><label>Supabase Anon Key</label>
+      <div style="display:flex;gap:8px">
+        <input id="sb_key" type="password" class="input" style="flex:1" value="${SUPABASE_KEY}" placeholder="sb_publishable_xxx...">
+        <button class="btn btn-sm btn-secondary" onclick="const el=document.getElementById('sb_key');el.type=el.type==='password'?'text':'password'">👁</button>
+      </div>
     </div>
-    <button class="btn btn-primary" style="width:100%;padding:12px;font-size:15px;margin-top:4px" onclick="saveSupabaseConfig()">저장</button>
-    <div style="margin-top:16px"><button class="export-btn" onclick="registerDefaultKPI()">📋 일괄등록</button></div>
-    <div style="margin-top:12px;font-size:11px;color:var(--dim)">* Supabase 테이블 생성 후 사용 (SQL 아래 참조)</div>
-    <details style="margin-top:8px"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--blue)">▶ 📋 Supabase SQL (테이블 생성)</summary>
-      <pre style="margin-top:8px;padding:12px;background:var(--card);border-radius:6px;font-size:11px;overflow-x:auto;line-height:1.6;white-space:pre-wrap">
--- mold_db 테이블
-CREATE TABLE IF NOT EXISTS mold_db (
-  id BIGSERIAL PRIMARY KEY,
-  mold_code TEXT UNIQUE NOT NULL,
-  mold_group TEXT DEFAULT '200톤',
-  mold_name TEXT, mold_no TEXT,
-  customer TEXT, product TEXT,
-  status TEXT DEFAULT '가동중',
-  shot_count INT DEFAULT 0,
-  max_shots INT DEFAULT 300000,
-  reg_date TEXT, location TEXT,
-  last_repair TEXT, note TEXT
-);
-
--- repair_data 테이블
-CREATE TABLE IF NOT EXISTS repair_data (
-  id BIGSERIAL PRIMARY KEY,
-  mold_code TEXT NOT NULL,
-  repair_type TEXT, stage TEXT DEFAULT '의뢰접수',
-  request_date TEXT, requester TEXT,
-  assignee TEXT, reason TEXT,
-  description TEXT, cost INT DEFAULT 0,
-  spec TEXT, measure_before TEXT,
-  measure_after TEXT,
-  before_img TEXT, after_img TEXT
-);
-
--- repair_history 테이블
-CREATE TABLE IF NOT EXISTS repair_history (
-  id BIGSERIAL PRIMARY KEY,
-  repair_id BIGINT REFERENCES repair_data(id),
-  action TEXT, action_date TEXT
-);
-
--- settings 테이블
-CREATE TABLE IF NOT EXISTS settings (
-  category TEXT PRIMARY KEY,
-  name TEXT, description TEXT,
-  items JSONB
-);</pre>
-    </details>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="btn btn-teal" onclick="testSupabaseConnection()">🔗 연결 테스트</button>
+      <span id="sb_status" style="font-size:13px"></span>
+    </div>
   </div>`;
 
   // ========== 4. 텔레그램 알림 ==========
@@ -2177,31 +2024,6 @@ async function historyDeleteRange(){
 }
 
 // ========== Supabase 연결 테스트 ==========
-async function registerDefaultKPI(){
-  if(!confirm('기본 설정 데이터를 일괄 등록하시겠습니까?'))return;
-  settingsData=JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-  await saveAllSettings();
-  toast('일괄등록 완료','success');
-  renderSettings();
-}
-
-async function saveSupabaseConfig(){
-  const url=document.getElementById('sb_url').value.trim();
-  const key=document.getElementById('sb_key').value.trim();
-  if(!url||!key){alert('URL과 Anon Key를 모두 입력해주세요.');return}
-  try{
-    const testSb=supabase.createClient(url,key);
-    const{data,error}=await testSb.from('mold_db').select('id').limit(1);
-    if(error)throw error;
-    localStorage.setItem('sb_url',url);
-    localStorage.setItem('sb_key',key);
-    toast('Supabase 설정 저장 완료. 페이지를 새로고침합니다.','success');
-    setTimeout(()=>location.reload(),1000);
-  }catch(e){
-    toast('연결 실패: '+e.message,'error');
-  }
-}
-
 async function testSupabaseConnection(){
   document.getElementById('sb_status').innerHTML='<span style="color:var(--orange)">⏳ 테스트 중...</span>';
   try{
