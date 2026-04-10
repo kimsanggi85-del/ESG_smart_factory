@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>설비·금형 통합관리</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f5f6fa;--card:#ffffff;--card2:#f0f2f7;--text:#1a1a2e;--muted:#6b7280;--accent:#2563eb;--accent2:#3b82f6;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--border:#e0e3eb;--radius:12px}
+body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent}
+.portal{max-width:600px;margin:0 auto;padding:20px 16px 40px}
+.portal-title{text-align:center;padding:32px 0 8px}
+.portal-title h1{font-size:22px;font-weight:800;color:var(--accent);letter-spacing:-0.5px}.portal-title p{font-size:13px;color:var(--muted);margin-top:4px}
+.menu-list{display:flex;flex-direction:column;gap:10px;margin-top:24px}
+.menu-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .2s;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.menu-item:hover{background:#eef2ff;border-color:#c7d2fe;transform:translateY(-1px)}
+.menu-item:active{transform:scale(.98)}
+.menu-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.menu-info{flex:1;min-width:0}
+.menu-info h3{font-size:15px;font-weight:700;margin-bottom:3px}
+.menu-info p{font-size:12px;color:var(--muted);line-height:1.4}
+.menu-arrow{color:var(--muted);font-size:18px;flex-shrink:0}
+
+/* Sub pages */
+.page{display:none;max-width:100%;margin:0 auto;padding:12px 12px 40px}
+.page.active{display:block}
+#maintenancePage{max-width:900px}
+#moldrepairPage{max-width:100%;padding:0 4px}
+.page-header{display:flex;align-items:center;gap:12px;padding:12px 0 16px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.back-btn{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px 8px;border-radius:8px}
+.back-btn:hover{background:#eef2ff;color:var(--text)}
+.page-header h2{font-size:17px;font-weight:700;flex:1}
+
+/* Equipment maintenance plan */
+.vol-tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.vol-tab{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;background:#fff;border:1px solid var(--border);color:var(--muted);transition:all .15s}
+.vol-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.legend{display:flex;gap:16px;margin-bottom:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:4px}
+.legend .sym{font-size:16px}
+.eq-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius);border:1px solid var(--border)}
+.eq-table{width:100%;border-collapse:collapse;font-size:12px;min-width:750px}
+.eq-table th{background:#f8f9fb;padding:8px 6px;font-weight:600;text-align:center;border:1px solid var(--border);position:sticky;top:0;white-space:nowrap;font-size:11px;color:var(--muted)}
+.eq-table td{padding:7px 6px;text-align:center;border:1px solid var(--border);background:#fff}
+.eq-table tr:hover td{background:#eef2ff}
+.eq-table .eq-id{font-weight:700;color:var(--accent);white-space:nowrap}.eq-table .eq-name{text-align:left;white-space:nowrap}
+.plan-cell{font-size:15px}
+.plan-cell .plan{color:#2563eb}
+.plan-cell .done{color:#16a34a}
+.plan-cell .self{color:#dc2626}
+.grade-a{color:#16a34a;font-weight:700}
+.grade-b{color:#2563eb;font-weight:700}
+.grade-c{color:#d97706;font-weight:700}
+.grade-d{color:#ea580c;font-weight:700}
+.grade-e{color:#dc2626;font-weight:700}
+.notes-box{margin-top:16px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.notes-box h4{font-size:13px;font-weight:700;margin-bottom:8px;color:var(--accent)}
+.notes-box p{font-size:12px;color:var(--muted);line-height:1.6;white-space:pre-line}
+.grade-legend{margin-top:12px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;font-size:12px;color:var(--muted)}
+.grade-legend b{color:var(--text)}
+
+/* Detail modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:1000;justify-content:center;align-items:flex-start;padding:40px 16px;overflow-y:auto}
+.modal-box{background:#fff;border-radius:var(--radius);width:100%;max-width:500px;padding:24px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal-close{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}
+.modal-box h3{font-size:16px;font-weight:700;margin-bottom:16px;padding-right:30px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.detail-item{background:#f8f9fb;border-radius:8px;padding:10px 12px}
+.detail-item label{font-size:11px;color:var(--muted);display:block;margin-bottom:3px}
+.detail-item span{font-size:14px;font-weight:600}
+.month-plan-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.mp-cell{background:#f8f9fb;border-radius:6px;padding:8px 4px;text-align:center}
+.mp-cell .mp-month{font-size:10px;color:var(--muted);margin-bottom:2px}
+.mp-cell .mp-val{font-size:18px}
+
+/* Completion tracking */
+.progress-bar{display:flex;gap:12px;margin-bottom:16px;padding:14px 16px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);align-items:center;flex-wrap:wrap}
+.progress-bar .prog-label{font-size:13px;font-weight:700;color:var(--text)}
+.prog-track{flex:1;min-width:120px;height:12px;background:#e5e7eb;border-radius:6px;overflow:hidden}
+.prog-fill{height:100%;border-radius:6px;transition:width .3s}
+.prog-text{font-size:12px;font-weight:700;min-width:60px;text-align:right}
+.plan-cell.clickable{cursor:pointer;transition:background .15s}
+.plan-cell.clickable:hover{background:#eef2ff!important}
+.check-date{font-size:9px;color:var(--muted);display:block;margin-top:2px}
+
+/* Maintenance History */
+.mh-input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;color:var(--text);background:#fff}
+.mh-table{width:100%;border-collapse:collapse;font-size:12px}
+.mh-table th{background:#f8f9fb;padding:10px 8px;font-weight:600;text-align:center;border:1px solid var(--border);font-size:11px;color:var(--muted);white-space:nowrap}
+.mh-table td{padding:9px 8px;border:1px solid var(--border);background:#fff}
+.mh-table tr:hover td{background:#eef2ff}
+.mh-table tr{cursor:pointer}
+.mh-badge{padding:3px 10px;border-radius:3px;font-size:11px;font-weight:600;color:#fff;display:inline-block}
+.mh-form-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:1100;justify-content:center;align-items:flex-start;padding:30px 16px;overflow-y:auto}
+.mh-form-box{background:#fff;border-radius:12px;width:100%;max-width:600px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.mh-form-title{font-size:17px;font-weight:800;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.mh-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mh-form-field{margin-bottom:12px}
+.mh-form-field label{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:4px}
+.mh-form-field textarea{resize:vertical;height:60px}
+.mh-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.mh-summary-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.mh-summary-card .num{font-size:22px;font-weight:800}
+.mh-summary-card .label{font-size:11px;color:var(--muted);margin-top:2px}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- Maint History Form Modal -->
+<div id="maintFormModal" class="mh-form-overlay" onclick="if(event.target===this)closeMaintForm()">
+  <div class="mh-form-box" id="maintFormBody"></div>
+</div>
+
+<!-- PORTAL MENU -->
+<div id="portalPage" class="portal">
+  <div class="portal-title">
+    <h1>🏭 설비 · 금형 통합관리</h1>
+    <p>(주)태진다이텍 · 생산현장 관리시스템</p>
+  </div>
+  <div class="menu-list">
+    <div class="menu-item" onclick="showPage('maintenance')">
+      <div class="menu-icon" style="background:linear-gradient(135deg,#1e3a5f,#2563eb)">🔧</div>
+      <div class="menu-info">
+        <h3>설비 보전 계획표/보전이력</h3>
+        <p>프레스 설비 연간 보전 계획 · 점검이력 · 등급관리</p>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="showPage('moldrepair')">
+      <div class="menu-icon" style="background:linear-gradient(135deg,#5b2c1a,#dc6d28)">🛠</div>
+      <div class="menu-info">
+        <h3>금형수리이력</h3>
+        <p>금형 수리의뢰 · 진행현황 · 측정검증 · Supabase DB 연동</p>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- MOLD REPAIR PAGE -->
+<div id="moldrepairPage" class="page">
+  <div class="page-header">
+    <button class="back-btn" onclick="showPortal()">‹</button>
+    <h2>🛠 금형수리이력</h2>
+  </div>
+  <iframe id="moldFrame" src="" style="width:100%;height:calc(100vh - 80px);border:none;border-radius:8px"></iframe>
+</div>
+
+<!-- MAINTENANCE PAGE -->
+<div id="maintenancePage" class="page">
+  <div class="page-header">
+    <button class="back-btn" onclick="showPortal()">‹</button>
+    <h2>2026 설비 보전 관리</h2>
+  </div>
+  <!-- Sub tabs -->
+  <div style="display:flex;gap:6px;margin-bottom:16px">
+    <div class="vol-tab active" id="subTab_plan" onclick="switchSubTab('plan')" style="font-size:14px;padding:10px 20px">📋 보전계획표</div>
+    <div class="vol-tab" id="subTab_history" onclick="switchSubTab('history')" style="font-size:14px;padding:10px 20px">📝 보전이력관리</div>
+  </div>
+
+  <!-- 보전계획표 -->
+  <div id="subView_plan">
+    <div class="vol-tabs" id="volTabs"></div>
+    <div class="legend">
+      <span><span class="sym" style="color:#2563eb">□</span> 계획</span>
+      <span><span class="sym" style="color:#16a34a">▣</span> 점검완료</span>
+      <span><span class="sym" style="color:#dc2626">■</span> 자체점검</span>
+      <span style="color:var(--muted);font-size:11px">| □ 클릭 → ▣ 점검완료 처리</span>
+    </div>
+    <div id="eqContent"></div>
+  </div>
+
+  <!-- 보전이력관리 -->
+  <div id="subView_history" style="display:none">
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end">
+      <div class="field" style="margin:0;min-width:130px"><label>설비</label>
+        <select id="mh_filter_eq" class="mh-input" onchange="renderMaintHistory()">
+          <option value="">전체</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;min-width:120px"><label>보전유형</label>
+        <select id="mh_filter_type" class="mh-input" onchange="renderMaintHistory()">
+          <option value="">전체</option>
+          <option>정기보전</option><option>고장보전</option><option>예방보전</option><option>개선보전</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;min-width:120px"><label>시작일</label>
+        <input type="date" id="mh_filter_from" class="mh-input" onchange="renderMaintHistory()">
+      </div>
+      <div class="field" style="margin:0;min-width:120px"><label>종료일</label>
+        <input type="date" id="mh_filter_to" class="mh-input" value="" onchange="renderMaintHistory()">
+      </div>
+      <div style="display:flex;gap:6px;align-items:flex-end">
+        <button onclick="openMaintForm()" style="padding:10px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">+ 이력등록</button>
+      </div>
+    </div>
+    <div id="maintHistContent"></div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeDetail()">✕</button>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<script>
+const EQUIP = [{"vol":1,"id":"P- 01","name":"쌍용 200톤","grade":"C/4회","year":"26","improvement":"","plan":{"1":{"w2":"","w4":"□"},"4":{"w2":"","w4":"□"},"7":{"w2":"","w4":"□"},"11":{"w2":"","w4":"□"}}},{"vol":1,"id":"P- 02","name":"심팩 200톤","grade":"B/3회","year":"19","improvement":"","plan":{"1":{"w2":"□","w4":""},"6":{"w2":"□","w4":""},"11":{"w2":"□","w4":""}}},{"vol":1,"id":"P- 03","name":"심팩 150톤","grade":"B/3회","year":"20","improvement":"","plan":{"1":{"w2":"□","w4":""},"6":{"w2":"□","w4":""},"11":{"w2":"□","w4":""}}},{"vol":1,"id":"P- 04","name":"심팩 150톤","grade":"B/3회","year":"20","improvement":"","plan":{"1":{"w2":"□","w4":""},"6":{"w2":"□","w4":""},"11":{"w2":"□","w4":""}}},{"vol":1,"id":"P- 05","name":"심팩 110톤","grade":"B/3회","year":"20","improvement":"","plan":{"1":{"w2":"□","w4":""},"6":{"w2":"□","w4":""},"11":{"w2":"□","w4":""}}},{"vol":1,"id":"P- 06","name":"심팩 110톤","grade":"B/3회","year":"20","improvement":"","plan":{"1":{"w2":"□","w4":""},"6":{"w2":"□","w4":""},"11":{"w2":"□","w4":""}}},{"vol":1,"id":"P- 07","name":"심팩 80톤","grade":"B/3회","year":"20","improvement":"자체점검","plan":{"1":{"w2":"","w4":"■"},"6":{"w2":"","w4":"■"},"11":{"w2":"","w4":"■"}}},{"vol":1,"id":"P- 08","name":"심팩 80톤","grade":"B/3회","year":"20","improvement":"자체점검","plan":{"1":{"w2":"","w4":"■"},"6":{"w2":"","w4":"■"},"11":{"w2":"","w4":"■"}}},{"vol":1,"id":"P- 09","name":"심팩 80톤","grade":"B/3회","year":"20","improvement":"자체점검","plan":{"1":{"w2":"","w4":"■"},"6":{"w2":"","w4":"■"},"11":{"w2":"","w4":"■"}}},{"vol":1,"id":"P- 10","name":"심팩 80톤","grade":"B/3회","year":"20","improvement":"자체점검","plan":{"1":{"w2":"","w4":"■"},"6":{"w2":"","w4":"■"},"11":{"w2":"","w4":"■"}}},{"vol":2,"id":"P- 11","name":"심팩 80톤","grade":"B/3회","year":"20","improvement":"자체점검","plan":{"2":{"w2":"","w4":"■"},"7":{"w2":"","w4":"■"},"12":{"w2":"","w4":"■"}}},{"vol":2,"id":"P- 12","name":"심팩 80톤","grade":"B/3회","year":"20","improvement":"자체점검","plan":{"2":{"w2":"","w4":"■"},"7":{"w2":"","w4":"■"},"12":{"w2":"","w4":"■"}}},{"vol":2,"id":"P- 13","name":"심팩 80톤","grade":"B/3회","year":"20","improvement":"자체점검","plan":{"2":{"w2":"","w4":"■"},"7":{"w2":"","w4":"■"},"12":{"w2":"","w4":"■"}}},{"vol":2,"id":"P- 17","name":"심팩 80톤","grade":"B/3회","year":"20","improvement":"자체점검","plan":{"2":{"w2":"","w4":"■"},"7":{"w2":"","w4":"■"},"12":{"w2":"","w4":"■"}}},{"vol":2,"id":"P- 28","name":"국일250톤","grade":"B/3회","year":"18","improvement":"","plan":{"1":{"w2":"□","w4":""},"6":{"w2":"□","w4":""},"11":{"w2":"□","w4":""}}},{"vol":2,"id":"P- 29","name":"국일200톤","grade":"B/3회","year":"17","improvement":"","plan":{"1":{"w2":"□","w4":""},"6":{"w2":"□","w4":""},"11":{"w2":"□","w4":""}}},{"vol":2,"id":"P- 30","name":"국일160톤","grade":"B/3회","year":"17","improvement":"","plan":{"1":{"w2":"□","w4":""},"6":{"w2":"□","w4":""},"11":{"w2":"□","w4":""}}},{"vol":3,"id":"P- 31","name":"심팩150톤","grade":"C/4회","year":"21","improvement":"","plan":{"1":{"w2":"","w4":"□"},"5":{"w2":"","w4":"□"},"9":{"w2":"","w4":"□"},"12":{"w2":"","w4":"□"}}},{"vol":3,"id":"P- 32","name":"심팩200톤","grade":"C/4회","year":"21","improvement":"","plan":{"1":{"w2":"","w4":"□"},"5":{"w2":"","w4":"□"},"9":{"w2":"","w4":"□"},"12":{"w2":"","w4":"□"}}},{"vol":3,"id":"P- 34","name":"심팩250톤","grade":"C/4회","year":"24","improvement":"","plan":{"1":{"w2":"","w4":"□"},"5":{"w2":"","w4":"□"},"9":{"w2":"","w4":"□"},"12":{"w2":"","w4":"□"}}},{"vol":3,"id":"P- 35","name":"심팩250톤","grade":"C/4회","year":"24","improvement":"","plan":{"1":{"w2":"","w4":"□"},"5":{"w2":"","w4":"□"},"9":{"w2":"","w4":"□"},"12":{"w2":"","w4":"□"}}},{"vol":3,"id":"P- 36","name":"심팩300톤","grade":"B/3회","year":"14","improvement":"25.07.28일 안전검사종료","plan":{"2":{"w2":"","w4":"□"},"7":{"w2":"","w4":"□"},"11":{"w2":"","w4":"□"}}},{"vol":3,"id":"P- 37","name":"국일200톤","grade":"B/3회","year":"13","improvement":"","plan":{"2":{"w2":"","w4":"□"},"7":{"w2":"","w4":"□"},"11":{"w2":"","w4":"□"}}},{"vol":3,"id":"P- 38","name":"국일250톤","grade":"B/3회","year":"13","improvement":"","plan":{"2":{"w2":"","w4":"□"},"7":{"w2":"","w4":"□"},"11":{"w2":"","w4":"□"}}},{"vol":3,"id":"P- 39","name":"국일250톤","grade":"B/3회","year":"13","improvement":"","plan":{"2":{"w2":"","w4":"□"},"7":{"w2":"","w4":"□"},"11":{"w2":"","w4":"□"}}},{"vol":3,"id":"P- 40","name":"심팩200톤","grade":"B/3회","year":"13","improvement":"25.07.28일 안전검사종료","plan":{"2":{"w2":"","w4":"□"},"7":{"w2":"","w4":"□"},"11":{"w2":"","w4":"□"}}},{"vol":4,"id":"P- 41","name":"국일200톤","grade":"B/3회","year":"14","improvement":"25.07.28일 안전검사종료","plan":{"3":{"w2":"","w4":"□"},"7":{"w2":"","w4":"□"},"11":{"w2":"","w4":"□"}}},{"vol":4,"id":"P- 42","name":"AIDA200톤","grade":"B/3회","year":"14","improvement":"25.07.28일 안전검사종료","plan":{"3":{"w2":"","w4":"□"},"7":{"w2":"","w4":"□"},"11":{"w2":"","w4":"□"}}},{"vol":4,"id":"P- 43","name":"HIM 800톤","grade":"B/3회","year":"11","improvement":"","plan":{"3":{"w2":"","w4":"□"},"7":{"w2":"","w4":"□"},"11":{"w2":"","w4":"□"}}},{"vol":4,"id":"P- 45","name":"심팩300톤","grade":"A/2회","year":"9","improvement":"","plan":{"4":{"w2":"","w4":"□"},"10":{"w2":"","w4":"□"}}},{"vol":5,"id":"P- 46","name":"심팩300톤","grade":"A/2회","year":"6","improvement":"","plan":{"4":{"w2":"","w4":"□"},"10":{"w2":"","w4":"□"}}},{"vol":5,"id":"P- 47","name":"심팩300톤","grade":"A/2회","year":"5","improvement":"","plan":{"4":{"w2":"","w4":"□"},"10":{"w2":"","w4":"□"}}},{"vol":5,"id":"P- 48","name":"심팩300톤","grade":"A/2회","year":"5","improvement":"","plan":{"4":{"w2":"","w4":"□"},"10":{"w2":"","w4":"□"}}},{"vol":5,"id":"P- 49","name":"심팩300톤","grade":"A/2회","year":"3","improvement":"","plan":{"4":{"w2":"","w4":"□"},"10":{"w2":"","w4":"□"}}}];
+
+const NOTES = "2025년 1/11일 설비대행업체 전설비 정밀점검실시 -세광기계 (월 2회 정기점검실시)\n2025년 07/28일 안전검사 완료\n2025년 12/10일 안전검사 완료";
+
+let currentVol = 0; // 0 = all
+
+function showPage(id){
+  document.getElementById('portalPage').style.display='none';
+  document.getElementById(id+'Page').classList.add('active');
+  if(id==='maintenance') renderVolTabs();
+  if(id==='moldrepair'){
+    const frame=document.getElementById('moldFrame');
+    if(!frame.src||frame.src==='about:blank'||!frame.src.includes('mold_repair'))
+      frame.src='https://kimsanggi85-del.github.io/ESG_smart_factory/mold_repair.html';
+  }
+}
+function showPortal(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('portalPage').style.display='';
+}
+
+function renderVolTabs(){
+  const tabs = document.getElementById('volTabs');
+  let h = `<div class="vol-tab ${currentVol===0?'active':''}" onclick="currentVol=0;renderVolTabs()">전체</div>`;
+  for(let i=1;i<=5;i++) h+=`<div class="vol-tab ${currentVol===i?'active':''}" onclick="currentVol=${i};renderVolTabs()">${i}권</div>`;
+  tabs.innerHTML = h;
+  renderEqTable();
+}
+
+// ========== 점검 완료 데이터 관리 ==========
+let checkData=JSON.parse(localStorage.getItem('eq_checks')||'{}');
+function saveChecks(){localStorage.setItem('eq_checks',JSON.stringify(checkData))}
+function getCheckKey(eqId,month,week){return `${eqId}_${month}_${week}`}
+
+function toggleCheck(eqId,month,week,event){
+  event.stopPropagation();
+  const key=getCheckKey(eqId,month,week);
+  if(checkData[key]){
+    if(confirm('점검 완료를 취소하시겠습니까?')){delete checkData[key];saveChecks()}
+  }else{
+    checkData[key]={date:new Date().toISOString().slice(0,10),by:''};
+    saveChecks();
+  }
+  renderEqTable();
+}
+
+function getCompletionStats(){
+  let total=0,done=0;
+  EQUIP.forEach(eq=>{
+    for(let m=1;m<=12;m++){
+      const p=eq.plan[String(m)];
+      if(p&&p.w2){total++;if(checkData[getCheckKey(eq.id,m,'w2')])done++}
+      if(p&&p.w4){total++;if(checkData[getCheckKey(eq.id,m,'w4')])done++}
+    }
+  });
+  return{total,done,pct:total?Math.round(done/total*100):0};
+}
+
+function renderEqTable(){
+  const list = currentVol===0 ? EQUIP : EQUIP.filter(e=>e.vol===currentVol);
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const stats=getCompletionStats();
+  const barColor=stats.pct>=80?'var(--green)':stats.pct>=50?'#d97706':'var(--red)';
+
+  let h=`<div class="progress-bar">
+    <span class="prog-label">📋 점검 진행률</span>
+    <div class="prog-track"><div class="prog-fill" style="width:${stats.pct}%;background:${barColor}"></div></div>
+    <span class="prog-text" style="color:${barColor}">${stats.done}/${stats.total} (${stats.pct}%)</span>
+  </div>`;
+
+  h += `<div class="eq-table-wrap"><table class="eq-table"><thead><tr>
+    <th rowspan="2">설비번호</th><th rowspan="2">설비명</th>`;
+  months.forEach(m=>h+=`<th colspan="2">${m}</th>`);
+  h+=`<th rowspan="2">등급</th><th rowspan="2">년식</th><th rowspan="2">진행</th></tr><tr>`;
+  for(let i=0;i<12;i++) h+=`<th>2주</th><th>4주</th>`;
+  h+=`</tr></thead><tbody>`;
+
+  list.forEach(eq=>{
+    const gc = eq.grade.startsWith('A')?'grade-a':eq.grade.startsWith('B')?'grade-b':eq.grade.startsWith('C')?'grade-c':eq.grade.startsWith('D')?'grade-d':'grade-e';
+    // Per-equipment completion
+    let eqTotal=0,eqDone=0;
+    for(let m=1;m<=12;m++){
+      const p=eq.plan[String(m)];
+      if(p&&p.w2){eqTotal++;if(checkData[getCheckKey(eq.id,m,'w2')])eqDone++}
+      if(p&&p.w4){eqTotal++;if(checkData[getCheckKey(eq.id,m,'w4')])eqDone++}
+    }
+    const eqPct=eqTotal?Math.round(eqDone/eqTotal*100):0;
+
+    h+=`<tr>
+      <td class="eq-id" style="cursor:pointer" onclick="openDetail('${eq.id}')">${eq.id}</td><td class="eq-name" style="cursor:pointer" onclick="openDetail('${eq.id}')">${eq.name}</td>`;
+    for(let m=1;m<=12;m++){
+      const p = eq.plan[String(m)];
+      const w2 = p?p.w2:'';
+      const w4 = p?p.w4:'';
+      // w2 cell
+      if(w2){
+        const k2=getCheckKey(eq.id,m,'w2');
+        const isDone2=!!checkData[k2];
+        const display2=isDone2?'<span class="done">▣</span>':sym(w2);
+        const dateStr2=isDone2?`<span class="check-date">${checkData[k2].date}</span>`:'';
+        h+=`<td class="plan-cell clickable" onclick="toggleCheck('${eq.id}',${m},'w2',event)" title="${isDone2?'점검완료 '+checkData[k2].date+' (클릭하여 취소)':'클릭하여 점검완료 처리'}">${display2}${dateStr2}</td>`;
+      }else{
+        h+=`<td class="plan-cell"></td>`;
+      }
+      // w4 cell
+      if(w4){
+        const k4=getCheckKey(eq.id,m,'w4');
+        const isDone4=!!checkData[k4];
+        const display4=isDone4?'<span class="done">▣</span>':sym(w4);
+        const dateStr4=isDone4?`<span class="check-date">${checkData[k4].date}</span>`:'';
+        h+=`<td class="plan-cell clickable" onclick="toggleCheck('${eq.id}',${m},'w4',event)" title="${isDone4?'점검완료 '+checkData[k4].date+' (클릭하여 취소)':'클릭하여 점검완료 처리'}">${display4}${dateStr4}</td>`;
+      }else{
+        h+=`<td class="plan-cell"></td>`;
+      }
+    }
+    const eqColor=eqPct>=100?'var(--green)':eqPct>=50?'#d97706':'var(--muted)';
+    h+=`<td class="${gc}">${eq.grade}</td><td>${eq.year}</td>
+      <td style="font-size:11px;font-weight:700;color:${eqColor}">${eqDone}/${eqTotal}</td></tr>`;
+  });
+  h+=`</tbody></table></div>`;
+  h+=`<div class="notes-box"><h4>특이사항</h4><p>${NOTES}</p></div>`;
+  h+=`<div class="grade-legend"><b>등급기준:</b> A: 1년~10년 &nbsp;|&nbsp; B: 11년~20년 &nbsp;|&nbsp; C: 21년~30년 &nbsp;|&nbsp; D: 31년~40년 &nbsp;|&nbsp; E: 41년 이상 &nbsp;|&nbsp; <span style="color:var(--blue)">□</span> 계획 → 클릭하면 <span style="color:var(--green)">▣</span> 점검완료</div>`;
+  document.getElementById('eqContent').innerHTML = h;
+}
+
+function sym(v){
+  if(v==='□') return '<span class="plan">□</span>';
+  if(v==='▣') return '<span class="done">▣</span>';
+  if(v==='■') return '<span class="self">■</span>';
+  return '';
+}
+
+function openDetail(id){
+  const eq = EQUIP.find(e=>e.id===id);
+  if(!eq) return;
+  const gc = eq.grade.startsWith('A')?'grade-a':eq.grade.startsWith('B')?'grade-b':eq.grade.startsWith('C')?'grade-c':eq.grade.startsWith('D')?'grade-d':'grade-e';
+  let h = `<h3>${eq.id} · ${eq.name}</h3>`;
+  h+=`<div class="detail-grid">
+    <div class="detail-item"><label>설비번호</label><span>${eq.id}</span></div>
+    <div class="detail-item"><label>설비명</label><span>${eq.name}</span></div>
+    <div class="detail-item"><label>등급/점검횟수</label><span class="${gc}">${eq.grade}</span></div>
+    <div class="detail-item"><label>년식</label><span>${eq.year}년</span></div>
+    <div class="detail-item"><label>권</label><span>${eq.vol}권</span></div>
+    <div class="detail-item"><label>비고</label><span style="font-size:12px">${eq.improvement||'-'}</span></div>
+  </div>`;
+  h+=`<div style="font-size:13px;font-weight:700;margin-bottom:10px">월별 보전 계획 <span style="font-size:11px;color:var(--muted);font-weight:400">(클릭하여 점검완료 처리)</span></div>`;
+  h+=`<div class="month-plan-grid">`;
+  for(let m=1;m<=12;m++){
+    const p = eq.plan[String(m)];
+    if(!p) {h+=`<div class="mp-cell"><div class="mp-month">${m}월</div><div class="mp-val" style="color:var(--muted)">-</div></div>`;continue;}
+    // Check both w2 and w4
+    let cellH=`<div class="mp-month">${m}월</div>`;
+    ['w2','w4'].forEach(w=>{
+      if(!p[w])return;
+      const key=getCheckKey(eq.id,m,w);
+      const isDone=!!checkData[key];
+      const label=w==='w2'?'2주':'4주';
+      if(isDone){
+        cellH+=`<div style="cursor:pointer;padding:4px;border-radius:4px;background:#dcfce7;margin-top:3px" onclick="toggleCheck('${eq.id}',${m},'${w}',event)">
+          <span class="done" style="font-size:20px">▣</span><br>
+          <span style="font-size:9px;color:var(--green);font-weight:600">${label} 완료</span><br>
+          <span style="font-size:9px;color:var(--muted)">${checkData[key].date}</span>
+        </div>`;
+      }else{
+        const symStr=p[w]==='■'?'<span class="self" style="font-size:20px">■</span>':'<span class="plan" style="font-size:20px">□</span>';
+        cellH+=`<div style="cursor:pointer;padding:4px;border-radius:4px;margin-top:3px" onclick="toggleCheck('${eq.id}',${m},'${w}',event)">
+          ${symStr}<br>
+          <span style="font-size:9px;color:var(--muted)">${label} 미실시</span>
+        </div>`;
+      }
+    });
+    h+=`<div class="mp-cell">${cellH}</div>`;
+  }
+  h+=`</div>`;
+  document.getElementById('detailBody').innerHTML = h;
+  document.getElementById('detailModal').style.display='flex';
+}
+function closeDetail(){document.getElementById('detailModal').style.display='none'}
+document.getElementById('detailModal').onclick=e=>{if(e.target.id==='detailModal')closeDetail()};
+
+// ========== SUB TAB SWITCH ==========
+function switchSubTab(tab){
+  document.getElementById('subView_plan').style.display=tab==='plan'?'':'none';
+  document.getElementById('subView_history').style.display=tab==='history'?'':'none';
+  document.getElementById('subTab_plan').className='vol-tab'+(tab==='plan'?' active':'');
+  document.getElementById('subTab_history').className='vol-tab'+(tab==='history'?' active':'');
+  if(tab==='history'){initMaintHistory();renderMaintHistory()}
+}
+
+// ========== 보전이력관리 ==========
+let maintHistory=JSON.parse(localStorage.getItem('maint_history')||'[]');
+let _mhNextId=maintHistory.length?Math.max(...maintHistory.map(h=>h.id||0))+1:1;
+function saveMaintHistory(){localStorage.setItem('maint_history',JSON.stringify(maintHistory))}
+
+const MH_TYPES=['정기보전','고장보전','예방보전','개선보전'];
+const MH_RESULTS=['정상복구','임시조치','외주의뢰','부품대기','미완료'];
+const MH_TYPE_COLORS={'정기보전':'#2563eb','고장보전':'#dc2626','예방보전':'#16a34a','개선보전':'#d97706'};
+
+function initMaintHistory(){
+  const sel=document.getElementById('mh_filter_eq');
+  if(sel.options.length<=1){
+    EQUIP.forEach(eq=>{const o=document.createElement('option');o.value=eq.id;o.textContent=`${eq.id} ${eq.name}`;sel.appendChild(o)});
+  }
+  document.getElementById('mh_filter_to').value=new Date().toISOString().slice(0,10);
+}
+
+function renderMaintHistory(){
+  const fEq=document.getElementById('mh_filter_eq').value;
+  const fType=document.getElementById('mh_filter_type').value;
+  const fFrom=document.getElementById('mh_filter_from').value;
+  const fTo=document.getElementById('mh_filter_to').value;
+
+  const filtered=maintHistory.filter(h=>{
+    if(fEq&&h.eqId!==fEq)return false;
+    if(fType&&h.type!==fType)return false;
+    if(fFrom&&(h.date||'')<fFrom)return false;
+    if(fTo&&(h.date||'')>fTo)return false;
+    return true;
+  }).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+
+  const totalCost=filtered.reduce((a,b)=>a+(b.cost||0),0);
+  const totalHours=filtered.reduce((a,b)=>a+(b.hours||0),0);
+  const breakdowns=filtered.filter(h=>h.type==='고장보전').length;
+
+  let h=`<div class="mh-summary">
+    <div class="mh-summary-card"><div class="num" style="color:var(--accent)">${filtered.length}</div><div class="label">총 보전건수</div></div>
+    <div class="mh-summary-card"><div class="num" style="color:var(--red)">${breakdowns}</div><div class="label">고장보전</div></div>
+    <div class="mh-summary-card"><div class="num" style="color:var(--blue)">${totalHours.toFixed(1)}</div><div class="label">총 소요시간(h)</div></div>
+    <div class="mh-summary-card"><div class="num" style="color:var(--green)">${(totalCost/10000).toFixed(0)}</div><div class="label">총 비용(만원)</div></div>
+  </div>`;
+
+  if(!filtered.length){
+    h+=`<div style="text-align:center;padding:40px;color:var(--muted)">등록된 보전이력이 없습니다.<br><br><button onclick="openMaintForm()" style="padding:10px 24px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">+ 첫 이력 등록하기</button></div>`;
+  }else{
+    h+=`<div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px"><table class="mh-table"><thead><tr>
+      <th>No</th><th>보전일자</th><th>설비</th><th>보전유형</th><th>고장/이상내용</th><th>보전내용</th><th>담당자</th><th>소요(h)</th><th>교체부품</th><th>비용</th><th>결과</th><th></th>
+    </tr></thead><tbody>`;
+    filtered.forEach((r,i)=>{
+      const tc=MH_TYPE_COLORS[r.type]||'#666';
+      const eq=EQUIP.find(e=>e.id===r.eqId);
+      h+=`<tr onclick="openMaintForm(${r.id})">
+        <td style="text-align:center;color:var(--muted)">${i+1}</td>
+        <td style="white-space:nowrap">${r.date||''}</td>
+        <td style="font-weight:600;color:var(--accent);white-space:nowrap">${r.eqId}${eq?' '+eq.name:''}</td>
+        <td><span class="mh-badge" style="background:${tc}">${r.type}</span></td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.issue||'-'}</td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.work||'-'}</td>
+        <td>${r.worker||'-'}</td>
+        <td style="text-align:right">${r.hours||'-'}</td>
+        <td style="font-size:11px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.parts||'-'}</td>
+        <td style="text-align:right">${r.cost?(r.cost/10000).toFixed(1)+'만':'-'}</td>
+        <td><span class="mh-badge" style="background:${r.result==='정상복구'?'var(--green)':r.result==='미완료'?'var(--red)':'#6b7280'}">${r.result||'-'}</span></td>
+        <td style="text-align:center"><button onclick="event.stopPropagation();deleteMaintHistory(${r.id})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px">🗑</button></td>
+      </tr>`;
+    });
+    h+=`</tbody></table></div>`;
+    h+=`<div style="margin-top:10px;text-align:right"><button onclick="exportMaintHistory()" style="padding:8px 16px;background:#fff;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">📥 엑셀 다운로드</button></div>`;
+  }
+  document.getElementById('maintHistContent').innerHTML=h;
+}
+
+function openMaintForm(editId){
+  const isEdit=editId!==undefined;
+  const r=isEdit?maintHistory.find(h=>h.id===editId):{};
+  const eqOpts=EQUIP.map(eq=>`<option value="${eq.id}"${r.eqId===eq.id?' selected':''}>${eq.id} ${eq.name}</option>`).join('');
+  const typeOpts=MH_TYPES.map(t=>`<option${r.type===t?' selected':''}>${t}</option>`).join('');
+  const resultOpts=MH_RESULTS.map(t=>`<option${r.result===t?' selected':''}>${t}</option>`).join('');
+
+  let h=`<div class="mh-form-title">${isEdit?'✏️ 보전이력 수정':'+ 보전이력 등록'}<button onclick="closeMaintForm()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button></div>`;
+  h+=`<div class="mh-form-grid">
+    <div class="mh-form-field"><label>설비 *</label><select id="mhf_eq" class="mh-input">${eqOpts}</select></div>
+    <div class="mh-form-field"><label>보전일자 *</label><input type="date" id="mhf_date" class="mh-input" value="${r.date||new Date().toISOString().slice(0,10)}"></div>
+    <div class="mh-form-field"><label>보전유형 *</label><select id="mhf_type" class="mh-input">${typeOpts}</select></div>
+    <div class="mh-form-field"><label>결과</label><select id="mhf_result" class="mh-input"><option value="">-- 선택 --</option>${resultOpts}</select></div>
+    <div class="mh-form-field"><label>담당자</label><input id="mhf_worker" class="mh-input" value="${r.worker||''}" placeholder="예: 홍길동"></div>
+    <div class="mh-form-field"><label>소요시간 (h)</label><input type="number" step="0.5" id="mhf_hours" class="mh-input" value="${r.hours||''}" placeholder="예: 2.5"></div>
+  </div>
+  <div class="mh-form-field"><label>고장/이상 내용</label><textarea id="mhf_issue" class="mh-input" placeholder="고장 증상, 이상 현상 등">${r.issue||''}</textarea></div>
+  <div class="mh-form-field"><label>보전 내용 (조치사항)</label><textarea id="mhf_work" class="mh-input" placeholder="수리 내용, 조치 사항 등">${r.work||''}</textarea></div>
+  <div class="mh-form-grid">
+    <div class="mh-form-field"><label>교체부품</label><input id="mhf_parts" class="mh-input" value="${r.parts||''}" placeholder="예: 베어링, 실린더, 밸브 등"></div>
+    <div class="mh-form-field"><label>비용 (원)</label><input type="number" id="mhf_cost" class="mh-input" value="${r.cost||''}" placeholder="예: 150000"></div>
+  </div>
+  <div class="mh-form-field"><label>비고</label><input id="mhf_note" class="mh-input" value="${r.note||''}" placeholder="특이사항"></div>
+  <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+    <button onclick="closeMaintForm()" style="padding:10px 20px;background:#6b7280;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer">취소</button>
+    <button onclick="saveMaintForm(${isEdit?r.id:'null'})" style="padding:10px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">${isEdit?'수정 저장':'등록'}</button>
+  </div>`;
+  document.getElementById('maintFormBody').innerHTML=h;
+  document.getElementById('maintFormModal').style.display='flex';
+}
+
+function closeMaintForm(){document.getElementById('maintFormModal').style.display='none'}
+
+function saveMaintForm(editId){
+  const eqId=document.getElementById('mhf_eq').value;
+  const date=document.getElementById('mhf_date').value;
+  const type=document.getElementById('mhf_type').value;
+  if(!eqId||!date||!type){alert('설비, 보전일자, 보전유형은 필수입니다.');return}
+
+  const data={
+    eqId,date,type,
+    issue:document.getElementById('mhf_issue').value,
+    work:document.getElementById('mhf_work').value,
+    worker:document.getElementById('mhf_worker').value,
+    hours:parseFloat(document.getElementById('mhf_hours').value)||0,
+    parts:document.getElementById('mhf_parts').value,
+    cost:parseInt(document.getElementById('mhf_cost').value)||0,
+    result:document.getElementById('mhf_result').value,
+    note:document.getElementById('mhf_note').value
+  };
+
+  if(editId!==null){
+    const idx=maintHistory.findIndex(h=>h.id===editId);
+    if(idx>=0){data.id=editId;maintHistory[idx]=data}
+  }else{
+    data.id=_mhNextId++;
+    maintHistory.push(data);
+  }
+  saveMaintHistory();
+  closeMaintForm();
+  renderMaintHistory();
+}
+
+function deleteMaintHistory(id){
+  const r=maintHistory.find(h=>h.id===id);
+  if(!confirm(`${r?.eqId} (${r?.date}) 보전이력을 삭제하시겠습니까?`))return;
+  maintHistory=maintHistory.filter(h=>h.id!==id);
+  saveMaintHistory();
+  renderMaintHistory();
+}
+
+function exportMaintHistory(){
+  if(typeof XLSX==='undefined'){alert('엑셀 라이브러리 로드 중... 잠시 후 다시 시도해주세요.');return}
+  const rows=maintHistory.map(r=>{
+    const eq=EQUIP.find(e=>e.id===r.eqId);
+    return{'설비번호':r.eqId,'설비명':eq?eq.name:'','보전일자':r.date,'보전유형':r.type,'고장/이상내용':r.issue,'보전내용':r.work,'담당자':r.worker,'소요시간(h)':r.hours,'교체부품':r.parts,'비용':r.cost,'결과':r.result,'비고':r.note};
+  });
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"보전이력");
+  XLSX.writeFile(wb,"보전이력_"+new Date().toISOString().slice(0,10)+".xlsx");
+}
+</script>
+</body>
+</html>
