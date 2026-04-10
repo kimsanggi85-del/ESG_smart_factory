@@ -169,12 +169,13 @@ tr.row{cursor:pointer;transition:background .15s}
   <div class="header-actions">
     <span id="dbStatus" class="db-status db-loading">⏳ 연결중</span>
     <div id="alertBadgeArea"></div>
-    <button class="btn btn-primary" onclick="openNewRepairForm()">+ 수리의뢰</button>
+
   </div>
 </div>
 
 <div class="tabs">
   <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard',this)">대시보드</button>
+  <button class="tab" style="background:var(--blue);color:#fff;font-weight:700" onclick="openNewRepairForm()">+ 수리의뢰</button>
   <button class="tab" data-tab="molddb" onclick="switchTab('molddb',this)">금형 DB</button>
   <button class="tab" data-tab="list" onclick="switchTab('list',this)">수리내역</button>
   <button class="tab" data-tab="stats" onclick="switchTab('stats',this)">통계분석</button>
