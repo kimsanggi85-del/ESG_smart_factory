@@ -468,7 +468,7 @@ function renderMoldDB(){
   let h=`<div class="filters">
     <select class="input" style="width:120px" onchange="moldFilterStatus=this.value;render()"><option>전체</option>${getMoldStatuses().map(s=>`<option${moldFilterStatus===s?' selected':''}>${s}</option>`).join('')}</select>
     <select class="input" style="width:120px" onchange="moldFilterGroup=this.value;render()"><option>전체</option>${getMoldGroups().map(g=>`<option${moldFilterGroup===g?' selected':''}>${g}</option>`).join('')}</select>
-    <div style="display:flex;gap:4px"><input id="moldSearchInput" class="input" style="width:240px" placeholder="금형코드, 품명, 고객사..." value="${moldFilterSearch}" oninput="debounceRender(this.value,'mold')" onkeydown="if(event.key==='Enter'){moldFilterSearch=this.value;render()}"><button class="btn btn-primary btn-sm" onclick="moldFilterSearch=document.getElementById('moldSearchInput')?.value??'';render()" style="padding:8px 12px">🔍</button></div>
+    <div style="display:flex;gap:4px"><input id="moldSearchInput" class="input" style="width:240px" placeholder="품번, 금형코드, 품명, 고객사..." value="${moldFilterSearch}" oninput="debounceRender(this.value,'mold')" onkeydown="if(event.key==='Enter'){moldFilterSearch=this.value;render()}"><button class="btn btn-primary btn-sm" onclick="moldFilterSearch=document.getElementById('moldSearchInput')?.value??'';render()" style="padding:8px 12px">🔍</button></div>
     <div style="flex:1"></div>
     <button class="export-btn" onclick="downloadMoldTemplate()">📋 양식</button>
     <button class="export-btn" onclick="document.getElementById('moldExcelInput').click()">📤 엑셀 업로드</button>
@@ -1406,10 +1406,9 @@ function setupRealtime(){
 function openNewRepairForm(){openNewRepairFormWith("")}
 function openNewRepairFormWith(code){
   document.getElementById("modalTitle").textContent="수리의뢰 등록";
-  let opts=moldDB.map(m=>`<option value="${m.mold_code}"${m.mold_code===code?' selected':''}>${m.mold_code} (${m.mold_name||''})</option>`).join('');
   let reasonOpts=S('repairReasons').map(r=>`<option value="${r}">${r}</option>`).join('');
   let h=`<div class="form-grid">
-    <div class="field"><label>금형 선택 *</label><select id="rf_mold"><option value="">-- 선택 --</option>${opts}</select></div>
+    <div class="field"><label>금형 선택 *</label><div style="position:relative"><input id="rf_mold_search" placeholder="품번 2자리 이상 입력" autocomplete="off" style="width:100%;padding:8px;background:var(--card);border:1px solid #d1d5db;border-radius:4px;color:var(--text);font-size:13px" oninput="moldAutoComplete(this.value)" onfocus="moldAutoComplete(this.value)"><input type="hidden" id="rf_mold"><div id="rf_mold_list" style="display:none;position:absolute;top:100%;left:0;right:0;max-height:200px;overflow-y:auto;background:var(--card);border:1px solid #d1d5db;border-radius:0 0 4px 4px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.15)"></div></div></div>
     <div class="field"><label>수리유형</label><select id="rf_type">${getRepairTypes().map(t=>`<option>${t}</option>`).join('')}</select></div>
     <div class="field"><label>의뢰자 *</label><select id="rf_req"><option value="">-- 선택 --</option>${getRequesters().map(r=>`<option>${r}</option>`).join('')}<option value="__custom">직접입력...</option></select></div>
     <div class="field"><label>담당자</label><select id="rf_assign"><option value="">-- 선택 --</option>${getAssignees().map(a=>`<option>${a}</option>`).join('')}</select></div>
@@ -1434,7 +1433,28 @@ function openNewRepairFormWith(code){
   <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">취소</button><button class="btn btn-primary" onclick="saveRepair()">등록</button></div>`;
   document.getElementById("modalBody").innerHTML=h;document.getElementById("modalOverlay").style.display="flex";
   window._np={before:null,after:null};
+  if(code){
+    const m=moldDB.find(x=>x.mold_code===code);
+    if(m){document.getElementById("rf_mold_search").value=`${m.mold_no||m.mold_code} (${m.mold_code}${m.mold_name?' / '+m.mold_name:''})`;document.getElementById("rf_mold").value=m.mold_code;}
+  }
 }
+
+function moldAutoComplete(val){
+  const list=document.getElementById("rf_mold_list");
+  if(!list)return;
+  const q=val.replace(/\s/g,'');
+  if(q.length<2){list.style.display='none';return;}
+  const matches=moldDB.filter(m=>(m.mold_code||'').includes(q)||(m.mold_name||'').includes(q)||(m.mold_no||'').includes(q)||(m.customer||'').includes(q)).slice(0,20);
+  if(!matches.length){list.innerHTML='<div style="padding:8px 12px;color:var(--muted);font-size:12px">결과 없음</div>';list.style.display='block';return;}
+  list.innerHTML=matches.map(m=>`<div style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid rgba(0,0,0,.05)" onmousedown="selectMoldAC('${m.mold_code}','${(m.mold_name||'').replace(/'/g,"\\'")}','${(m.mold_no||'').replace(/'/g,"\\'")}')" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">${m.mold_no||'-'} <span style="color:var(--muted)">(${m.mold_code} / ${m.mold_name||''})</span></div>`).join('');
+  list.style.display='block';
+}
+function selectMoldAC(code,name,partNum){
+  document.getElementById("rf_mold_search").value=(partNum||code)+' ('+code+(name?' / '+name:'')+')';
+  document.getElementById("rf_mold").value=code;
+  document.getElementById("rf_mold_list").style.display='none';
+}
+document.addEventListener('click',e=>{const l=document.getElementById('rf_mold_list');if(l&&!e.target.closest('#rf_mold_search'))l.style.display='none';});
 
 function previewNP(input,zid,key){const f=input.files[0];if(!f)return;if(f.size>10*1024*1024){alert("10MB 이하만");return}toast('사진 압축 중...','info');compressImage(f,50).then(compressed=>{window._np[key]=compressed;document.getElementById(zid).innerHTML=`<img src="${compressed}"><input type="file" accept="image/*" onchange="previewNP(this,'${zid}','${key}')">`;const sizeKB=(compressed.length*0.73/1024).toFixed(1);toast(`압축 완료 (${sizeKB}KB)`,'success')})}
 
