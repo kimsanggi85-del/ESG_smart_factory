@@ -242,7 +242,18 @@ function debounceRender(val,target){
   if(target==='mold')moldFilterSearch=val;
   else filterSearch=val;
   clearTimeout(_searchTimer);
-  _searchTimer=setTimeout(()=>render(),300);
+  _searchTimer=setTimeout(()=>{
+    const cursorPos=document.activeElement?.selectionStart??null;
+    render();
+    setTimeout(()=>{
+      const inputId=target==='mold'?'moldSearchInput':'repairSearchInput';
+      const inp=document.getElementById(inputId);
+      if(inp&&cursorPos!==null){
+        inp.focus();
+        try{inp.setSelectionRange(cursorPos,cursorPos)}catch(e){}
+      }
+    },0);
+  },300);
 }
 
 function S(key){return settingsData[key]?settingsData[key].items:[]}
@@ -457,7 +468,7 @@ function renderMoldDB(){
   let h=`<div class="filters">
     <select class="input" style="width:120px" onchange="moldFilterStatus=this.value;render()"><option>전체</option>${getMoldStatuses().map(s=>`<option${moldFilterStatus===s?' selected':''}>${s}</option>`).join('')}</select>
     <select class="input" style="width:120px" onchange="moldFilterGroup=this.value;render()"><option>전체</option>${getMoldGroups().map(g=>`<option${moldFilterGroup===g?' selected':''}>${g}</option>`).join('')}</select>
-    <div style="display:flex;gap:4px"><input class="input" style="width:240px" placeholder="금형코드, 품명, 고객사..." value="${moldFilterSearch}" oninput="debounceRender(this.value,'mold')" onkeydown="if(event.key==='Enter'){moldFilterSearch=this.value;render()}"><button class="btn btn-primary btn-sm" onclick="moldFilterSearch=document.querySelector('[placeholder*=금형코드]').value;render()" style="padding:8px 12px">🔍</button></div>
+    <div style="display:flex;gap:4px"><input id="moldSearchInput" class="input" style="width:240px" placeholder="금형코드, 품명, 고객사..." value="${moldFilterSearch}" oninput="debounceRender(this.value,'mold')" onkeydown="if(event.key==='Enter'){moldFilterSearch=this.value;render()}"><button class="btn btn-primary btn-sm" onclick="moldFilterSearch=document.getElementById('moldSearchInput')?.value??'';render()" style="padding:8px 12px">🔍</button></div>
     <div style="flex:1"></div>
     <button class="export-btn" onclick="downloadMoldTemplate()">📋 양식</button>
     <button class="export-btn" onclick="document.getElementById('moldExcelInput').click()">📤 엑셀 업로드</button>
@@ -646,7 +657,7 @@ function renderList(){
     <select class="input" style="width:110px" onchange="filterYear=this.value;render()"><option value="전체">연도 전체</option>${years.map(y=>`<option${filterYear===y?' selected':''}>${y} (${yearStats[y]||0})</option>`).join('')}</select>
     <select class="input" style="width:120px" onchange="filterStage=this.value;render()"><option>전체</option>${STAGES.map(s=>`<option${filterStage===s?' selected':''}>${s}</option>`).join('')}</select>
     <select class="input" style="width:120px" onchange="filterGroup=this.value;render()"><option>전체</option>${getMoldGroups().map(g=>`<option${filterGroup===g?' selected':''}>${g}</option>`).join('')}</select>
-    <div style="display:flex;gap:4px"><input class="input" style="width:190px" placeholder="금형코드, 사유, 의뢰자..." value="${filterSearch}" oninput="debounceRender(this.value,'repair')" onkeydown="if(event.key==='Enter'){filterSearch=this.value;render()}"><button class="btn btn-primary btn-sm" onclick="filterSearch=document.querySelector('[placeholder*=사유]').value;render()" style="padding:8px 12px">🔍</button></div>
+    <div style="display:flex;gap:4px"><input id="repairSearchInput" class="input" style="width:190px" placeholder="금형코드, 사유, 의뢰자..." value="${filterSearch}" oninput="debounceRender(this.value,'repair')" onkeydown="if(event.key==='Enter'){filterSearch=this.value;render()}"><button class="btn btn-primary btn-sm" onclick="filterSearch=document.getElementById('repairSearchInput')?.value??'';render()" style="padding:8px 12px">🔍</button></div>
     <div style="flex:1"></div>
     <button class="export-btn" onclick="downloadRepairTemplate()">📋 양식</button>
     <button class="export-btn" onclick="document.getElementById('repairExcelInput').click()">📤 업로드</button>
