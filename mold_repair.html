@@ -48,6 +48,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
 .cat-desc{font-size:11px;color:#8b8fa3;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cat-arrow{width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:#5a5e72;transition:transform .25s;flex-shrink:0;font-size:18px}
 .cat.open .cat-arrow{transform:rotate(90deg);color:#6366f1}
+.cat-badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:11px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:11px;font-weight:800;padding:0 7px;margin-right:6px;box-shadow:0 0 0 2px rgba(239,68,68,.18);animation:badgePulse 2s ease-in-out infinite}
+@keyframes badgePulse{0%,100%{box-shadow:0 0 0 2px rgba(239,68,68,.18)}50%{box-shadow:0 0 0 5px rgba(239,68,68,0)}}
+.cat-icon-wrap{position:relative;flex-shrink:0}
+.cat-icon-dot{position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;background:#ef4444;border:2px solid #1a1d27;animation:badgePulse 2s ease-in-out infinite}
 .cat-panel{max-height:0;overflow:hidden;transition:max-height .3s ease}
 .cat-divider{height:1px;background:#2a2e3d;margin:0 16px}
 .sub-list{padding:6px 8px 8px}
@@ -77,9 +81,16 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
 .repair-status.done{background:rgba(34,197,94,.15);color:#22c55e}
 
 /* ===== 설정 패널 ===== */
-.set-group{margin-bottom:16px}
-.set-group-title{font-size:12px;font-weight:700;color:#6366f1;margin-bottom:8px;padding-left:4px}
-.set-item{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;border-radius:12px;background:#1a1d27;border:1px solid #2a2e3d;margin-bottom:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.set-group{margin-bottom:10px;background:#1a1d27;border:1px solid #2a2e3d;border-radius:12px;overflow:hidden}
+.set-group-title{font-size:13px;font-weight:700;color:#e8eaf0;padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;-webkit-tap-highlight-color:transparent;user-select:none;background:#1a1d27;transition:background .2s}
+.set-group-title:hover{background:#222838}
+.set-group-title .set-group-toggle{font-size:14px;color:#6366f1;transition:transform .25s}
+.set-group.open .set-group-title .set-group-toggle{transform:rotate(180deg)}
+.set-group-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.set-group.open .set-group-body{max-height:1500px}
+.set-group-body-inner{padding:4px 10px 10px 10px}
+.set-item{display:flex;align-items:center;justify-content:space-between;padding:12px 12px;border-radius:10px;background:#15171f;border:1px solid #252938;margin-bottom:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.set-item:last-child{margin-bottom:0}
 .set-item:active{background:#222838}
 .set-left{display:flex;align-items:center;gap:10px}
 .set-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(99,102,241,.1)}
@@ -347,42 +358,82 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
 
 <!-- ===== 설정 탭 ===== -->
 <div class="tab-panel" id="panel-settings">
-  <div class="set-group">
-    <div class="set-group-title">☁️ 클라우드 동기화 <span id="sbStatusBadge" style="font-size:11px;font-weight:600;margin-left:8px;color:#8b8fa3">⚪ 미설정</span></div>
-    <div class="set-item" onclick="openModal('cloudSync')">
-      <div class="set-left"><div class="set-icon">☁️</div><div><div class="set-name">Supabase 설정</div><div class="set-desc">PC ↔ 모바일 데이터 자동 동기화</div></div></div>
-      <div class="set-arrow">›</div>
+  <div class="set-group" data-group="cloud">
+    <div class="set-group-title" onclick="toggleSetGroup(this)">
+      <span>☁️ 클라우드 동기화 <span id="sbStatusBadge" style="font-size:11px;font-weight:600;margin-left:8px;color:#8b8fa3">⚪ 미설정</span></span>
+      <span class="set-group-toggle">▼</span>
     </div>
+    <div class="set-group-body"><div class="set-group-body-inner">
+      <div class="set-item" onclick="openModal('cloudSync')">
+        <div class="set-left"><div class="set-icon">☁️</div><div><div class="set-name">Supabase 설정</div><div class="set-desc">PC ↔ 모바일 데이터 자동 동기화</div></div></div>
+        <div class="set-arrow">›</div>
+      </div>
+    </div></div>
   </div>
-  <div class="set-group">
-    <div class="set-group-title">💾 데이터 관리</div>
-    <div class="set-item" onclick="exportAllData()">
-      <div class="set-left"><div class="set-icon">☁️</div><div><div class="set-name">데이터 백업 (Excel)</div><div class="set-desc">금형DB + 수리이력 Excel 내보내기</div></div></div>
-      <div class="set-arrow">›</div>
+
+  <div class="set-group" data-group="molddb">
+    <div class="set-group-title" onclick="toggleSetGroup(this)">
+      <span>🗄️ 금형 DB</span>
+      <span class="set-group-toggle">▼</span>
     </div>
-    <div class="set-item" onclick="confirmReset()">
-      <div class="set-left"><div class="set-icon">🗑️</div><div><div class="set-name">데이터 초기화</div><div class="set-desc">전체 데이터 삭제 (복구 불가)</div></div></div>
-      <div class="set-arrow">›</div>
-    </div>
+    <div class="set-group-body"><div class="set-group-body-inner">
+      <div class="set-item" onclick="openModal('moldSearch')">
+        <div class="set-left"><div class="set-icon">🔍</div><div><div class="set-name">금형 조회</div><div class="set-desc">금형번호 · 고객사별 검색</div></div></div>
+        <div class="set-arrow">›</div>
+      </div>
+      <div class="set-item" onclick="openModal('moldCard')">
+        <div class="set-left"><div class="set-icon">📇</div><div><div class="set-name">금형 이력카드</div><div class="set-desc">수리·교체 이력 통합 조회</div></div></div>
+        <div class="set-arrow">›</div>
+      </div>
+    </div></div>
   </div>
-  <div class="set-group">
-    <div class="set-group-title">📂 마스터 데이터</div>
-    <div class="set-item" onclick="openModal('moldMaster')">
-      <div class="set-left"><div class="set-icon">🏢</div><div><div class="set-name">수리업체 관리</div><div class="set-desc">외주 수리업체 · 연락처 등록</div></div></div>
-      <div class="set-arrow">›</div>
+
+  <div class="set-group" data-group="master">
+    <div class="set-group-title" onclick="toggleSetGroup(this)">
+      <span>📂 마스터 데이터</span>
+      <span class="set-group-toggle">▼</span>
     </div>
-    <div class="set-item" onclick="openModal('repairTypes')">
-      <div class="set-left"><div class="set-icon">🔧</div><div><div class="set-name">수리유형 코드</div><div class="set-desc">수리유형 분류 관리</div></div></div>
-      <div class="set-arrow">›</div>
-    </div>
+    <div class="set-group-body"><div class="set-group-body-inner">
+      <div class="set-item" onclick="openModal('moldMaster')">
+        <div class="set-left"><div class="set-icon">🏢</div><div><div class="set-name">수리업체 관리</div><div class="set-desc">외주 수리업체 · 연락처 등록</div></div></div>
+        <div class="set-arrow">›</div>
+      </div>
+      <div class="set-item" onclick="openModal('repairTypes')">
+        <div class="set-left"><div class="set-icon">🔧</div><div><div class="set-name">수리유형 코드</div><div class="set-desc">수리유형 분류 관리</div></div></div>
+        <div class="set-arrow">›</div>
+      </div>
+    </div></div>
   </div>
-  <div class="set-group">
-    <div class="set-group-title">ℹ️ 정보</div>
-    <div style="padding:10px 14px;border-radius:12px;background:#1a1d27;border:1px solid #2a2e3d;font-size:11px;color:#8b8fa3;line-height:1.8">
-      저장소: localStorage (브라우저 내 저장)<br>
-      금형 DB: <b id="infoMoldCnt">0</b>건 &nbsp;|&nbsp; 수리이력: <b id="infoRepairCnt">0</b>건<br>
-      사용량: <b id="infoStorage">0</b> KB / 5,120 KB
+
+  <div class="set-group" data-group="data">
+    <div class="set-group-title" onclick="toggleSetGroup(this)">
+      <span>💾 데이터 관리</span>
+      <span class="set-group-toggle">▼</span>
     </div>
+    <div class="set-group-body"><div class="set-group-body-inner">
+      <div class="set-item" onclick="exportAllData()">
+        <div class="set-left"><div class="set-icon">☁️</div><div><div class="set-name">데이터 백업 (Excel)</div><div class="set-desc">금형DB + 수리이력 Excel 내보내기</div></div></div>
+        <div class="set-arrow">›</div>
+      </div>
+      <div class="set-item" onclick="confirmReset()">
+        <div class="set-left"><div class="set-icon">🗑️</div><div><div class="set-name">데이터 초기화</div><div class="set-desc">전체 데이터 삭제 (복구 불가)</div></div></div>
+        <div class="set-arrow">›</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="set-group" data-group="info">
+    <div class="set-group-title" onclick="toggleSetGroup(this)">
+      <span>ℹ️ 정보</span>
+      <span class="set-group-toggle">▼</span>
+    </div>
+    <div class="set-group-body"><div class="set-group-body-inner">
+      <div style="padding:10px 14px;border-radius:10px;background:#15171f;border:1px solid #252938;font-size:11px;color:#8b8fa3;line-height:1.8">
+        저장소: localStorage (브라우저 내 저장)<br>
+        금형 DB: <b id="infoMoldCnt">0</b>건 &nbsp;|&nbsp; 수리이력: <b id="infoRepairCnt">0</b>건<br>
+        사용량: <b id="infoStorage">0</b> KB / 5,120 KB
+      </div>
+    </div></div>
   </div>
 </div>
 
@@ -549,6 +600,15 @@ function updateSbStatusUI(){
     return;
   }
   el.textContent='🟢 연결됨'; el.style.color='#4ade80';
+}
+
+/* ================================================================
+   설정 아코디언 토글
+================================================================ */
+function toggleSetGroup(el){
+  const group=el.closest('.set-group');
+  if(!group) return;
+  group.classList.toggle('open');
 }
 
 /* ================================================================
@@ -1476,11 +1536,6 @@ const CATS=[
       {icon:'🔴',name:'긴급 수리요청',desc:'긴급 수리 의뢰 · 즉시 알림 발송',action:()=>openModal('repairRequestUrgent')},
       {icon:'📋',name:'의뢰 목록',desc:'전체 수리의뢰 현황 조회',action:()=>openModal('repairList')}
     ]},
-  {id:'molddb',icon:'🗄️',name:'금형 DB',desc:'금형 마스터 · 이력카드',
-    subs:[
-      {icon:'🔍',name:'금형 조회',desc:'금형번호 · 고객사별 검색',action:()=>openModal('moldSearch')},
-      {icon:'📇',name:'금형 이력카드',desc:'수리·교체 이력 통합 조회',action:()=>openModal('moldCard')}
-    ]},
   {id:'history',icon:'📜',name:'수리내역',desc:'수리 진행현황 · 완료이력 · 비용관리',
     subs:[
       {icon:'🔄',name:'진행현황',desc:'수리중 · 외주반출 · 입고대기 현황',action:()=>openModal('progressList')},
@@ -1496,14 +1551,24 @@ const CATS=[
   {id:'notify',icon:'🔔',name:'알림관리',desc:'수리요청 · 완료 알림 이력',single:true,action:()=>openModal('notifications')}
 ];
 
+function getActiveNotificationCount(){
+  const repairs=getRepairs();
+  const activeStates=['수리대기','수리중','진행중','설계의뢰','측정의뢰(자체)','측정의뢰(측정실)'];
+  return repairs.filter(r=>activeStates.includes(r['상태'])).length;
+}
+
 function renderCats(){
   const c=document.getElementById('catList');c.innerHTML='';
+  const notifyCount=getActiveNotificationCount();
   CATS.forEach((cat,ci)=>{
+    const isNotify=cat.id==='notify';
+    const badge=(isNotify&&notifyCount>0)?`<span class="cat-badge">${notifyCount}</span>`:'';
+    const iconDot=(isNotify&&notifyCount>0)?'<span class="cat-icon-dot"></span>':'';
     if(cat.single){
       const wrap=document.createElement('div');
       wrap.className='cat-single';
       wrap.onclick=cat.action;
-      wrap.innerHTML=`<div class="cat"><div class="cat-hdr"><div class="cat-icon">${cat.icon}</div><div class="cat-info"><div class="cat-name">${cat.name}</div><div class="cat-desc">${cat.desc}</div></div><div class="cat-arrow">›</div></div></div>`;
+      wrap.innerHTML=`<div class="cat"><div class="cat-hdr"><div class="cat-icon-wrap"><div class="cat-icon">${cat.icon}</div>${iconDot}</div><div class="cat-info"><div class="cat-name">${cat.name}</div><div class="cat-desc">${cat.desc}</div></div>${badge}<div class="cat-arrow">›</div></div></div>`;
       c.appendChild(wrap);
     }else{
       const el=document.createElement('div');el.className='cat';
@@ -1552,6 +1617,8 @@ function refreshDashboard(){
   }else{
     el.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">수리이력이 없습니다</div><div class="empty-sub">수리요청 또는 업로드로 데이터를 추가하세요</div></div>';
   }
+  // 알림 배지 갱신
+  if(document.getElementById('catList')) renderCats();
 }
 
 /* ================================================================
