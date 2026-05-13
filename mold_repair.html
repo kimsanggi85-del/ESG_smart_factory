@@ -146,11 +146,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
 .toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:8px 18px;border-radius:18px;font-size:12px;font-weight:600;z-index:10001;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
 
-/* ===== 알림 팝업창 (최상위) ===== */
+/* ===== 🔔 알림 팝업 ===== */
 .alarm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
 .alarm-overlay.show{display:flex;animation:alarmFlash 1.2s ease-in-out infinite}
 @keyframes alarmFlash{0%,100%{background:rgba(0,0,0,.85)}50%{background:rgba(120,0,0,.85)}}
-.alarm-box{width:100%;max-width:420px;background:linear-gradient(180deg,#1a1d27 0%,#2a1015 100%);border:2px solid #ef4444;border-radius:16px;overflow:hidden;box-shadow:0 0 40px rgba(239,68,68,.6),0 0 80px rgba(239,68,68,.3);animation:alarmShake .6s ease-in-out infinite}
+.alarm-box{width:100%;max-width:420px;background:linear-gradient(180deg,#1a1d27 0%,#2a1015 100%);border:2px solid #ef4444;border-radius:16px;overflow:hidden;box-shadow:0 0 40px rgba(239,68,68,.6),0 0 80px rgba(239,68,68,.3);animation:alarmShake .6s ease-in-out infinite;position:relative}
 @keyframes alarmShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
 .alarm-header{background:linear-gradient(135deg,#ef4444,#dc2626);padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:2px solid rgba(0,0,0,.2)}
 .alarm-icon-big{font-size:32px;animation:alarmRing .8s ease-in-out infinite}
@@ -160,23 +160,18 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
 .alarm-subtitle{font-size:11px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600}
 .alarm-body{padding:18px 20px;max-height:50vh;overflow-y:auto}
 .alarm-person{font-size:13px;color:#fbbf24;font-weight:700;margin-bottom:12px;text-align:center;padding:8px;background:rgba(251,191,36,.1);border-radius:8px;border:1px solid rgba(251,191,36,.3)}
-.alarm-item{background:#0f1117;border:1px solid #2a2e3d;border-left:4px solid #ef4444;border-radius:8px;padding:12px 14px;margin-bottom:8px}
+.alarm-item{background:#0f1117;border:1px solid #2a2e3d;border-left:4px solid #ef4444;border-radius:8px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.alarm-item:active{background:#15171f}
 .alarm-item.urgent{border-left-color:#fbbf24;background:linear-gradient(90deg,rgba(251,191,36,.08),#0f1117 40%)}
 .alarm-item-title{font-size:13px;font-weight:800;color:#fff;margin-bottom:4px}
 .alarm-item-meta{font-size:11px;color:#8b8fa3;display:flex;gap:10px;flex-wrap:wrap}
-.alarm-item-meta span{display:inline-flex;align-items:center;gap:3px}
 .alarm-item-status{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;background:rgba(239,68,68,.2);color:#fca5a5;margin-top:6px}
+.alarm-warn{padding:10px 20px 6px;background:#15171f;border-top:1px solid #2a2e3d;font-size:11px;color:#fbbf24;text-align:center;font-weight:600;line-height:1.5}
 .alarm-footer{padding:14px 20px;border-top:1px solid #2a2e3d;display:flex;gap:8px;background:#15171f}
-.alarm-btn-ack{flex:1;padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(239,68,68,.4);transition:transform .15s}
+.alarm-btn-ack{flex:1;padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(239,68,68,.4)}
 .alarm-btn-ack:active{transform:scale(.97)}
 .alarm-btn-snooze{padding:14px 16px;border:1px solid #3a3e4d;border-radius:10px;background:#1a1d27;color:#a8acc0;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
-.alarm-counter{position:absolute;top:8px;right:12px;font-size:10px;color:rgba(255,255,255,.6);font-weight:700;background:rgba(0,0,0,.3);padding:3px 8px;border-radius:10px}
-
-/* ===== 사용자 식별 뱃지 ===== */
-.user-badge{position:absolute;top:24px;right:14px;z-index:50;background:rgba(99,102,241,.18);border:1px solid rgba(99,102,241,.4);color:#a5b4fc;font-size:11px;font-weight:700;padding:4px 10px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent}
-.user-badge:active{opacity:.7}
-.user-badge.none{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.4);color:#fca5a5;animation:userBadgePulse 2s ease-in-out infinite}
-@keyframes userBadgePulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+.alarm-counter{position:absolute;top:8px;right:12px;font-size:10px;color:rgba(255,255,255,.6);font-weight:700;background:rgba(0,0,0,.3);padding:3px 8px;border-radius:10px;z-index:10}
 
 /* ===== 모달 ===== */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:flex-start;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;overflow-y:auto;padding:0}
@@ -312,9 +307,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
 <!-- ===== 헤더 ===== -->
 <div class="hdr" style="position:relative">
   <a class="hdr-back" href="javascript:history.back()">‹</a>
-  <div class="user-badge none" id="userBadge" onclick="openUserPicker()">
-    <span id="userBadgeIcon">🔐</span><span id="userBadgeName">로그인</span>
-  </div>
   <div class="hdr-title">금형 수리관리</div>
   <div class="hdr-sub">Mold Repair Management System</div>
   <div class="tab-bar">
@@ -400,7 +392,15 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
     </div>
     <div class="set-group-body"><div class="set-group-body-inner">
       <div class="set-item" onclick="openUserPicker()">
-        <div class="set-left"><div class="set-icon">👤</div><div><div class="set-name">본인 담당자 선택 / 변경</div><div class="set-desc">한 번 선택하면 자동 기억</div></div></div>
+        <div class="set-left"><div class="set-icon">👤</div><div><div class="set-name">본인 담당자 선택 / 변경</div><div class="set-desc">핀 인증된 담당자만 알림 수신</div></div></div>
+        <div class="set-arrow">›</div>
+      </div>
+      <div class="set-item" onclick="openMasterManage()">
+        <div class="set-left"><div class="set-icon">👥</div><div><div class="set-name">담당자 마스터 관리</div><div class="set-desc">이름 추가 · 수정 · 삭제 (퇴사자 정리)</div></div></div>
+        <div class="set-arrow">›</div>
+      </div>
+      <div class="set-item" onclick="openMyPinSettings()">
+        <div class="set-left"><div class="set-icon">🔑</div><div><div class="set-name">내 핀 관리</div><div class="set-desc">핀 변경 · 삭제 (현재 핀 필요)</div></div></div>
         <div class="set-arrow">›</div>
       </div>
       <div class="set-item" onclick="testAlarm()">
@@ -500,21 +500,19 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
   </div>
 </div>
 
-<!-- ===== 알림 팝업창 (최상위) ===== -->
+<!-- ===== 🔔 알림 팝업 ===== -->
 <div class="alarm-overlay" id="alarmOverlay">
-  <div class="alarm-box" style="position:relative">
+  <div class="alarm-box">
     <div class="alarm-counter" id="alarmCounter"></div>
     <div class="alarm-header">
       <div class="alarm-icon-big">🚨</div>
       <div class="alarm-title-wrap">
-        <div class="alarm-title" id="alarmTitle">수리요청 알림</div>
+        <div class="alarm-title">수리요청 알림</div>
         <div class="alarm-subtitle" id="alarmSubtitle">담당자 확인 필요</div>
       </div>
     </div>
     <div class="alarm-body" id="alarmBody"></div>
-    <div style="padding:10px 20px 6px;background:#15171f;border-top:1px solid #2a2e3d;font-size:11px;color:#fbbf24;text-align:center;font-weight:600;line-height:1.5">
-      ⚠️ 수리 상태를 <b>'완료'</b>로 변경해야 알림이 멈춥니다
-    </div>
+    <div class="alarm-warn">⚠️ 수리 상태를 <b>'완료'</b>로 변경해야 알림이 멈춥니다</div>
     <div class="alarm-footer">
       <button class="alarm-btn-snooze" onclick="snoozeAlarm()">5분 후</button>
       <button class="alarm-btn-ack" onclick="acknowledgeAlarm()">3분 닫기</button>
@@ -540,102 +538,80 @@ function getRepairTypes(){ return JSON.parse(localStorage.getItem('repairTypeLis
 function saveRepairTypes(d){ localStorage.setItem('repairTypeList',JSON.stringify(d)); sbQueueUpload('repair_types',d); }
 
 /* ================================================================
-   🔔 담당자 알림 시스템
-   - 본인이 담당자로 지정된 미완료 수리건이 있으면 팝업
-   - 확인(또는 5분 후) 누르기 전까지 계속 반복 표시
-   - Supabase 동기화로 신규 건도 실시간 감지
+   🔔 담당자 알림 시스템 (신규 추가 - 기존 코드 영향 없음)
+   - 설정 → 내 알림 설정 → 본인 담당자 선택
+   - 수리이력의 '담당자' 컬럼에 본인이 적힌 미완료(상태≠'완료') 건이 있으면 팝업
+   - 상태 '완료'로 바뀌면 알림 종료
 ================================================================ */
-const ALARM_REPEAT_MS = 30000;     // 팝업 닫힌 후 다시 체크하는 간격 (30초)
-const ALARM_SNOOZE_MS = 5 * 60000; // "5분 후" 누르면 다음 알림까지 5분
+const ALARM_REPEAT_MS = 30000;
+const ALARM_SNOOZE_MS = 5 * 60000;
+const ALARM_ACK_SNOOZE_MS = 3 * 60000;
 const ALARM_ACTIVE_STATES = ['수리대기','수리중','진행중','설계의뢰','측정의뢰(자체)','측정의뢰(측정실)'];
-
 let _alarmTimer = null;
-let _alarmSnoozeUntil = 0;        // 이 시각까지는 알림 안 띄움
-let _alarmAcknowledgedKeys = {};  // (예약) 차후 acknowledge 기능 확장용
+let _alarmSnoozeUntil = 0;
 
-/* 현재 인증된 사용자 (localStorage 기반 - 한 번 선택하면 자동 기억) */
+/* 🔑 담당자 마스터 - [{name, pin?}] 형태, Supabase 동기화됨
+   - pin이 빈 문자열이면 핀 미설정 상태 (본인이 첫 선택 시 설정)
+   - 과장님이 마스터에 이름만 추가하고, 핀은 각자 설정 가능 */
+function getUserPins(){ return JSON.parse(localStorage.getItem('userPins')||'[]') }
+function saveUserPins(d){ localStorage.setItem('userPins',JSON.stringify(d)); sbQueueUpload('user_pins',d); }
+function getPinByName(name){
+  const u=getUserPins().find(x=>x.name===name);
+  return (u && u.pin)?u.pin:null;
+}
+function hasPinRegistered(name){ return !!getPinByName(name); }
+function isInMaster(name){ return getUserPins().some(u=>u.name===name); }
+function getMasterNames(){ return getUserPins().map(u=>u.name).sort(); }
+
 function getCurrentUser(){ return localStorage.getItem('currentUser')||''; }
 function setCurrentUser(name){
   if(name) localStorage.setItem('currentUser',name);
   else localStorage.removeItem('currentUser');
-  updateUserBadge();
-  _alarmAcknowledgedKeys = {};
-  _alarmSnoozeUntil = 0;
+  _alarmSnoozeUntil=0;
+  if(typeof refreshSettings==='function') refreshSettings();
   checkAndShowAlarm();
 }
-function updateUserBadge(){
-  const u=getCurrentUser();
-  const b=document.getElementById('userBadge');
-  const n=document.getElementById('userBadgeName');
-  const i=document.getElementById('userBadgeIcon');
-  if(!b) return;
-  if(u){
-    b.classList.remove('none');
-    i.textContent='🔓';
-    n.textContent=u;
-  }else{
-    b.classList.add('none');
-    i.textContent='🔐';
-    n.textContent='로그인';
-  }
-}
 
-/* 담당자 후보 목록: 수리이력의 '담당자' 컬럼에서 유니크 추출 */
 function getAllAssignees(){
-  const repairs=getRepairs();
   const set=new Set();
-  repairs.forEach(r=>{
+  getRepairs().forEach(r=>{
     const p=(r['담당자']||'').trim();
     if(!p) return;
-    // "왕석주,임혜종" 같은 복수 담당 분리
-    p.split(/[,\/.]/).forEach(name=>{
-      const t=name.trim();
+    p.split(/[,\/.]/).forEach(n=>{
+      const t=n.trim();
       if(t && t.length<=20 && t!=='ADMIN') set.add(t);
     });
   });
   return [...set].sort();
 }
 
-/* 본인 담당 미완료 건 추출 */
 function getMyActiveRepairs(){
   const me=getCurrentUser();
   if(!me) return [];
-  const repairs=getRepairs();
-  return repairs.filter(r=>{
+  return getRepairs().filter(r=>{
     if(!ALARM_ACTIVE_STATES.includes(r['상태'])) return false;
     const p=(r['담당자']||'').trim();
     if(!p) return false;
-    // 복수 담당자 포함 여부 체크
     return p.split(/[,\/.]/).some(x=>x.trim()===me);
   });
 }
 
-/* 수리건 고유키 (담당자 알림 acknowledge 추적용) */
-function alarmKey(r){
-  return [r['금형번호']||'',r['수리일자']||'',r['수리내용']||'',r['담당자']||''].join('||');
-}
-
-/* 알림 팝업창 표시 */
 function showAlarm(items){
   const o=document.getElementById('alarmOverlay');
   const body=document.getElementById('alarmBody');
   const counter=document.getElementById('alarmCounter');
   const subtitle=document.getElementById('alarmSubtitle');
   if(!o||!body) return;
-
   counter.textContent=`${items.length}건`;
   subtitle.textContent=`${getCurrentUser()} 담당자님, 처리 대기 중입니다`;
-
   body.innerHTML=`<div class="alarm-person">👤 ${esc(getCurrentUser())} 담당자님 확인 요청</div>` +
     items.map(r=>{
       const urgent=(r['상태']==='수리대기')?'urgent':'';
       const dot=r['상태']==='수리대기'?'🔴':'🔵';
       const dataAttr=esc2(JSON.stringify(r));
-      return `<div class="alarm-item ${urgent}" style="cursor:pointer" onclick="openRepairFromAlarm(${dataAttr})">
+      return `<div class="alarm-item ${urgent}" onclick="openRepairFromAlarm(${dataAttr})">
         <div class="alarm-item-title">${dot} ${esc(r['금형번호']||'-')} <span style="float:right;font-size:10px;color:#a5b4fc;font-weight:600">탭하여 상태 변경 ›</span></div>
-        <div class="alarm-item-meta">
-          <span>📝 ${esc((r['수리내용']||'').slice(0,50))}${(r['수리내용']||'').length>50?'…':''}</span>
-        </div>
+        <div class="alarm-item-meta"><span>📝 ${esc((r['수리내용']||'').slice(0,50))}${(r['수리내용']||'').length>50?'…':''}</span></div>
         <div class="alarm-item-meta" style="margin-top:4px">
           <span>📅 ${esc(r['수리일자']||'-')}</span>
           <span>🔧 ${esc(r['수리유형']||'-')}</span>
@@ -644,21 +620,8 @@ function showAlarm(items){
         <span class="alarm-item-status">${esc(r['상태']||'-')}</span>
       </div>`;
     }).join('');
-
   o.classList.add('show');
-  // 진동 (모바일)
   if(navigator.vibrate) try{ navigator.vibrate([200,100,200,100,200]); }catch(e){}
-}
-
-/* 알림 항목 클릭 → 수정 폼으로 바로 이동 (상태를 '완료'로 변경할 수 있도록) */
-function openRepairFromAlarm(repair){
-  // 잠시 알림 닫고 수정 폼 오픈
-  hideAlarm();
-  _alarmSnoozeUntil=Date.now()+30000; // 30초 임시 닫힘 (작업 시간 확보)
-  setTimeout(()=>{
-    const key=repairKey(repair);
-    openModal('repairRequest', Object.assign({}, repair, {_key:key}));
-  },200);
 }
 
 function hideAlarm(){
@@ -666,78 +629,87 @@ function hideAlarm(){
   if(o) o.classList.remove('show');
 }
 
-/* "확인했습니다" - 임시 닫기 (3분 후 자동 재표시)
-   수리건은 상태가 '완료'로 바뀌어야 비로소 알림이 멈춤 */
-const ALARM_ACK_SNOOZE_MS = 3 * 60000; // 확인 후 3분간 임시 닫힘
 function acknowledgeAlarm(){
   _alarmSnoozeUntil=Date.now()+ALARM_ACK_SNOOZE_MS;
   hideAlarm();
-  showToast('확인됨 · 3분 후 미완료건이 있으면 다시 알림');
+  showToast('3분 후 미완료건이 있으면 다시 알림');
 }
 
-/* "5분 후" */
 function snoozeAlarm(){
   _alarmSnoozeUntil=Date.now()+ALARM_SNOOZE_MS;
   hideAlarm();
   showToast('5분 후 다시 알림드립니다');
 }
 
-/* 핵심: 알림 체크 (반복 호출됨)
-   - 본인 담당 미완료(상태 != '완료') 건이 있으면 무조건 띄움
-   - '완료' 상태로 바뀌어야 비로소 멈춤 */
+function openRepairFromAlarm(repair){
+  hideAlarm();
+  _alarmSnoozeUntil=Date.now()+30000;
+  setTimeout(()=>{
+    const key=repairKey(repair);
+    openModal('repairRequest', Object.assign({}, repair, {_key:key}));
+  },200);
+}
+
 function checkAndShowAlarm(){
-  // 담당자 미지정이면 알림 없음
-  if(!getCurrentUser()) return;
-  // 스누즈/임시닫힘 중이면 패스
+  const me=getCurrentUser();
+  if(!me) return;
+  // 🔑 핀이 등록된 담당자만 알림 수신 (인증된 본인만)
+  if(!hasPinRegistered(me)) return;
   if(Date.now()<_alarmSnoozeUntil) return;
-  // 이미 띄워져 있으면 패스
   const o=document.getElementById('alarmOverlay');
   if(o && o.classList.contains('show')) return;
-
   const myItems=getMyActiveRepairs();
-  if(myItems.length>0){
-    showAlarm(myItems);
-  }
+  if(myItems.length>0) showAlarm(myItems);
 }
 
-/* 알림 타이머 시작 */
 function startAlarmLoop(){
   if(_alarmTimer) clearInterval(_alarmTimer);
-  // 즉시 1회
   checkAndShowAlarm();
-  // 30초마다 반복
   _alarmTimer=setInterval(checkAndShowAlarm, ALARM_REPEAT_MS);
 }
-/* 헤더 뱃지 클릭: 담당자 이름 선택 팝업 (핀 입력 없음) */
+
+/* 본인 담당자 선택 — 핀 인증 흐름
+   - 핀 없는 사람: "핀 설정" 단계 (4자리 입력 → 확인 입력 → 저장)
+   - 핀 있는 사람: "핀 입력" 단계 (4자리 입력 → 일치하면 본인으로 설정)
+*/
+let _pinFlow = { mode:null, name:null, step:null, buf1:'', buf2:'', failCount:0 };
+
 function openUserPicker(){
-  const list=getAllAssignees();
+  const list=getMasterNames(); // 마스터에 등록된 담당자만 표시
   const current=getCurrentUser();
   if(!list.length){
-    alert('수리이력이 없어 담당자 목록을 만들 수 없습니다.\n먼저 수리이력을 등록해주세요.');
+    if(confirm('등록된 담당자가 없습니다.\n담당자 마스터를 먼저 등록하시겠습니까?')){
+      openMasterManage();
+    }
     return;
   }
+  _pinFlow = { mode:null, name:null, step:null, buf1:'', buf2:'', failCount:0 };
   const html=`
     <div style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.3);border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:#a5b4fc;line-height:1.6">
-      👤 본인 이름을 선택하세요. <b>한 번만 선택하면 이 기기에서 자동 기억</b>됩니다.<br>
-      본인이 담당자로 적힌 미완료 수리건이 있으면 알림 팝업이 뜹니다.
+      👤 본인 이름을 선택 후 <b>핀번호 4자리</b>로 인증합니다.<br>
+      • 핀이 없는 분: 처음 선택 시 핀 설정<br>
+      • 핀이 있는 분: 본인 핀 입력 (틀리면 알림 못 받음)
     </div>
     <div style="margin-bottom:12px">
       <input type="text" class="form-input" id="userPickerSearch" placeholder="이름 검색..." oninput="renderUserPickerList(this.value)">
     </div>
-    <div id="userPickerList" style="max-height:55vh;overflow-y:auto"></div>
-    ${current?`<button class="btn-danger" style="margin-top:14px" onclick="setCurrentUser('');closeModal();showToast('담당자 해제됨 (알림 OFF)')">담당자 해제 (알림 끄기)</button>`:''}
+    <div id="userPickerList" style="max-height:50vh;overflow-y:auto"></div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button style="flex:1;padding:12px;background:rgba(99,102,241,.12);color:#a5b4fc;border:1px solid rgba(99,102,241,.35);border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px" onclick="closeModal();setTimeout(openMasterManage,200)">⚙️ 담당자 마스터 관리</button>
+      ${current?`<button class="btn-danger" style="flex:1;padding:12px;font-size:13px" onclick="setCurrentUser('');closeModal();showToast('담당자 해제됨 (알림 OFF)')">알림 끄기</button>`:''}
+    </div>
   `;
   const o=document.getElementById('modalOverlay');
   const t=document.getElementById('modalTitle');
   const b=document.getElementById('modalBody');
-  t.textContent='👤 본인 선택';
+  t.textContent='👤 본인 담당자 선택';
   b.innerHTML=html;
   renderUserPickerList('');
   setTimeout(()=>{o.classList.add('show');o.scrollTop=0;document.body.style.overflow='hidden';},10);
 }
 
 function renderUserPickerList(q){
-  const list=getAllAssignees();
+  const list=getMasterNames();
   const current=getCurrentUser();
   q=(q||'').trim().toLowerCase();
   const filtered=q?list.filter(n=>n.toLowerCase().includes(q)):list;
@@ -749,18 +721,344 @@ function renderUserPickerList(q){
   }
   el.innerHTML=filtered.map(name=>{
     const isMe=name===current;
+    const hasPin=hasPinRegistered(name);
     const escName=esc(name).replace(/'/g,"\\'");
-    return `<div onclick="setCurrentUser('${escName}');closeModal();showToast('${esc(name)} 으로 설정됨');"
+    const pinBadge = hasPin
+      ? '<span style="font-size:10px;font-weight:700;color:#4ade80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);padding:2px 7px;border-radius:8px">🔑 PIN</span>'
+      : '<span style="font-size:10px;font-weight:700;color:#fbbf24;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);padding:2px 7px;border-radius:8px">PIN 설정 필요</span>';
+    return `<div onclick="startPinFlow('${escName}')"
       style="padding:14px;border-radius:10px;background:${isMe?'rgba(99,102,241,.15)':'#15171f'};border:1px solid ${isMe?'#6366f1':'#252938'};margin-bottom:6px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#818cf8);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff">${esc(name.charAt(0))}</div>
-        <div style="font-size:14px;font-weight:700">${esc(name)}</div>
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#818cf8);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0">${esc(name.charAt(0))}</div>
+        <div style="font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis">${esc(name)}</div>
       </div>
-      ${isMe?'<div style="font-size:11px;color:#a5b4fc;font-weight:700">✓ 현재 선택</div>':'<div style="color:#8b8fa3;font-size:18px">›</div>'}
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        ${pinBadge}
+        ${isMe?'<span style="font-size:11px;color:#a5b4fc;font-weight:700">✓</span>':'<span style="color:#8b8fa3;font-size:18px">›</span>'}
+      </div>
     </div>`;
   }).join('');
 }
 
+/* ================================================================
+   👥 담당자 마스터 관리 (이름 추가/수정/삭제)
+================================================================ */
+function openMasterManage(){
+  const o=document.getElementById('modalOverlay');
+  const t=document.getElementById('modalTitle');
+  const b=document.getElementById('modalBody');
+  t.textContent='👥 담당자 마스터 관리';
+  renderMasterManage();
+  setTimeout(()=>{o.classList.add('show');o.scrollTop=0;document.body.style.overflow='hidden';},10);
+}
+
+function renderMasterManage(){
+  const b=document.getElementById('modalBody');
+  if(!b) return;
+  const users=getUserPins().slice().sort((a,b)=>a.name.localeCompare(b.name,'ko'));
+  // 수리이력에 있지만 마스터에 없는 사람 (가져오기 후보)
+  const historyOnly=getAllAssignees().filter(n=>!isInMaster(n));
+
+  b.innerHTML=`
+    <div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:#fbbf24;line-height:1.6">
+      👥 <b>담당자 마스터</b> — 본인 담당자 선택 화면에 표시될 사람을 관리합니다.<br>
+      • 핀은 각 담당자가 직접 첫 로그인 시 설정합니다.<br>
+      • 퇴사자는 여기서 <b>삭제</b>하면 본인 선택 화면에서 사라집니다.
+    </div>
+
+    <div style="margin-bottom:18px">
+      <div style="font-size:12px;font-weight:700;color:#a8acc0;margin-bottom:8px">➕ 새 담당자 추가</div>
+      <div style="display:flex;gap:6px">
+        <input class="form-input" id="newMasterName" placeholder="이름 (예: 강영태)" list="masterNameOptions" style="flex:1">
+        <button class="btn-primary" style="padding:10px 18px;font-size:13px;width:auto" onclick="addMasterUser()">추가</button>
+      </div>
+      ${historyOnly.length?`
+      <datalist id="masterNameOptions">
+        ${historyOnly.map(n=>`<option value="${esc(n)}">`).join('')}
+      </datalist>
+      <div style="font-size:10px;color:#5a5e72;margin-top:6px">💡 수리이력에 있지만 마스터에 없는 사람 ${historyOnly.length}명 자동완성 지원</div>
+      `:''}
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:#a8acc0;margin-bottom:8px">📋 등록된 담당자 (${users.length}명)</div>
+    <div id="masterList">
+      ${users.length?users.map((u,i)=>{
+        const hasPin=!!u.pin;
+        return `<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#15171f;border:1px solid #252938;border-radius:10px;margin-bottom:6px">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#818cf8);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0">${esc(u.name.charAt(0))}</div>
+          <input class="form-input" style="padding:6px 10px;font-size:13px;flex:1" value="${esc(u.name)}" onchange="renameMasterUser(${i},this.value)">
+          <span style="font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px;${hasPin?'color:#4ade80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3)':'color:#fbbf24;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3)'}">${hasPin?'🔑 PIN':'설정중'}</span>
+          ${hasPin?`<button onclick="resetMasterPin(${i})" title="핀 초기화" style="background:rgba(251,191,36,.15);color:#fbbf24;border:none;border-radius:6px;padding:6px 8px;cursor:pointer;font-size:11px;font-weight:700">핀↻</button>`:''}
+          <button onclick="removeMasterUser(${i})" title="삭제" style="background:rgba(239,68,68,.15);color:#f87171;border:none;border-radius:6px;padding:6px 8px;cursor:pointer;font-size:14px">🗑</button>
+        </div>`;
+      }).join(''):'<div style="text-align:center;padding:24px;color:#8b8fa3;font-size:12px;background:#15171f;border-radius:10px">등록된 담당자가 없습니다</div>'}
+    </div>
+
+    ${historyOnly.length?`
+    <div style="margin-top:18px;padding:12px;background:#15171f;border:1px solid #252938;border-radius:10px">
+      <div style="font-size:12px;font-weight:700;color:#a8acc0;margin-bottom:6px">📥 수리이력에서 일괄 가져오기</div>
+      <div style="font-size:11px;color:#8b8fa3;margin-bottom:10px;line-height:1.5">수리이력에 있지만 마스터에 없는 ${historyOnly.length}명을 한 번에 추가합니다.</div>
+      <button class="btn-primary" style="padding:10px;font-size:12px" onclick="bulkImportFromHistory()">📥 ${historyOnly.length}명 일괄 추가</button>
+    </div>
+    `:''}
+
+    <button style="margin-top:16px;width:100%;padding:12px;background:#1a1d27;border:1px solid #2a2e3d;color:#a8acc0;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit" onclick="closeModal();setTimeout(openUserPicker,200)">← 본인 담당자 선택으로</button>
+  `;
+}
+
+function addMasterUser(){
+  const inp=document.getElementById('newMasterName');
+  const name=inp.value.trim();
+  if(!name){ alert('이름을 입력하세요.'); return; }
+  if(name.length>20){ alert('이름은 20자 이하로 입력하세요.'); return; }
+  const users=getUserPins();
+  if(users.find(u=>u.name===name)){ alert('이미 등록된 담당자입니다.'); return; }
+  users.push({name, pin:''}); // 핀은 본인이 첫 선택 시 설정
+  saveUserPins(users);
+  showToast(`${name} 추가 완료`);
+  renderMasterManage();
+}
+
+function renameMasterUser(idx, newName){
+  newName=(newName||'').trim();
+  const users=getUserPins();
+  if(idx<0||idx>=users.length) return;
+  if(!newName){ alert('이름은 비울 수 없습니다.'); renderMasterManage(); return; }
+  if(users.some((u,i)=>i!==idx && u.name===newName)){ alert('이미 같은 이름이 있습니다.'); renderMasterManage(); return; }
+  const oldName=users[idx].name;
+  users[idx].name=newName;
+  saveUserPins(users);
+  // 현재 로그인 사용자도 갱신
+  if(getCurrentUser()===oldName) localStorage.setItem('currentUser',newName);
+  showToast(`${oldName} → ${newName} 변경`);
+  refreshSettings();
+}
+
+function resetMasterPin(idx){
+  const users=getUserPins();
+  if(idx<0||idx>=users.length) return;
+  if(!confirm(`${users[idx].name} 담당자의 핀을 초기화하시겠습니까?\n(본인이 다음 선택 시 새로 설정합니다)`)) return;
+  users[idx].pin='';
+  saveUserPins(users);
+  showToast(`${users[idx].name} 핀 초기화 완료`);
+  renderMasterManage();
+}
+
+function removeMasterUser(idx){
+  const users=getUserPins();
+  if(idx<0||idx>=users.length) return;
+  const name=users[idx].name;
+  if(!confirm(`${name} 담당자를 마스터에서 삭제하시겠습니까?\n(수리이력은 보존됩니다)`)) return;
+  users.splice(idx,1);
+  saveUserPins(users);
+  if(getCurrentUser()===name){
+    setCurrentUser(''); // 본인이면 로그아웃
+  }
+  showToast(`${name} 삭제 완료`);
+  renderMasterManage();
+}
+
+function bulkImportFromHistory(){
+  const historyOnly=getAllAssignees().filter(n=>!isInMaster(n));
+  if(!historyOnly.length) return;
+  if(!confirm(`수리이력에 있는 ${historyOnly.length}명을 마스터에 일괄 추가하시겠습니까?\n핀은 각자 첫 선택 시 설정합니다.`)) return;
+  const users=getUserPins();
+  historyOnly.forEach(n=>users.push({name:n, pin:''}));
+  saveUserPins(users);
+  showToast(`${historyOnly.length}명 일괄 추가 완료`);
+  renderMasterManage();
+}
+
+/* 핀 인증/설정 단계 시작 */
+function startPinFlow(name){
+  const hasPin=hasPinRegistered(name);
+  _pinFlow = {
+    mode: hasPin?'verify':'setup',
+    name: name,
+    step: hasPin?'verify':'setup1', // setup1=새 핀, setup2=재확인, verify=인증
+    buf1:'', buf2:'', failCount:0
+  };
+  renderPinPad();
+}
+
+function renderPinPad(){
+  const f=_pinFlow;
+  const b=document.getElementById('modalBody');
+  const t=document.getElementById('modalTitle');
+  if(!b||!f.name) return;
+
+  let headerText='', desc='', currentBuf='';
+  if(f.step==='setup1'){
+    headerText='🆕 새 핀 설정';
+    desc=`${f.name} 담당자님의 핀을 새로 설정합니다.<br><b>4자리 숫자</b>를 입력하세요.`;
+    currentBuf=f.buf1;
+  }else if(f.step==='setup2'){
+    headerText='🔁 핀 재확인';
+    desc=`방금 입력한 핀을 <b>한 번 더</b> 입력해주세요.`;
+    currentBuf=f.buf2;
+  }else if(f.step==='verify'){
+    headerText='🔑 핀 입력';
+    desc=`${f.name} 담당자님, 본인 핀 <b>4자리</b>를 입력하세요.`;
+    currentBuf=f.buf1;
+  }
+  t.textContent=headerText;
+
+  const dots = [0,1,2,3].map(i=>{
+    const filled = i<currentBuf.length;
+    return `<div style="width:42px;height:50px;border-radius:8px;background:#0f1117;border:2px solid ${filled?'#6366f1':'#2a2e3d'};display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#a5b4fc;${filled?'box-shadow:0 0 0 1px #6366f1':''}">${filled?'●':''}</div>`;
+  }).join('');
+
+  const keyBtn = (val, label, special) => 
+    `<button onclick="pinKey('${val}')" style="aspect-ratio:1.4/1;border:1px solid #2a2e3d;border-radius:12px;background:${special?'#15171f':'#1a1d27'};color:${special?'#8b8fa3':'#e8eaf0'};font-size:${special?'13px':'22px'};font-weight:700;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;transition:transform .1s">${label||val}</button>`;
+
+  b.innerHTML=`
+    <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:12px;margin-bottom:18px;font-size:12px;color:#a5b4fc;line-height:1.6;text-align:center">
+      ${desc}
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:12px" id="pinDots">${dots}</div>
+    <div id="pinErrMsg" style="color:#ef4444;font-size:12px;text-align:center;height:18px;margin-bottom:10px;font-weight:600"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:320px;margin:0 auto">
+      ${keyBtn('1')}${keyBtn('2')}${keyBtn('3')}
+      ${keyBtn('4')}${keyBtn('5')}${keyBtn('6')}
+      ${keyBtn('7')}${keyBtn('8')}${keyBtn('9')}
+      ${keyBtn('back','↶ 뒤로',true)}${keyBtn('0')}${keyBtn('clear','✕ 지움',true)}
+    </div>
+    <button style="margin-top:18px;width:100%;padding:10px;background:none;border:1px solid #2a2e3d;border-radius:8px;color:#8b8fa3;font-size:12px;cursor:pointer;font-family:inherit" onclick="openUserPicker()">← 담당자 목록으로</button>
+  `;
+}
+
+function pinKey(k){
+  const f=_pinFlow;
+  if(!f.name) return;
+  const buf = (f.step==='setup2')?'buf2':'buf1';
+  if(k==='back'){
+    if(f[buf].length>0) f[buf]=f[buf].slice(0,-1);
+    renderPinPad(); return;
+  }
+  if(k==='clear'){ f[buf]=''; renderPinPad(); return; }
+  if(f[buf].length>=4) return;
+  f[buf]+=k;
+  renderPinPad();
+  if(f[buf].length===4) setTimeout(pinComplete, 200);
+}
+
+function pinComplete(){
+  const f=_pinFlow;
+  if(f.step==='setup1'){
+    if(f.buf1.length!==4) return;
+    f.step='setup2';
+    f.buf2='';
+    renderPinPad();
+  }else if(f.step==='setup2'){
+    if(f.buf1!==f.buf2){
+      document.getElementById('pinErrMsg').textContent='두 핀이 일치하지 않습니다. 다시 입력하세요.';
+      f.buf2=''; f.buf1='';
+      f.step='setup1';
+      setTimeout(renderPinPad, 800);
+      return;
+    }
+    // 저장
+    const users=getUserPins().filter(u=>u.name!==f.name);
+    users.push({name:f.name, pin:f.buf1});
+    saveUserPins(users);
+    // 인증 완료 → 본인으로 설정
+    setCurrentUser(f.name);
+    closeModal();
+    showToast(`${f.name} 담당자 핀 등록 완료 - 알림 시작`);
+  }else if(f.step==='verify'){
+    const correct=getPinByName(f.name);
+    if(f.buf1===correct){
+      setCurrentUser(f.name);
+      closeModal();
+      showToast(`${f.name} 담당자 인증 완료 - 알림 시작`);
+    }else{
+      f.failCount++;
+      document.getElementById('pinErrMsg').textContent=`핀이 일치하지 않습니다 (${f.failCount}회)`;
+      if(navigator.vibrate) try{ navigator.vibrate(300); }catch(e){}
+      f.buf1='';
+      setTimeout(renderPinPad, 500);
+      if(f.failCount>=5){
+        setTimeout(()=>{ alert('5회 실패 - 담당자 목록으로 돌아갑니다.'); openUserPicker(); },800);
+      }
+    }
+  }
+}
+
+/* 핀 변경/삭제 - 설정 메뉴에서 호출 (본인 핀 알아야 변경 가능) */
+function openMyPinSettings(){
+  const me=getCurrentUser();
+  if(!me){ alert('먼저 본인 담당자를 선택해주세요.'); return; }
+  const hasPin=hasPinRegistered(me);
+  const o=document.getElementById('modalOverlay');
+  const t=document.getElementById('modalTitle');
+  const b=document.getElementById('modalBody');
+  t.textContent='🔑 내 핀 관리';
+  b.innerHTML=`
+    <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:14px;margin-bottom:14px;text-align:center">
+      <div style="font-size:13px;color:#a5b4fc;margin-bottom:4px">현재 인증된 담당자</div>
+      <div style="font-size:18px;font-weight:800;color:#fff">👤 ${esc(me)}</div>
+      <div style="font-size:11px;color:${hasPin?'#4ade80':'#fbbf24'};margin-top:6px;font-weight:600">${hasPin?'🔑 핀 등록됨':'⚠ 핀 미등록'}</div>
+    </div>
+    ${hasPin?`
+      <button class="btn-primary" style="margin-bottom:8px" onclick="changeMyPin()">🔁 핀 변경</button>
+      <button class="btn-danger" onclick="deleteMyPin()">🗑 핀 삭제 (알림 끄기)</button>
+    `:`
+      <button class="btn-primary" onclick="closeModal();setTimeout(()=>startPinFlow('${esc(me).replace(/'/g,"\\'")}'),200)">🆕 핀 설정하기</button>
+    `}
+  `;
+  setTimeout(()=>{o.classList.add('show');o.scrollTop=0;document.body.style.overflow='hidden';},10);
+}
+
+function changeMyPin(){
+  const me=getCurrentUser();
+  if(!me) return;
+  // 현재 핀 검증 후 새 핀 설정
+  const cur=prompt(`현재 핀 4자리를 입력하세요:`);
+  if(cur===null) return;
+  if(cur!==getPinByName(me)){ alert('현재 핀이 일치하지 않습니다.'); return; }
+  const np=prompt('새 핀 4자리를 입력하세요:');
+  if(np===null) return;
+  if(!/^\d{4}$/.test(np)){ alert('숫자 4자리여야 합니다.'); return; }
+  const np2=prompt('새 핀을 한 번 더 입력하세요:');
+  if(np!==np2){ alert('두 핀이 일치하지 않습니다.'); return; }
+  const users=getUserPins().filter(u=>u.name!==me);
+  users.push({name:me, pin:np});
+  saveUserPins(users);
+  closeModal();
+  showToast('핀 변경 완료');
+}
+
+function deleteMyPin(){
+  const me=getCurrentUser();
+  if(!me) return;
+  const cur=prompt(`핀 삭제를 위해 현재 핀 4자리를 입력하세요:`);
+  if(cur===null) return;
+  if(cur!==getPinByName(me)){ alert('핀이 일치하지 않습니다.'); return; }
+  if(!confirm(`${me} 담당자의 핀을 삭제하시겠습니까?\n(알림도 OFF 됩니다)`)) return;
+  const users=getUserPins().filter(u=>u.name!==me);
+  saveUserPins(users);
+  setCurrentUser(''); // 로그아웃
+  closeModal();
+  showToast('핀 삭제 완료 - 알림 OFF');
+}
+
+function testAlarm(){
+  const u=getCurrentUser();
+  if(!u){ alert('먼저 본인 담당자를 선택해주세요.'); return; }
+  const myItems=getMyActiveRepairs();
+  if(!myItems.length){
+    showAlarm([{
+      '금형번호':'TEST-001',
+      '수리내용':'알림 테스트입니다. 본인 담당 미완료 수리건이 있을 경우 이렇게 표시됩니다.',
+      '수리일자':new Date().toISOString().slice(0,10),
+      '수리유형':'테스트','수리업체':'태진다이텍','상태':'수리대기'
+    }]);
+    showToast('테스트 알림 (실제 데이터 없음)');
+  }else{
+    _alarmSnoozeUntil=0;
+    showAlarm(myItems);
+  }
+}
 
 /* ================================================================
    Supabase 자동 동기화 엔진 (kv_store 테이블 사용)
@@ -770,12 +1068,13 @@ function renderUserPickerList(q){
    - 데이터 변경 시: localStorage → 클라우드 (1초 debounce 업로드)
 ================================================================ */
 const SB_TABLE = 'kv_store';
-const SB_KEYS = ['mold_db_v2','repair_history_v2','vendors','repair_types'];
+const SB_KEYS = ['mold_db_v2','repair_history_v2','vendors','repair_types','user_pins'];
 const SB_KEY_MAP = {
   'mold_db_v2': {ls:'moldDB', default:[]},
   'repair_history_v2': {ls:'repairHistory', default:[]},
   'vendors': {ls:'repairVendors', default:["태진툴","거명정밀","한성특수금속열처리","외주A","외주B"]},
-  'repair_types': {ls:'repairTypeList', default:["크랙수리","마모교체","파손교체","용접보수","연마","세척정비","기타"]}
+  'repair_types': {ls:'repairTypeList', default:["크랙수리","마모교체","파손교체","용접보수","연마","세척정비","기타"]},
+  'user_pins': {ls:'userPins', default:[]}
 };
 
 function getSbUrl(){ return (localStorage.getItem('sbUrl')||'').trim().replace(/\/+$/,''); }
@@ -1006,7 +1305,10 @@ function renderRepairRequestForm(container, editData, urgent){
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">담당자</label>
-        <input class="form-input" id="f-person" placeholder="담당자명" value="${esc(d['담당자']||'')}">
+        <input class="form-input" id="f-person" placeholder="담당자명" value="${esc(d['담당자']||'')}" list="repairPersonOptions">
+        <datalist id="repairPersonOptions">
+          ${getMasterNames().map(n=>`<option value="${esc(n)}">`).join('')}
+        </datalist>
       </div>
       <div class="form-group">
         <label class="form-label">상태</label>
@@ -1077,15 +1379,10 @@ function submitRepairRequest(editKey, urgent){
   showToast(editKey?'수리이력 수정 완료':'수리요청 등록 완료');
   closeModal();
   refreshDashboard();
-  // 신규 등록 시 본인이 담당이면 즉시 알림
-  if(!editKey){
-    const me=getCurrentUser();
-    const assignee=(row['담당자']||'').trim();
-    if(me && assignee && assignee.split(/[,\/.]/).some(x=>x.trim()===me)){
-      _alarmAcknowledgedKeys={}; // 본인 새 건이므로 acknowledge 초기화
-      _alarmSnoozeUntil=0;
-      setTimeout(checkAndShowAlarm, 800);
-    }
+  // 🔔 알림 체크 (수정으로 '완료' 되면 알림 사라지고, 신규 본인담당이면 즉시 표시)
+  if(typeof checkAndShowAlarm==='function'){
+    _alarmSnoozeUntil=0;
+    setTimeout(checkAndShowAlarm, 500);
   }
 }
 
@@ -1494,7 +1791,7 @@ function renderNotifications(container){
 function renderCloudSync(container){
   // 잠금 상태: 설정이 저장되어 있으면 기본적으로 잠금
   let unlocked = false; // 한 번 잠금 해제하면 이 모달이 열려있는 동안만 유효
-  const LOCK_PASSWORD = '2480'; // 잠금 해제 비밀번호
+  const LOCK_PASSWORD = '4003'; // 잠금 해제 비밀번호
 
   const render=()=>{
     const url=getSbUrl(), key=getSbKey();
@@ -1830,45 +2127,24 @@ function refreshSettings(){
     const bytes=(localStorage.getItem('moldDB')||'').length+(localStorage.getItem('repairHistory')||'').length;
     el3.textContent=Math.round(bytes/1024);
   }
-  // 내 알림 설정 뱃지
+  // 🔔 알림 뱃지 갱신
   const ab=document.getElementById('alarmUserBadge');
-  if(ab){
+  if(ab && typeof getCurrentUser==='function'){
     const u=getCurrentUser();
     if(u){
-      const cnt=getMyActiveRepairs().length;
-      ab.style.color=cnt>0?'#fca5a5':'#4ade80';
-      ab.textContent=cnt>0?`🔔 ${esc(u)} · ${cnt}건 대기`:`✓ ${esc(u)}`;
+      const hasPin = (typeof hasPinRegistered==='function') && hasPinRegistered(u);
+      if(!hasPin){
+        ab.style.color='#fbbf24';
+        ab.textContent=`⚠ ${esc(u)} · 핀 미설정`;
+      }else{
+        const cnt=getMyActiveRepairs().length;
+        ab.style.color=cnt>0?'#fca5a5':'#4ade80';
+        ab.textContent=cnt>0?`🔔 ${esc(u)} · ${cnt}건 대기`:`✓ ${esc(u)}`;
+      }
     }else{
       ab.style.color='#8b8fa3';
       ab.textContent='⚪ 미지정';
     }
-  }
-}
-
-/* 알림 테스트 함수 */
-function testAlarm(){
-  const u=getCurrentUser();
-  if(!u){
-    alert('먼저 담당자 본인을 지정해주세요.');
-    return;
-  }
-  const myItems=getMyActiveRepairs();
-  if(!myItems.length){
-    // 테스트용 가짜 데이터
-    showAlarm([{
-      '금형번호':'TEST-001',
-      '수리내용':'알림 테스트입니다. 본인 담당 미완료 수리건이 있을 경우 이렇게 표시됩니다.',
-      '수리일자':new Date().toISOString().slice(0,10),
-      '수리유형':'테스트',
-      '수리업체':'태진다이텍',
-      '상태':'수리대기'
-    }]);
-    showToast('테스트 알림 (실제 데이터 없음)');
-  }else{
-    // 실제 데이터로 표시 - acknowledge 초기화
-    _alarmAcknowledgedKeys={};
-    _alarmSnoozeUntil=0;
-    showAlarm(myItems);
   }
 }
 
@@ -2218,22 +2494,9 @@ const SEED_REPAIR_DATA=[{"금형번호": "10DHA248A", "수리일자": "2022-01-2
 renderCats();
 refreshDashboard();
 refreshSettings();
-updateUserBadge();
 
 /* ===== 🔔 담당자 알림 루프 시작 ===== */
-setTimeout(()=>{
-  startAlarmLoop();
-  // 미지정 상태이고 미완료건이 있으면 안내 토스트
-  if(!getCurrentUser()){
-    setTimeout(()=>{
-      const repairs=getRepairs();
-      const hasActive=repairs.some(r=>ALARM_ACTIVE_STATES.includes(r['상태']));
-      if(hasActive){
-        showToast('💡 우측상단 뱃지 탭해서 본인 선택 → 알림 받기');
-      }
-    },1500);
-  }
-},1500);
+setTimeout(()=>{ if(typeof startAlarmLoop==='function') startAlarmLoop(); }, 1500);
 
 /* ===== Supabase 자동 동기화 (페이지 로드 시 다운로드) ===== */
 (async function autoSync(){
@@ -2258,18 +2521,17 @@ setTimeout(()=>{
       console.log('[Supabase] 클라우드 데이터로 갱신됨 - 화면 새로고침');
       refreshDashboard();
       refreshSettings();
-      // 동기화로 신규 건이 들어왔을 수 있으므로 즉시 알림 체크
-      checkAndShowAlarm();
+      // 🔔 동기화로 신규건 들어왔을 수 있음
+      if(typeof checkAndShowAlarm==='function') checkAndShowAlarm();
     }
   }
   updateSbStatusUI();
 })();
 
-/* ===== 🔄 주기적 Supabase 폴링 (60초마다 - 다른 PC에서 등록한 신규건 감지) ===== */
+/* ===== 🔔 60초마다 Supabase 폴링 (다른 PC에서 등록한 신규건 감지) ===== */
 setInterval(async ()=>{
   if(!sbConfigured()) return;
-  if(!getCurrentUser()) return; // 담당자 미지정이면 폴링 불필요
-  // 알림 팝업이 떠있으면 폴링 잠시 멈춤 (사용자가 처리 중)
+  if(!getCurrentUser()) return;
   const o=document.getElementById('alarmOverlay');
   if(o && o.classList.contains('show')) return;
   try{
@@ -2280,11 +2542,12 @@ setInterval(async ()=>{
       if(beforeRepair!==afterRepair){
         console.log('[Supabase 폴링] 신규 수리데이터 감지');
         refreshDashboard();
+        refreshSettings();
         checkAndShowAlarm();
       }
     }
-  }catch(e){ /* 무시 */ }
-}, 60000);
+  }catch(e){}
+},60000);
 </script>
 </body>
 </html>
