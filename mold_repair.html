@@ -348,6 +348,13 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
 <!-- ===== 설정 탭 ===== -->
 <div class="tab-panel" id="panel-settings">
   <div class="set-group">
+    <div class="set-group-title">☁️ 클라우드 동기화 <span id="sbStatusBadge" style="font-size:11px;font-weight:600;margin-left:8px;color:#8b8fa3">⚪ 미설정</span></div>
+    <div class="set-item" onclick="openModal('cloudSync')">
+      <div class="set-left"><div class="set-icon">☁️</div><div><div class="set-name">Supabase 설정</div><div class="set-desc">PC ↔ 모바일 데이터 자동 동기화</div></div></div>
+      <div class="set-arrow">›</div>
+    </div>
+  </div>
+  <div class="set-group">
     <div class="set-group-title">💾 데이터 관리</div>
     <div class="set-item" onclick="exportAllData()">
       <div class="set-left"><div class="set-icon">☁️</div><div><div class="set-name">데이터 백업 (Excel)</div><div class="set-desc">금형DB + 수리이력 Excel 내보내기</div></div></div>
@@ -396,16 +403,153 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 /* ================================================================
-   데이터 레이어 (localStorage)
+   데이터 레이어 (localStorage + Supabase 자동 동기화)
 ================================================================ */
 function getMolds(){ return JSON.parse(localStorage.getItem('moldDB')||'[]') }
 function getRepairs(){ return JSON.parse(localStorage.getItem('repairHistory')||'[]') }
-function saveMolds(d){ localStorage.setItem('moldDB',JSON.stringify(d)) }
-function saveRepairs(d){ localStorage.setItem('repairHistory',JSON.stringify(d)) }
+function saveMolds(d){ localStorage.setItem('moldDB',JSON.stringify(d)); sbQueueUpload('mold_db_v2',d); }
+function saveRepairs(d){ localStorage.setItem('repairHistory',JSON.stringify(d)); sbQueueUpload('repair_history_v2',d); }
 function getVendors(){ return JSON.parse(localStorage.getItem('repairVendors')||'["태진툴","거명정밀","한성특수금속열처리","외주A","외주B"]') }
-function saveVendors(d){ localStorage.setItem('repairVendors',JSON.stringify(d)) }
+function saveVendors(d){ localStorage.setItem('repairVendors',JSON.stringify(d)); sbQueueUpload('vendors',d); }
 function getRepairTypes(){ return JSON.parse(localStorage.getItem('repairTypeList')||'["크랙수리","마모교체","파손교체","용접보수","연마","세척정비","기타"]') }
-function saveRepairTypes(d){ localStorage.setItem('repairTypeList',JSON.stringify(d)) }
+function saveRepairTypes(d){ localStorage.setItem('repairTypeList',JSON.stringify(d)); sbQueueUpload('repair_types',d); }
+
+/* ================================================================
+   Supabase 자동 동기화 엔진 (kv_store 테이블 사용)
+   - 테이블: kv_store (key TEXT PK, value JSONB)
+   - Keys: mold_db_v2, repair_history_v2, vendors, repair_types
+   - 페이지 로드 시: 클라우드 → localStorage (다운로드)
+   - 데이터 변경 시: localStorage → 클라우드 (1초 debounce 업로드)
+================================================================ */
+const SB_TABLE = 'kv_store';
+const SB_KEYS = ['mold_db_v2','repair_history_v2','vendors','repair_types'];
+const SB_KEY_MAP = {
+  'mold_db_v2': {ls:'moldDB', default:[]},
+  'repair_history_v2': {ls:'repairHistory', default:[]},
+  'vendors': {ls:'repairVendors', default:["태진툴","거명정밀","한성특수금속열처리","외주A","외주B"]},
+  'repair_types': {ls:'repairTypeList', default:["크랙수리","마모교체","파손교체","용접보수","연마","세척정비","기타"]}
+};
+
+function getSbUrl(){ return (localStorage.getItem('sbUrl')||'').trim().replace(/\/+$/,''); }
+function getSbKey(){ return (localStorage.getItem('sbKey')||'').trim(); }
+function sbConfigured(){ return !!(getSbUrl() && getSbKey()); }
+
+const _sbUploadTimers = {};
+const _sbStatus = {lastSync:null, lastError:null, syncing:false};
+
+function sbQueueUpload(key, value){
+  if(!sbConfigured()) return;
+  clearTimeout(_sbUploadTimers[key]);
+  _sbUploadTimers[key]=setTimeout(()=>sbUpload(key,value),1000);
+}
+
+async function sbUpload(key, value){
+  if(!sbConfigured()) return;
+  const url=getSbUrl(), apikey=getSbKey();
+  try{
+    _sbStatus.syncing=true; updateSbStatusUI();
+    const res=await fetch(`${url}/rest/v1/${SB_TABLE}?on_conflict=key`,{
+      method:'POST',
+      headers:{
+        'apikey':apikey,
+        'Authorization':`Bearer ${apikey}`,
+        'Content-Type':'application/json',
+        'Prefer':'resolution=merge-duplicates,return=minimal'
+      },
+      body:JSON.stringify({key:key, value:value})
+    });
+    if(!res.ok){
+      const t=await res.text();
+      throw new Error(`HTTP ${res.status}: ${t}`);
+    }
+    _sbStatus.lastSync=new Date();
+    _sbStatus.lastError=null;
+  }catch(e){
+    _sbStatus.lastError=e.message;
+    console.warn('[Supabase upload]', key, e);
+  }finally{
+    _sbStatus.syncing=false; updateSbStatusUI();
+  }
+}
+
+async function sbDownloadAll(){
+  if(!sbConfigured()) return {ok:false, reason:'not_configured'};
+  const url=getSbUrl(), apikey=getSbKey();
+  try{
+    _sbStatus.syncing=true; updateSbStatusUI();
+    const res=await fetch(`${url}/rest/v1/${SB_TABLE}?key=in.(${SB_KEYS.join(',')})&select=key,value`,{
+      headers:{'apikey':apikey,'Authorization':`Bearer ${apikey}`}
+    });
+    if(!res.ok){
+      const t=await res.text();
+      throw new Error(`HTTP ${res.status}: ${t}`);
+    }
+    const rows=await res.json();
+    let applied=0;
+    rows.forEach(r=>{
+      const map=SB_KEY_MAP[r.key]; if(!map) return;
+      if(r.value!=null){
+        localStorage.setItem(map.ls, JSON.stringify(r.value));
+        applied++;
+      }
+    });
+    _sbStatus.lastSync=new Date();
+    _sbStatus.lastError=null;
+    return {ok:true, applied:applied, total:rows.length};
+  }catch(e){
+    _sbStatus.lastError=e.message;
+    console.warn('[Supabase download]', e);
+    return {ok:false, reason:e.message};
+  }finally{
+    _sbStatus.syncing=false; updateSbStatusUI();
+  }
+}
+
+// 전체 강제 업로드 (수동 동기화용)
+async function sbUploadAll(){
+  if(!sbConfigured()) return {ok:false, reason:'not_configured'};
+  let success=0, fail=0;
+  for(const key of SB_KEYS){
+    const map=SB_KEY_MAP[key];
+    const v=JSON.parse(localStorage.getItem(map.ls)||JSON.stringify(map.default));
+    try{ await sbUpload(key,v); success++; }catch(e){ fail++; }
+  }
+  return {ok:fail===0, success, fail};
+}
+
+// 연결 테스트
+async function sbTestConnection(){
+  if(!sbConfigured()) return {ok:false, msg:'URL과 KEY를 입력하세요'};
+  const url=getSbUrl(), apikey=getSbKey();
+  try{
+    const res=await fetch(`${url}/rest/v1/${SB_TABLE}?select=key&limit=1`,{
+      headers:{'apikey':apikey,'Authorization':`Bearer ${apikey}`}
+    });
+    if(!res.ok){
+      const t=await res.text();
+      return {ok:false, msg:`연결 실패 (HTTP ${res.status}): ${t.slice(0,120)}`};
+    }
+    return {ok:true, msg:'연결 성공'};
+  }catch(e){
+    return {ok:false, msg:'네트워크 오류: '+e.message};
+  }
+}
+
+function updateSbStatusUI(){
+  const el=document.getElementById('sbStatusBadge');
+  if(!el) return;
+  if(!sbConfigured()){ el.textContent='⚪ 미설정'; el.style.color='#8b8fa3'; return; }
+  if(_sbStatus.syncing){ el.textContent='🔄 동기화중...'; el.style.color='#fbbf24'; return; }
+  if(_sbStatus.lastError){ el.textContent='🔴 오류'; el.style.color='#f87171'; return; }
+  if(_sbStatus.lastSync){
+    const t=_sbStatus.lastSync;
+    const hh=String(t.getHours()).padStart(2,'0'), mm=String(t.getMinutes()).padStart(2,'0'), ss=String(t.getSeconds()).padStart(2,'0');
+    el.textContent=`🟢 동기화 ${hh}:${mm}:${ss}`;
+    el.style.color='#4ade80';
+    return;
+  }
+  el.textContent='🟢 연결됨'; el.style.color='#4ade80';
+}
 
 /* ================================================================
    탭 전환
@@ -443,6 +587,7 @@ function openModal(type, data){
     case 'notifications': renderNotifications(b); t.textContent='알림관리'; break;
     case 'moldMaster': renderVendorManage(b); t.textContent='수리업체 관리'; break;
     case 'repairTypes': renderRepairTypeManage(b); t.textContent='수리유형 코드'; break;
+    case 'cloudSync': renderCloudSync(b); t.textContent='☁️ Supabase 동기화 설정'; break;
     case 'repairDetail': renderRepairDetail(b,data); t.textContent='수리 상세'; break;
     case 'moldDetail': renderMoldDetail(b,data); t.textContent='금형 상세'; break;
     case 'repairByType': renderRepairByType(b); t.textContent='수리유형별 조회'; break;
@@ -977,6 +1122,191 @@ function renderNotifications(container){
 }
 
 /* ================================================================
+   클라우드 동기화 설정 화면
+================================================================ */
+function renderCloudSync(container){
+  // 잠금 상태: 설정이 저장되어 있으면 기본적으로 잠금
+  let unlocked = false; // 한 번 잠금 해제하면 이 모달이 열려있는 동안만 유효
+  const LOCK_PASSWORD = '4003'; // 잠금 해제 비밀번호
+
+  const render=()=>{
+    const url=getSbUrl(), key=getSbKey();
+    const isConfigured = !!(url && key);
+    const isLocked = isConfigured && !unlocked;
+    const cnt={
+      mold:getMolds().length,
+      repair:getRepairs().length,
+      vendor:getVendors().length,
+      type:getRepairTypes().length
+    };
+    // key 마스킹: 앞 8자 + ... + 뒤 4자
+    const maskedKey = key ? (key.length>16 ? key.slice(0,8)+'…'+key.slice(-4) : '••••••••') : '';
+    const displayKey = isLocked ? maskedKey : key;
+
+    container.innerHTML=`
+      <div style="background:#1a1d27;border:1px solid #2a2e3d;border-radius:12px;padding:14px;margin-bottom:14px;font-size:12px;line-height:1.7;color:#a8acc0">
+        <b style="color:#60a5fa">📱 PC와 모바일에서 동일한 데이터를 사용하려면 설정이 필요합니다.</b><br>
+        • Supabase URL과 anon KEY를 입력하면 <b>모든 기기에서 자동 동기화</b>됩니다.<br>
+        • 데이터 변경 시 자동 업로드, 페이지 로드 시 자동 다운로드.<br>
+        • 테이블: <code style="background:#0f172a;padding:1px 6px;border-radius:4px">kv_store</code> (key TEXT PK, value JSONB)<br>
+        • 저장되는 키: <code style="background:#0f172a;padding:1px 6px;border-radius:4px">mold_db_v2, repair_history_v2, vendors, repair_types</code>
+      </div>
+
+      ${isLocked?`
+      <div style="background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(59,130,246,.12));border:1px solid rgba(74,222,128,.3);border-radius:12px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+        <div style="font-size:24px">🔒</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:#4ade80">설정 완료 (잠금 상태)</div>
+          <div style="font-size:11px;color:#a8acc0;margin-top:2px">URL과 KEY가 저장되어 있으며 자동 동기화 중입니다.<br>변경하려면 잠금을 해제하세요.</div>
+        </div>
+        <button onclick="unlockSb()" style="background:rgba(251,191,36,.2);color:#fbbf24;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">🔓 잠금 해제</button>
+      </div>
+      `:''}
+
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:12px;color:#8b8fa3;font-weight:600;margin-bottom:6px">Supabase Project URL</label>
+        <input type="text" id="sbUrlInput" class="form-input" value="${esc(url)}" placeholder="https://xxxxx.supabase.co" style="font-family:monospace;font-size:13px${isLocked?';opacity:0.6;cursor:not-allowed':''}" ${isLocked?'readonly':''}>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:12px;color:#8b8fa3;font-weight:600;margin-bottom:6px">Supabase anon / publishable KEY</label>
+        <input type="text" id="sbKeyInput" class="form-input" value="${esc(displayKey)}" placeholder="eyJhbGciOi... 또는 sb_publishable_..." style="font-family:monospace;font-size:12px${isLocked?';opacity:0.6;cursor:not-allowed':''}" ${isLocked?'readonly':''}>
+      </div>
+
+      ${isLocked?'':`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <button class="btn-primary" onclick="saveSbConfig()" style="padding:12px">💾 저장 및 연결 테스트</button>
+        <button onclick="clearSbConfig()" style="background:rgba(239,68,68,.15);color:#f87171;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer">설정 초기화</button>
+      </div>
+      `}
+
+      <div style="background:#1a1d27;border:1px solid #2a2e3d;border-radius:12px;padding:14px;margin-bottom:14px">
+        <div style="font-size:12px;color:#8b8fa3;font-weight:700;margin-bottom:10px">📊 현재 로컬 데이터</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:#a8acc0">
+          <div>금형 DB: <b style="color:#fff">${cnt.mold}</b>건</div>
+          <div>수리이력: <b style="color:#fff">${cnt.repair}</b>건</div>
+          <div>수리업체: <b style="color:#fff">${cnt.vendor}</b>개</div>
+          <div>수리유형: <b style="color:#fff">${cnt.type}</b>개</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <button onclick="manualUploadAll()" style="background:rgba(59,130,246,.15);color:#60a5fa;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer">⬆ 로컬→클라우드 업로드</button>
+        <button onclick="manualDownloadAll()" style="background:rgba(34,197,94,.15);color:#4ade80;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer">⬇ 클라우드→로컬 다운로드</button>
+      </div>
+
+      ${isLocked?'':`
+      <details style="background:#1a1d27;border:1px solid #2a2e3d;border-radius:12px;padding:12px 14px;margin-bottom:14px">
+        <summary style="cursor:pointer;font-size:12px;font-weight:700;color:#60a5fa">▶ kv_store 테이블이 없을 때 실행할 SQL</summary>
+        <pre id="sbSql" style="background:#0f172a;color:#e2e8f0;padding:12px;border-radius:8px;font-size:11px;overflow-x:auto;margin-top:10px;line-height:1.6;font-family:monospace;white-space:pre">CREATE TABLE IF NOT EXISTS kv_store (
+  key TEXT PRIMARY KEY,
+  value JSONB NOT NULL DEFAULT '[]',
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE kv_store ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all access" ON kv_store
+  FOR ALL USING (true) WITH CHECK (true);
+
+CREATE INDEX IF NOT EXISTS idx_kv_store_updated
+  ON kv_store(updated_at DESC);</pre>
+        <button onclick="copySbSql()" style="margin-top:8px;background:rgba(59,130,246,.15);color:#60a5fa;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer">📋 SQL 복사</button>
+      </details>
+      `}
+
+      <div id="sbResult" style="font-size:12px;line-height:1.6;color:#a8acc0"></div>
+    `;
+    updateSbStatusUI();
+  };
+
+  window.unlockSb=()=>{
+    const pw=prompt('잠금 해제 비밀번호를 입력하세요:');
+    if(pw===null) return;
+    if(pw===LOCK_PASSWORD){
+      unlocked=true;
+      showToast('🔓 잠금 해제됨');
+      render();
+    }else{
+      showToast('❌ 비밀번호가 일치하지 않습니다');
+    }
+  };
+
+  window.saveSbConfig=async()=>{
+    const url=document.getElementById('sbUrlInput').value.trim().replace(/\/+$/,'');
+    const key=document.getElementById('sbKeyInput').value.trim();
+    if(!url||!key){ showToast('URL과 KEY를 모두 입력하세요'); return; }
+    localStorage.setItem('sbUrl',url);
+    localStorage.setItem('sbKey',key);
+    const r=document.getElementById('sbResult');
+    r.innerHTML='<span style="color:#fbbf24">🔄 연결 테스트 중...</span>';
+    const res=await sbTestConnection();
+    if(res.ok){
+      r.innerHTML='<span style="color:#4ade80">✅ '+res.msg+' - 잠금 처리됩니다</span>';
+      showToast('설정 저장 완료 - 연결 성공');
+      const dl=await sbDownloadAll();
+      if(dl.ok && dl.applied>0){
+        r.innerHTML+=`<br><span style="color:#60a5fa">⬇ 클라우드에서 ${dl.applied}개 데이터 가져옴 - 새로고침합니다</span>`;
+        setTimeout(()=>location.reload(), 1500);
+      }else{
+        // 새로고침 안 해도 잠금 상태로 재렌더
+        setTimeout(()=>{ unlocked=false; render(); }, 800);
+      }
+    }else{
+      r.innerHTML='<span style="color:#f87171">❌ '+res.msg+'</span>';
+      showToast('연결 실패');
+    }
+    updateSbStatusUI();
+  };
+
+  window.clearSbConfig=()=>{
+    const pw=prompt('⚠ 설정을 완전히 초기화합니다.\n비밀번호를 입력하세요:');
+    if(pw===null) return;
+    if(pw!==LOCK_PASSWORD){ showToast('❌ 비밀번호가 일치하지 않습니다'); return; }
+    if(!confirm('Supabase 설정을 초기화하시겠습니까?\n(로컬 데이터는 유지됩니다)')) return;
+    localStorage.removeItem('sbUrl');
+    localStorage.removeItem('sbKey');
+    unlocked=false;
+    render();
+    showToast('설정 초기화 완료');
+  };
+
+  window.manualUploadAll=async()=>{
+    if(!sbConfigured()){ showToast('먼저 URL과 KEY를 저장하세요'); return; }
+    const r=document.getElementById('sbResult');
+    r.innerHTML='<span style="color:#fbbf24">🔄 업로드 중...</span>';
+    const res=await sbUploadAll();
+    if(res.ok){
+      r.innerHTML=`<span style="color:#4ade80">✅ 업로드 완료 (${res.success}개 키)</span>`;
+      showToast('업로드 완료');
+    }else{
+      r.innerHTML=`<span style="color:#f87171">❌ 일부 실패 (성공 ${res.success} / 실패 ${res.fail})</span>`;
+    }
+  };
+
+  window.manualDownloadAll=async()=>{
+    if(!sbConfigured()){ showToast('먼저 URL과 KEY를 저장하세요'); return; }
+    if(!confirm('클라우드 데이터로 로컬 데이터를 덮어씁니다.\n계속하시겠습니까?')) return;
+    const r=document.getElementById('sbResult');
+    r.innerHTML='<span style="color:#fbbf24">🔄 다운로드 중...</span>';
+    const res=await sbDownloadAll();
+    if(res.ok){
+      r.innerHTML=`<span style="color:#4ade80">✅ 다운로드 완료 (${res.applied}개 키) - 새로고침합니다</span>`;
+      setTimeout(()=>location.reload(), 1200);
+    }else{
+      r.innerHTML='<span style="color:#f87171">❌ '+res.reason+'</span>';
+    }
+  };
+
+  window.copySbSql=()=>{
+    const el=document.getElementById('sbSql');
+    if(!el) return;
+    navigator.clipboard.writeText(el.textContent).then(()=>showToast('SQL 복사 완료'));
+  };
+
+  render();
+}
+
+/* ================================================================
    수리업체 관리
 ================================================================ */
 function renderVendorManage(container){
@@ -987,11 +1317,31 @@ function renderVendorManage(container){
         <input class="form-input" id="newVendor" placeholder="업체명 입력" style="flex:1">
         <button class="btn-primary" style="width:auto;padding:10px 20px" onclick="addVendor()">추가</button>
       </div>
-      ${vendors.map((v,i)=>`<div class="list-item" style="display:flex;align-items:center;justify-content:space-between">
-        <span style="font-size:13px;font-weight:600">${esc(v)}</span>
-        <button style="background:rgba(239,68,68,.15);color:#f87171;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer" onclick="removeVendor(${i})">삭제</button>
+      ${vendors.map((v,i)=>`<div class="list-item" data-idx="${i}" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <span class="vendor-name" style="font-size:13px;font-weight:600;flex:1">${esc(v)}</span>
+        <input class="form-input vendor-edit-input" data-idx="${i}" value="${esc(v)}" style="flex:1;display:none;padding:6px 10px;font-size:13px">
+        <div style="display:flex;gap:6px">
+          <button class="vendor-edit-btn" data-idx="${i}" style="background:rgba(59,130,246,.15);color:#60a5fa;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer" onclick="editVendor(${i})">수정</button>
+          <button class="vendor-save-btn" data-idx="${i}" style="background:rgba(34,197,94,.15);color:#4ade80;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;display:none" onclick="saveVendor(${i})">저장</button>
+          <button class="vendor-cancel-btn" data-idx="${i}" style="background:rgba(148,163,184,.15);color:#94a3b8;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;display:none" onclick="cancelEditVendor(${i})">취소</button>
+          <button class="vendor-del-btn" data-idx="${i}" style="background:rgba(239,68,68,.15);color:#f87171;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer" onclick="removeVendor(${i})">삭제</button>
+        </div>
       </div>`).join('')}
     `;
+  };
+  const toggleEditMode=(i,editing)=>{
+    const item=container.querySelector(`.list-item[data-idx="${i}"]`);
+    if(!item) return;
+    item.querySelector('.vendor-name').style.display=editing?'none':'';
+    item.querySelector('.vendor-edit-input').style.display=editing?'':'none';
+    item.querySelector('.vendor-edit-btn').style.display=editing?'none':'';
+    item.querySelector('.vendor-del-btn').style.display=editing?'none':'';
+    item.querySelector('.vendor-save-btn').style.display=editing?'':'none';
+    item.querySelector('.vendor-cancel-btn').style.display=editing?'':'none';
+    if(editing){
+      const inp=item.querySelector('.vendor-edit-input');
+      inp.focus();inp.select();
+    }
   };
   window.addVendor=()=>{
     const v=document.getElementById('newVendor').value.trim();
@@ -1000,8 +1350,45 @@ function renderVendorManage(container){
     if(list.includes(v)){showToast('이미 등록된 업체입니다');return;}
     list.push(v);saveVendors(list);render();showToast('업체 추가 완료');
   };
+  window.editVendor=(i)=>{
+    toggleEditMode(i,true);
+  };
+  window.cancelEditVendor=(i)=>{
+    const list=getVendors();
+    const inp=container.querySelector(`.vendor-edit-input[data-idx="${i}"]`);
+    if(inp) inp.value=list[i];
+    toggleEditMode(i,false);
+  };
+  window.saveVendor=(i)=>{
+    const inp=container.querySelector(`.vendor-edit-input[data-idx="${i}"]`);
+    if(!inp) return;
+    const newName=inp.value.trim();
+    if(!newName){showToast('업체명을 입력하세요');return;}
+    const list=getVendors();
+    const oldName=list[i];
+    if(newName===oldName){toggleEditMode(i,false);return;}
+    if(list.includes(newName)){showToast('이미 등록된 업체명입니다');return;}
+    // 수리이력의 업체명 일괄 변경
+    const repairs=getRepairs();
+    let changed=0;
+    repairs.forEach(r=>{
+      if(r['수리업체']===oldName){r['수리업체']=newName;changed++;}
+    });
+    if(changed>0) saveRepairs(repairs);
+    list[i]=newName;
+    saveVendors(list);
+    render();
+    showToast(`수정 완료 (이력 ${changed}건 함께 변경)`);
+  };
   window.removeVendor=(i)=>{
-    const list=getVendors();list.splice(i,1);saveVendors(list);render();showToast('삭제 완료');
+    const list=getVendors();
+    const name=list[i];
+    const repairs=getRepairs();
+    const useCount=repairs.filter(r=>r['수리업체']===name).length;
+    let msg=`'${name}' 업체를 삭제하시겠습니까?`;
+    if(useCount>0) msg+=`\n\n※ 이 업체로 등록된 수리이력 ${useCount}건이 있습니다.\n(이력 데이터는 그대로 유지됩니다)`;
+    if(!confirm(msg)) return;
+    list.splice(i,1);saveVendors(list);render();showToast('삭제 완료');
   };
   render();
 }
@@ -1417,6 +1804,34 @@ const SEED_REPAIR_DATA=[{"금형번호": "10DHA248A", "수리일자": "2022-01-2
 renderCats();
 refreshDashboard();
 refreshSettings();
+
+/* ===== Supabase 자동 동기화 (페이지 로드 시 다운로드) ===== */
+(async function autoSync(){
+  if(!sbConfigured()) return;
+  console.log('[Supabase] 자동 동기화 시작...');
+  const before={
+    mold:JSON.stringify(getMolds()),
+    repair:JSON.stringify(getRepairs()),
+    vendor:JSON.stringify(getVendors()),
+    type:JSON.stringify(getRepairTypes())
+  };
+  const res=await sbDownloadAll();
+  if(res.ok && res.applied>0){
+    const after={
+      mold:localStorage.getItem('moldDB')||'[]',
+      repair:localStorage.getItem('repairHistory')||'[]',
+      vendor:localStorage.getItem('repairVendors')||'[]',
+      type:localStorage.getItem('repairTypeList')||'[]'
+    };
+    const changed=before.mold!==after.mold||before.repair!==after.repair||before.vendor!==after.vendor||before.type!==after.type;
+    if(changed){
+      console.log('[Supabase] 클라우드 데이터로 갱신됨 - 화면 새로고침');
+      refreshDashboard();
+      refreshSettings();
+    }
+  }
+  updateSbStatusUI();
+})();
 </script>
 </body>
 </html>
