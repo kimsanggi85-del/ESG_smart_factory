@@ -512,7 +512,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
       </div>
     </div>
     <div class="alarm-body" id="alarmBody"></div>
-    <div class="alarm-warn">⚠️ 수리 상태를 <b>'완료'</b>로 변경해야 알림이 멈춥니다</div>
+    <div class="alarm-warn">⚠️ <b>'✅ 입고완료 처리'</b> 또는 상태를 <b>'완료'</b>로 변경해야 알림이 멈춥니다</div>
     <div class="alarm-footer">
       <button class="alarm-btn-snooze" onclick="snoozeAlarm()">5분 후</button>
       <button class="alarm-btn-ack" onclick="acknowledgeAlarm()">3분 닫기</button>
@@ -610,7 +610,7 @@ function showAlarm(items){
       const dot=r['상태']==='수리대기'?'🔴':'🔵';
       const dataAttr=esc2(JSON.stringify(r));
       return `<div class="alarm-item ${urgent}" onclick="openRepairFromAlarm(${dataAttr})">
-        <div class="alarm-item-title">${dot} ${esc(r['금형번호']||'-')} <span style="float:right;font-size:10px;color:#a5b4fc;font-weight:600">탭하여 상태 변경 ›</span></div>
+        <div class="alarm-item-title">${dot} ${esc(r['금형번호']||'-')} <span style="float:right;font-size:10px;color:#a5b4fc;font-weight:600">탭하여 처리 ›</span></div>
         <div class="alarm-item-meta"><span>📝 ${esc((r['수리내용']||'').slice(0,50))}${(r['수리내용']||'').length>50?'…':''}</span></div>
         <div class="alarm-item-meta" style="margin-top:4px">
           <span>📅 ${esc(r['수리일자']||'-')}</span>
@@ -645,8 +645,12 @@ function openRepairFromAlarm(repair){
   hideAlarm();
   _alarmSnoozeUntil=Date.now()+30000;
   setTimeout(()=>{
+    // 현재 데이터로 재조회 (다른 PC에서 갱신된 최신 상태 반영)
+    const repairs=getRepairs();
     const key=repairKey(repair);
-    openModal('repairRequest', Object.assign({}, repair, {_key:key}));
+    const fresh=repairs.find(r=>repairKey(r)===key) || repair;
+    // 수리 상세 화면으로 이동 (✅ 입고완료 처리 버튼, ✏ 수정 버튼 둘 다 거기 있음)
+    openModal('repairDetail', fresh);
   },200);
 }
 
@@ -1526,6 +1530,12 @@ function advanceRepairStage(key, nextState){
   showToast(`${labels[nextState]} 처리 완료`);
   closeModal();
   refreshDashboard();
+  // 🔔 상태 변경 → 알림 즉시 재평가 (완료 시 본인 알림 종료, 다른 미완료건 있으면 그것만 표시)
+  if(typeof checkAndShowAlarm==='function'){
+    _alarmSnoozeUntil=0;
+    refreshSettings();
+    setTimeout(checkAndShowAlarm, 500);
+  }
   setTimeout(()=>openModal('repairDetail',repairs[idx]),350);
 }
 
@@ -1536,6 +1546,12 @@ function deleteRepair(key){
   showToast('삭제 완료');
   closeModal();
   refreshDashboard();
+  // 🔔 삭제 시에도 알림 재평가 (미완료건 삭제되면 자동으로 알림 사라짐)
+  if(typeof checkAndShowAlarm==='function'){
+    _alarmSnoozeUntil=0;
+    refreshSettings();
+    setTimeout(checkAndShowAlarm, 500);
+  }
 }
 
 /* ================================================================
