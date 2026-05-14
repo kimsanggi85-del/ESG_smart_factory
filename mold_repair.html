@@ -1445,6 +1445,9 @@ function renderRepairList(container){
    수리 상세
 ================================================================ */
 function renderRepairDetail(container, data){
+  // 🔑 현재 상세 보고 있는 수리 데이터를 전역에 저장 (수정/의뢰 버튼에서 사용)
+  window._curDetail = data;
+
   const fields=[['금형번호'],['수리일자'],['수리유형'],['수리내용'],['수리업체'],['수리비용','원'],['완료일자'],['담당자'],['상태'],['비고']];
   const hasPhotos=data['before_img']||data['after_img'];
   
@@ -1508,29 +1511,67 @@ function renderRepairDetail(container, data){
       </div>
     `:''}
     <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn-primary" style="flex:1" onclick="editRepairByKey('${esc(repairKey(data))}')">✏️ 수정</button>
-      <button class="btn-danger" style="flex:1" onclick="deleteRepair('${esc(repairKey(data))}')">🗑️ 삭제</button>
+      <button class="btn-primary" style="flex:1" onclick="editCurrentRepair()">✏️ 수정</button>
+      <button class="btn-danger" style="flex:1" onclick="deleteCurrentRepair()">🗑️ 삭제</button>
     </div>
   `;
 
   // 단계별 버튼 렌더
   const area=document.getElementById('stageActionArea');
-  const rkey=esc(repairKey(data));
   if(curStage===0){
-    area.innerHTML=`<button class="stage-btn next" onclick="advanceRepairStage('${rkey}','설계의뢰')">➡️ 금형설계담당 의뢰</button>`;
+    area.innerHTML=`<button class="stage-btn next" onclick="advanceCurrentRepair('설계의뢰')">➡️ 금형설계담당 의뢰</button>`;
   }else if(curStage===1){
     area.innerHTML=`<div style="display:flex;gap:8px;margin-top:8px">
-      <button class="stage-btn next" style="flex:1;background:linear-gradient(135deg,#7c3aed,#a78bfa)" onclick="advanceRepairStage('${rkey}','측정의뢰(자체)')">🔍 생산자체확인</button>
-      <button class="stage-btn next" style="flex:1;background:linear-gradient(135deg,#0891b2,#22d3ee)" onclick="advanceRepairStage('${rkey}','측정의뢰(측정실)')">📐 측정실의뢰</button>
+      <button class="stage-btn next" style="flex:1;background:linear-gradient(135deg,#7c3aed,#a78bfa)" onclick="advanceCurrentRepair('측정의뢰(자체)')">🔍 생산자체확인</button>
+      <button class="stage-btn next" style="flex:1;background:linear-gradient(135deg,#0891b2,#22d3ee)" onclick="advanceCurrentRepair('측정의뢰(측정실)')">📐 측정실의뢰</button>
     </div>`;
   }else if(curStage===2){
-    area.innerHTML=`<button class="stage-btn complete" onclick="advanceRepairStage('${rkey}','완료')">✅ 입고완료 처리</button>`;
+    area.innerHTML=`<button class="stage-btn complete" onclick="advanceCurrentRepair('완료')">✅ 입고완료 처리</button>`;
   }else{
     area.innerHTML=`<button class="stage-btn disabled">✅ 수리 완료됨</button>`;
   }
 }
 
 /* 단계 진행 */
+// 🔧 전역 변수 기반 안전 헬퍼 함수들 (수정/삭제/단계진행)
+function editCurrentRepair(){
+  try{
+    const r = window._curDetail;
+    if(!r){ alert('수리 데이터를 찾을 수 없습니다.\n상세 화면을 다시 열어주세요.'); return; }
+    const k = repairKey(r);
+    closeModal();
+    setTimeout(()=>{
+      try{
+        openModal('repairRequest', Object.assign({}, r, {_key: k}));
+      }catch(e){
+        alert('수정 모달 열기 실패:\n' + (e && e.message ? e.message : e));
+      }
+    }, 300);
+  }catch(e){
+    alert('수정 처리 오류:\n' + (e && e.message ? e.message : e));
+  }
+}
+
+function deleteCurrentRepair(){
+  try{
+    const r = window._curDetail;
+    if(!r){ alert('수리 데이터를 찾을 수 없습니다.'); return; }
+    deleteRepair(repairKey(r));
+  }catch(e){
+    alert('삭제 처리 오류:\n' + (e && e.message ? e.message : e));
+  }
+}
+
+function advanceCurrentRepair(nextState){
+  try{
+    const r = window._curDetail;
+    if(!r){ alert('수리 데이터를 찾을 수 없습니다.\n상세 화면을 다시 열어주세요.'); return; }
+    advanceRepairStage(repairKey(r), nextState);
+  }catch(e){
+    alert('단계 진행 오류:\n' + (e && e.message ? e.message : e));
+  }
+}
+
 function editRepairByKey(key){
   const r = getRepairs().find(x => repairKey(x) === key);
   if(!r){ showToast('수리건을 찾을 수 없습니다'); return; }
