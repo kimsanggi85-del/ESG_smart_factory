@@ -1078,8 +1078,20 @@ const SB_KEY_MAP = {
   'user_pins': {ls:'userPins', default:[]}
 };
 
-function getSbUrl(){ return (localStorage.getItem('sbUrl')||'').trim().replace(/\/+$/,''); }
-function getSbKey(){ return (localStorage.getItem('sbKey')||'').trim(); }
+/* ================================================================
+   🔥 하드코딩된 회사 공용 Supabase 설정
+   - 새 기기에서 첫 접속 시 자동으로 동기화 활성
+   - 기존 사용자(localStorage에 값이 있는 경우)는 기존 값 유지
+   ================================================================ */
+const HARDCODED_SB_URL = 'https://ebthltdmxpzlkfwvdloz.supabase.co';
+const HARDCODED_SB_KEY = 'sb_publishable_ZSgcZapb7cTgFezGm0V_ow_9MT153n9';
+(function autoSetupSupabase(){
+  if(!localStorage.getItem('sbUrl')) localStorage.setItem('sbUrl', HARDCODED_SB_URL);
+  if(!localStorage.getItem('sbKey')) localStorage.setItem('sbKey', HARDCODED_SB_KEY);
+})();
+
+function getSbUrl(){ return (localStorage.getItem('sbUrl')||HARDCODED_SB_URL||'').trim().replace(/\/+$/,''); }
+function getSbKey(){ return (localStorage.getItem('sbKey')||HARDCODED_SB_KEY||'').trim(); }
 function sbConfigured(){ return !!(getSbUrl() && getSbKey()); }
 
 const _sbUploadTimers = {};
