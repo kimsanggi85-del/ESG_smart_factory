@@ -89,6 +89,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
 .set-group-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
 .set-group.open .set-group-body{max-height:1500px}
 .set-group-body-inner{padding:4px 10px 10px 10px}
+/* 🔓 그룹 접힘 기능 비활성화 - 항상 펼쳐진 상태로 표시 */
+.set-group-body{max-height:none !important;overflow:visible !important;transition:none !important}
+.set-group-title{cursor:default !important}
+.set-group-title:hover{background:#1a1d27 !important}
+.set-group-toggle{display:none !important}
 .set-item{display:flex;align-items:center;justify-content:space-between;padding:12px 12px;border-radius:10px;background:#15171f;border:1px solid #252938;margin-bottom:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .set-item:last-child{margin-bottom:0}
 .set-item:active{background:#222838}
@@ -1821,7 +1826,7 @@ function renderCloudSync(container){
   const render=()=>{
     const url=getSbUrl(), key=getSbKey();
     const isConfigured = !!(url && key);
-    const isLocked = isConfigured && !unlocked;
+    const isLocked = false; // 🔓 잠금 기능 제거 - 항상 잠금 해제 상태
     const cnt={
       mold:getMolds().length,
       repair:getRepairs().length,
