@@ -535,7 +535,21 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
 function getMolds(){ return JSON.parse(localStorage.getItem('moldDB')||'[]') }
 function getRepairs(){ return JSON.parse(localStorage.getItem('repairHistory')||'[]') }
 function saveMolds(d){ localStorage.setItem('moldDB',JSON.stringify(d)); sbQueueUpload('mold_db_v2',d); }
-function saveRepairs(d){ localStorage.setItem('repairHistory',JSON.stringify(d)); sbQueueUpload('repair_history_v2',d); }
+function saveRepairs(d){ 
+  try {
+    localStorage.setItem('repairHistory',JSON.stringify(d));
+    sbQueueUpload('repair_history_v2',d);
+    return true;
+  } catch(e){
+    if(e.name==='QuotaExceededError' || e.code===22 || e.code===1014){
+      alert('⚠️ 저장 공간 부족\n\n사진 용량이 너무 큽니다. 사진을 더 작게 압축하거나 일부 삭제해주세요.\n\n오류: ' + e.message);
+    } else {
+      alert('⚠️ 저장 실패\n\n' + (e.message||e));
+    }
+    console.error('[saveRepairs] error:', e);
+    return false;
+  }
+}
 function getVendors(){ return JSON.parse(localStorage.getItem('repairVendors')||'["태진툴","거명정밀","한성특수금속열처리","외주A","외주B"]') }
 function saveVendors(d){ localStorage.setItem('repairVendors',JSON.stringify(d)); sbQueueUpload('vendors',d); }
 function getRepairTypes(){ return JSON.parse(localStorage.getItem('repairTypeList')||'["크랙수리","마모교체","파손교체","용접보수","연마","세척정비","기타"]') }
@@ -1286,7 +1300,30 @@ function renderRepairRequestForm(container, editData, urgent){
   const types=getRepairTypes();
   const d=editData||{};
   const today=new Date().toISOString().slice(0,10);
-  window._photoData={before_img:d['before_img']||null, after_img:d['after_img']||null};
+  
+  // 🔄 사진 백업 자동 복원 (카메라 촬영으로 페이지가 종료된 경우 대비)
+  // 같은 수리건(같은 _key)을 다시 연 경우에만 복원
+  let restoredBefore=null, restoredAfter=null;
+  try{
+    const backupKey=sessionStorage.getItem('_photoBackup_key');
+    const currentKey=d._key||'';
+    if(backupKey===currentKey){
+      restoredBefore=sessionStorage.getItem('_photoBackup_before_img');
+      restoredAfter=sessionStorage.getItem('_photoBackup_after_img');
+      if(restoredBefore||restoredAfter){
+        setTimeout(()=>showToast('이전 작업의 사진이 복원되었습니다'),500);
+      }
+    }
+  }catch(e){}
+  
+  window._currentEditKey=d._key||'';
+  window._photoData={
+    before_img: d['before_img']||restoredBefore||null,
+    after_img: d['after_img']||restoredAfter||null
+  };
+  // 복원된 사진이 있으면 d에도 반영해서 화면에 표시되도록
+  if(restoredBefore && !d['before_img']) d['before_img']=restoredBefore;
+  if(restoredAfter && !d['after_img']) d['after_img']=restoredAfter;
   
   container.innerHTML=`
     ${urgent?'<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#f87171;font-weight:600">⚠️ 긴급 수리요청은 즉시 처리됩니다</div>':''}
@@ -1361,7 +1398,7 @@ function renderRepairRequestForm(container, editData, urgent){
           <input type="file" accept="image/*" onchange="handlePhotoUpload(this,'photo-after','after_img')">
         </div>
       </div>
-      <div style="font-size:10px;color:#5a5e72;margin-top:4px;text-align:center">자동 압축 (최대 800px, JPEG 30% 품질)</div>
+      <div style="font-size:10px;color:#5a5e72;margin-top:4px;text-align:center">자동 압축 (최대 600px, JPEG 25% 품질)</div>
     </div>
     <button class="btn-primary" style="margin-top:14px" onclick="submitRepairRequest(${editData?`'${esc(d._key||'')}'`:'null'},${urgent?'true':'false'})">${editData?'수정 저장':'등록'}</button>
   `;
@@ -1393,7 +1430,14 @@ function submitRepairRequest(editKey, urgent){
   }else{
     repairs.push(row);
   }
-  saveRepairs(repairs);
+  if(!saveRepairs(repairs)) return; // 저장 실패 시 후속 처리 중단 (이미 alert 표시됨)
+  // 폼/사진 백업 데이터 모두 삭제 (저장 성공)
+  try{
+    sessionStorage.removeItem('_repairFormBackup');
+    sessionStorage.removeItem('_photoBackup_key');
+    sessionStorage.removeItem('_photoBackup_before_img');
+    sessionStorage.removeItem('_photoBackup_after_img');
+  }catch(e){}
   showToast(editKey?'수리이력 수정 완료':'수리요청 등록 완료');
   closeModal();
   refreshDashboard();
@@ -2336,7 +2380,7 @@ function showToast(m){const e=document.getElementById('toast');e.textContent=m;e
 /* ================================================================
    사진 압축 (최소 용량: 최대 800px, JPEG quality 0.3)
 ================================================================ */
-function compressImage(file, maxSize=800, quality=0.3){
+function compressImage(file, maxSize=600, quality=0.25){
   return new Promise((resolve,reject)=>{
     const reader=new FileReader();
     reader.onload=e=>{
@@ -2371,6 +2415,13 @@ function handlePhotoUpload(inputEl, targetId, dataField){
   compressImage(file).then(({dataUrl,sizeKB})=>{
     window._photoData=window._photoData||{};
     window._photoData[dataField]=dataUrl;
+    // 🔄 사진 자동 백업 (페이지 종료 대비)
+    try{
+      sessionStorage.setItem('_photoBackup_key', window._currentEditKey||'');
+      sessionStorage.setItem('_photoBackup_'+dataField, dataUrl);
+    }catch(e){
+      console.warn('[photo backup] sessionStorage 저장 실패:', e);
+    }
     const box=document.getElementById(targetId);
     box.classList.add('has-img');
     box.innerHTML=`<img src="${dataUrl}"><button class="photo-remove" onclick="event.stopPropagation();removePhoto('${targetId}','${dataField}')">✕</button><input type="file" accept="image/*" onchange="handlePhotoUpload(this,'${targetId}','${dataField}')">`;
@@ -2381,6 +2432,8 @@ function handlePhotoUpload(inputEl, targetId, dataField){
 function removePhoto(targetId, dataField){
   window._photoData=window._photoData||{};
   delete window._photoData[dataField];
+  // 백업도 함께 삭제
+  try{ sessionStorage.removeItem('_photoBackup_'+dataField); }catch(e){}
   const label=dataField==='before_img'?'수리 전':'수리 후';
   document.getElementById(targetId).classList.remove('has-img');
   document.getElementById(targetId).innerHTML=`<div class="ph-icon">📷</div><div class="ph-label">${label}</div><div class="ph-size">탭하여 사진 추가</div><input type="file" accept="image/*" onchange="handlePhotoUpload(this,'${targetId}','${dataField}')">`;
