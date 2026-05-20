@@ -533,12 +533,98 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
    데이터 레이어 (localStorage + Supabase 자동 동기화)
 ================================================================ */
 function getMolds(){ return JSON.parse(localStorage.getItem('moldDB')||'[]') }
-function getRepairs(){ return JSON.parse(localStorage.getItem('repairHistory')||'[]') }
 function saveMolds(d){ localStorage.setItem('moldDB',JSON.stringify(d)); sbQueueUpload('mold_db_v2',d); }
+
+/* 🖼️ 사진 분리 저장 (2026-05-20 추가) — repairHistory(메타) + repairPhotos(사진) */
+function getRepairPhotos(){ 
+  try{ return JSON.parse(localStorage.getItem('repairPhotos')||'{}'); }
+  catch(e){ return {}; }
+}
+function genPhotoId(){ return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+
+// 기존 데이터의 사진을 자동으로 별도 저장소로 분리
+function migrateRepairPhotos(){
+  let repairs, photos;
+  try{
+    repairs=JSON.parse(localStorage.getItem('repairHistory')||'[]');
+    photos=JSON.parse(localStorage.getItem('repairPhotos')||'{}');
+  }catch(e){ console.error('[migrate] parse error', e); return; }
+  
+  let migrated=0;
+  repairs.forEach(r=>{
+    if(r.before_img || r.after_img){
+      if(!r._photo_id) r._photo_id=genPhotoId();
+      photos[r._photo_id]={
+        before_img: r.before_img||'',
+        after_img: r.after_img||''
+      };
+      delete r.before_img;
+      delete r.after_img;
+      migrated++;
+    }
+  });
+  
+  if(migrated>0){
+    try{
+      localStorage.setItem('repairHistory', JSON.stringify(repairs));
+      localStorage.setItem('repairPhotos', JSON.stringify(photos));
+      console.log(`[migrate] ${migrated}건 사진 분리 완료`);
+      sbQueueUpload('repair_history_v2', repairs);
+      sbQueueUpload('repair_photos_v1', photos);
+    }catch(e){ console.error('[migrate] save error', e); }
+  }
+}
+
+// getRepairs: 화면 표시용으로 사진을 자동 합쳐서 반환 (기존 호출부 호환)
+function getRepairs(){
+  try{
+    const repairs=JSON.parse(localStorage.getItem('repairHistory')||'[]');
+    const photos=getRepairPhotos();
+    return repairs.map(r=>{
+      if(r._photo_id && photos[r._photo_id]){
+        return Object.assign({}, r, {
+          before_img: photos[r._photo_id].before_img||'',
+          after_img: photos[r._photo_id].after_img||''
+        });
+      }
+      // 옛 데이터 호환: row에 사진이 직접 있을 수도
+      return Object.assign({}, r, {
+        before_img: r.before_img||'',
+        after_img: r.after_img||''
+      });
+    });
+  }catch(e){ console.error('[getRepairs] error', e); return []; }
+}
+
+// saveRepairs: 저장 시 사진을 자동으로 분리하여 별도 키에 저장
 function saveRepairs(d){ 
   try {
-    localStorage.setItem('repairHistory',JSON.stringify(d));
-    sbQueueUpload('repair_history_v2',d);
+    const repairs=[];
+    const photos=getRepairPhotos();
+    
+    d.forEach(r=>{
+      const clean=Object.assign({}, r);
+      const hasPhoto=r.before_img||r.after_img;
+      
+      if(hasPhoto){
+        if(!clean._photo_id) clean._photo_id=genPhotoId();
+        photos[clean._photo_id]={
+          before_img: r.before_img||'',
+          after_img: r.after_img||''
+        };
+      } else if(clean._photo_id){
+        delete photos[clean._photo_id];
+        delete clean._photo_id;
+      }
+      delete clean.before_img;
+      delete clean.after_img;
+      repairs.push(clean);
+    });
+    
+    localStorage.setItem('repairHistory', JSON.stringify(repairs));
+    localStorage.setItem('repairPhotos', JSON.stringify(photos));
+    sbQueueUpload('repair_history_v2', repairs);
+    sbQueueUpload('repair_photos_v1', photos);
     return true;
   } catch(e){
     if(e.name==='QuotaExceededError' || e.code===22 || e.code===1014){
@@ -1088,10 +1174,11 @@ function testAlarm(){
    - 데이터 변경 시: localStorage → 클라우드 (1초 debounce 업로드)
 ================================================================ */
 const SB_TABLE = 'kv_store';
-const SB_KEYS = ['mold_db_v2','repair_history_v2','vendors','repair_types','user_pins'];
+const SB_KEYS = ['mold_db_v2','repair_history_v2','repair_photos_v1','vendors','repair_types','user_pins'];
 const SB_KEY_MAP = {
   'mold_db_v2': {ls:'moldDB', default:[]},
   'repair_history_v2': {ls:'repairHistory', default:[]},
+  'repair_photos_v1': {ls:'repairPhotos', default:{}},
   'vendors': {ls:'repairVendors', default:["태진툴","거명정밀","한성특수금속열처리","외주A","외주B"]},
   'repair_types': {ls:'repairTypeList', default:["크랙수리","마모교체","파손교체","용접보수","연마","세척정비","기타"]},
   'user_pins': {ls:'userPins', default:[]}
@@ -1123,8 +1210,11 @@ function sbQueueUpload(key, value){
 }
 
 async function sbUpload(key, value){
-  if(!sbConfigured()) return;
+  if(!sbConfigured()) return {ok:false, error:'not_configured'};
   const url=getSbUrl(), apikey=getSbKey();
+  const bodyStr=JSON.stringify({key:key, value:value});
+  const sizeMB=(bodyStr.length/1024/1024).toFixed(2);
+  
   try{
     _sbStatus.syncing=true; updateSbStatusUI();
     const res=await fetch(`${url}/rest/v1/${SB_TABLE}?on_conflict=key`,{
@@ -1135,17 +1225,21 @@ async function sbUpload(key, value){
         'Content-Type':'application/json',
         'Prefer':'resolution=merge-duplicates,return=minimal'
       },
-      body:JSON.stringify({key:key, value:value})
+      body:bodyStr
     });
     if(!res.ok){
       const t=await res.text();
-      throw new Error(`HTTP ${res.status}: ${t}`);
+      throw new Error(`HTTP ${res.status}: ${t.slice(0,200)} (size=${sizeMB}MB)`);
     }
     _sbStatus.lastSync=new Date();
     _sbStatus.lastError=null;
+    _sbStatus.lastUploadSize=sizeMB;
+    return {ok:true, sizeMB};
   }catch(e){
-    _sbStatus.lastError=e.message;
-    console.warn('[Supabase upload]', key, e);
+    _sbStatus.lastError=`[${key}] ${e.message}`;
+    _sbStatus.lastErrorTime=new Date();
+    console.warn('[Supabase upload]', key, sizeMB+'MB', e);
+    return {ok:false, error:e.message, sizeMB};
   }finally{
     _sbStatus.syncing=false; updateSbStatusUI();
   }
@@ -1188,12 +1282,20 @@ async function sbDownloadAll(){
 async function sbUploadAll(){
   if(!sbConfigured()) return {ok:false, reason:'not_configured'};
   let success=0, fail=0;
+  const details=[];
   for(const key of SB_KEYS){
     const map=SB_KEY_MAP[key];
     const v=JSON.parse(localStorage.getItem(map.ls)||JSON.stringify(map.default));
-    try{ await sbUpload(key,v); success++; }catch(e){ fail++; }
+    const result=await sbUpload(key,v);
+    if(result && result.ok){ 
+      success++; 
+      details.push(`✅ ${key} (${result.sizeMB}MB)`); 
+    } else { 
+      fail++; 
+      details.push(`❌ ${key}: ${result?.error||'알 수 없음'}`); 
+    }
   }
-  return {ok:fail===0, success, fail};
+  return {ok:fail===0, success, fail, details};
 }
 
 // 연결 테스트
@@ -1973,7 +2075,7 @@ function renderCloudSync(container){
         • Supabase URL과 anon KEY를 입력하면 <b>모든 기기에서 자동 동기화</b>됩니다.<br>
         • 데이터 변경 시 자동 업로드, 페이지 로드 시 자동 다운로드.<br>
         • 테이블: <code style="background:#0f172a;padding:1px 6px;border-radius:4px">kv_store</code> (key TEXT PK, value JSONB)<br>
-        • 저장되는 키: <code style="background:#0f172a;padding:1px 6px;border-radius:4px">mold_db_v2, repair_history_v2, vendors, repair_types</code>
+        • 저장되는 키: <code style="background:#0f172a;padding:1px 6px;border-radius:4px">mold_db_v2, repair_history_v2, repair_photos_v1, vendors, repair_types</code>
       </div>
 
       ${isLocked?`
@@ -2100,10 +2202,13 @@ CREATE INDEX IF NOT EXISTS idx_kv_store_updated
     r.innerHTML='<span style="color:#fbbf24">🔄 업로드 중...</span>';
     const res=await sbUploadAll();
     if(res.ok){
-      r.innerHTML=`<span style="color:#4ade80">✅ 업로드 완료 (${res.success}개 키)</span>`;
+      r.innerHTML=`<span style="color:#4ade80">✅ 업로드 완료 (${res.success}개 키)</span><div style="font-size:11px;color:#8b8fa3;margin-top:6px">${res.details.join('<br>')}</div>`;
       showToast('업로드 완료');
     }else{
-      r.innerHTML=`<span style="color:#f87171">❌ 일부 실패 (성공 ${res.success} / 실패 ${res.fail})</span>`;
+      r.innerHTML=`<span style="color:#f87171">❌ 일부 실패 (성공 ${res.success} / 실패 ${res.fail})</span><div style="font-size:11px;color:#8b8fa3;margin-top:6px">${res.details.join('<br>')}</div>`;
+      // 실패 내용을 alert로도 알림
+      const failedDetails=res.details.filter(d=>d.startsWith('❌')).join('\n');
+      alert('⚠️ 일부 데이터 업로드 실패\n\n' + failedDetails + '\n\n사진이 너무 많거나 큰 경우 발생할 수 있습니다. 사진을 줄이거나 일부 수리건의 사진을 삭제해 보세요.');
     }
   };
 
@@ -2114,6 +2219,8 @@ CREATE INDEX IF NOT EXISTS idx_kv_store_updated
     r.innerHTML='<span style="color:#fbbf24">🔄 다운로드 중...</span>';
     const res=await sbDownloadAll();
     if(res.ok){
+      // 다운로드 후 옛 구조의 사진이 있으면 자동 분리
+      migrateRepairPhotos();
       r.innerHTML=`<span style="color:#4ade80">✅ 다운로드 완료 (${res.applied}개 키) - 새로고침합니다</span>`;
       setTimeout(()=>location.reload(), 1200);
     }else{
@@ -2284,7 +2391,7 @@ function refreshSettings(){
   const el2=document.getElementById('infoRepairCnt'); if(el2) el2.textContent=r;
   const el3=document.getElementById('infoStorage');
   if(el3){
-    const bytes=(localStorage.getItem('moldDB')||'').length+(localStorage.getItem('repairHistory')||'').length;
+    const bytes=(localStorage.getItem('moldDB')||'').length+(localStorage.getItem('repairHistory')||'').length+(localStorage.getItem('repairPhotos')||'').length;
     el3.textContent=Math.round(bytes/1024);
   }
   // 🔔 알림 뱃지 갱신
@@ -2669,8 +2776,14 @@ setTimeout(()=>{ if(typeof startAlarmLoop==='function') startAlarmLoop(); }, 150
 
 /* ===== Supabase 자동 동기화 (페이지 로드 시 다운로드) ===== */
 (async function autoSync(){
-  if(!sbConfigured()) return;
+  if(!sbConfigured()){
+    // 오프라인이어도 로컬에서 마이그레이션 실행
+    migrateRepairPhotos();
+    return;
+  }
   console.log('[Supabase] 자동 동기화 시작...');
+  // 다운로드 전에도 한 번 마이그레이션 (로컬 데이터 정리)
+  migrateRepairPhotos();
   const before={
     mold:JSON.stringify(getMolds()),
     repair:JSON.stringify(getRepairs()),
@@ -2679,6 +2792,8 @@ setTimeout(()=>{ if(typeof startAlarmLoop==='function') startAlarmLoop(); }, 150
   };
   const res=await sbDownloadAll();
   if(res.ok && res.applied>0){
+    // 다운로드된 데이터에 옛 구조(사진이 row에 박힌)가 있을 수 있으므로 다시 마이그레이션
+    migrateRepairPhotos();
     const after={
       mold:localStorage.getItem('moldDB')||'[]',
       repair:localStorage.getItem('repairHistory')||'[]',
@@ -2690,7 +2805,6 @@ setTimeout(()=>{ if(typeof startAlarmLoop==='function') startAlarmLoop(); }, 150
       console.log('[Supabase] 클라우드 데이터로 갱신됨 - 화면 새로고침');
       refreshDashboard();
       refreshSettings();
-      // 🔔 동기화로 신규건 들어왔을 수 있음
       if(typeof checkAndShowAlarm==='function') checkAndShowAlarm();
     }
   }
@@ -2707,6 +2821,8 @@ setInterval(async ()=>{
     const beforeRepair=localStorage.getItem('repairHistory')||'[]';
     const res=await sbDownloadAll();
     if(res.ok){
+      // 다운로드 후 마이그레이션 (다른 기기가 옛 구조로 올렸을 수 있음)
+      migrateRepairPhotos();
       const afterRepair=localStorage.getItem('repairHistory')||'[]';
       if(beforeRepair!==afterRepair){
         console.log('[Supabase 폴링] 신규 수리데이터 감지');
