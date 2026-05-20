@@ -38,6 +38,14 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
 .sum-card.green .sum-val{color:#22c55e}
 .sum-card.blue .sum-val{color:#6366f1}
 
+/* 💾 강제 저장 버튼 */
+.force-sync-btn{display:block;width:100%;margin:4px 0 14px;padding:14px;background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(59,130,246,.35);transition:transform .15s,box-shadow .15s,opacity .2s;-webkit-tap-highlight-color:transparent}
+.force-sync-btn:hover{box-shadow:0 6px 18px rgba(59,130,246,.5)}
+.force-sync-btn:active{transform:scale(.98)}
+.force-sync-btn:disabled{opacity:.7;cursor:not-allowed;transform:none}
+.force-sync-btn.success{background:linear-gradient(135deg,#10b981,#34d399)}
+.force-sync-btn.error{background:linear-gradient(135deg,#ef4444,#f87171)}
+
 /* ===== 카드 ===== */
 .cat{border-radius:14px;margin-bottom:8px;overflow:hidden;border:1px solid #2a2e3d;background:#1a1d27;transition:border-color .3s,background .4s,box-shadow .4s}
 .cat.open{border-color:rgba(99,102,241,.3);background:#222838;box-shadow:0 0 20px rgba(99,102,241,.08)}
@@ -1698,6 +1706,9 @@ function renderRepairDetail(container, data){
       <button class="btn-primary" style="flex:1" onclick="editCurrentRepair()">✏️ 수정</button>
       <button class="btn-danger" style="flex:1" onclick="deleteCurrentRepair()">🗑️ 삭제</button>
     </div>
+    <button id="forceSyncBtn" class="force-sync-btn" onclick="forceCloudSave()">
+      💾 클라우드 DB 강제 저장
+    </button>
   `;
 
   // 단계별 버튼 렌더
@@ -2474,6 +2485,64 @@ function toggleCat(h){
   document.querySelectorAll('.cat.open').forEach(x=>{if(x!==cat){x.classList.remove('open');x.querySelector('.cat-panel').style.maxHeight='0'}});
   if(o){cat.classList.remove('open');p.style.maxHeight='0'}
   else{cat.classList.add('open');p.style.maxHeight=p.scrollHeight+'px';setTimeout(()=>cat.scrollIntoView({block:'nearest',behavior:'smooth'}),100)}
+}
+
+/* 💾 클라우드 DB 강제 저장 (대시보드 메인 버튼) */
+async function forceCloudSave(){
+  const btn=document.getElementById('forceSyncBtn');
+  if(!btn) return;
+  
+  if(!sbConfigured()){
+    alert('⚠️ Supabase 동기화 설정이 없습니다.\n\n설정 → ☁️ Supabase 동기화 설정에서 URL과 KEY를 확인하세요.');
+    return;
+  }
+  
+  const origText=btn.textContent;
+  const origClass=btn.className;
+  btn.disabled=true;
+  btn.className='force-sync-btn';
+  btn.textContent='🔄 클라우드에 저장 중...';
+  
+  try{
+    // 1) 사진 분리 마이그레이션 먼저
+    migrateRepairPhotos();
+    
+    // 2) 전체 강제 업로드
+    const res=await sbUploadAll();
+    
+    if(res.ok){
+      btn.className='force-sync-btn success';
+      btn.textContent=`✅ 저장 완료 (${res.success}개 항목)`;
+      showToast('☁️ 클라우드 저장 완료');
+      console.log('[강제저장] 성공:', res.details);
+      setTimeout(()=>{
+        btn.disabled=false;
+        btn.className=origClass;
+        btn.textContent=origText;
+      }, 3000);
+    } else {
+      btn.className='force-sync-btn error';
+      btn.textContent=`❌ 일부 실패 (${res.fail}개)`;
+      const failed=res.details.filter(d=>d.startsWith('❌')).join('\n');
+      const succeeded=res.details.filter(d=>d.startsWith('✅')).join('\n');
+      alert(`⚠️ 일부 데이터 업로드 실패\n\n[실패]\n${failed}\n\n[성공]\n${succeeded||'(없음)'}`);
+      setTimeout(()=>{
+        btn.disabled=false;
+        btn.className=origClass;
+        btn.textContent=origText;
+      }, 3000);
+    }
+  } catch(e){
+    btn.className='force-sync-btn error';
+    btn.textContent='❌ 오류 발생';
+    alert('⚠️ 강제 저장 중 오류:\n\n' + (e && e.message ? e.message : e));
+    console.error('[forceCloudSave] 예외:', e);
+    setTimeout(()=>{
+      btn.disabled=false;
+      btn.className=origClass;
+      btn.textContent=origText;
+    }, 3000);
+  }
 }
 
 function refreshDashboard(){
