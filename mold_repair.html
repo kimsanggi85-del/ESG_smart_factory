@@ -446,6 +446,15 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
         <div class="set-left"><div class="set-icon">➕</div><div><div class="set-name">금형 신규 등록</div><div class="set-desc">개별 금형 직접 추가</div></div></div>
         <div class="set-arrow">›</div>
       </div>
+      <div class="set-item" onclick="exportMoldsExcel()">
+        <div class="set-left"><div class="set-icon">📥</div><div><div class="set-name">금형 일괄 다운로드</div><div class="set-desc">전체 금형 Excel로 내보내기</div></div></div>
+        <div class="set-arrow">›</div>
+      </div>
+      <div class="set-item" onclick="document.getElementById('moldBulkUploadInput').click()">
+        <div class="set-left"><div class="set-icon">📤</div><div><div class="set-name">금형 일괄 업로드</div><div class="set-desc">Excel/CSV로 일괄 등록·갱신</div></div></div>
+        <div class="set-arrow">›</div>
+        <input type="file" id="moldBulkUploadInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="importMoldsExcel(event)">
+      </div>
       <div class="set-item" onclick="openModal('moldSearch')">
         <div class="set-left"><div class="set-icon">🔍</div><div><div class="set-name">금형 조회</div><div class="set-desc">금형번호 · 고객사별 검색</div></div></div>
         <div class="set-arrow">›</div>
@@ -1960,6 +1969,98 @@ function editMoldByKey(moldNo){
   setTimeout(()=>openModal('moldRegister', Object.assign({}, m, {_key: moldNo})), 300);
 }
 
+/* 📥 금형 일괄 다운로드 (현재 등록된 전체 금형을 Excel로) */
+function exportMoldsExcel(){
+  try{
+    const molds=getMolds();
+    if(!molds.length){ alert('등록된 금형이 없습니다.'); return; }
+    const cols=['금형번호','금형명','고객사','품번','보관위치','비고'];
+    // 내부 필드(_photo_id 등) 제외, 컬럼 순서 정리
+    const cleaned=molds.map(m=>{
+      const o={};
+      cols.forEach(c=>o[c]=m[c]||'');
+      return o;
+    });
+    const ws=XLSX.utils.json_to_sheet(cleaned, {header:cols});
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'금형DB');
+    const today=new Date().toISOString().slice(0,10);
+    XLSX.writeFile(wb,`금형DB_${today}.xlsx`);
+    showToast(`금형 ${molds.length}건 다운로드 완료`);
+  }catch(e){
+    alert('⚠️ 다운로드 오류:\n\n'+(e&&e.message?e.message:e));
+    console.error('[exportMoldsExcel]', e);
+  }
+}
+
+/* 📤 금형 일괄 업로드 (Excel/CSV로 일괄 등록·갱신, 클라우드 동기화 포함) */
+function importMoldsExcel(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  e.target.value=''; // 같은 파일 다시 선택 가능하도록
+  
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      let rows=[];
+      if(file.name.toLowerCase().endsWith('.csv')){
+        const text=new TextDecoder('utf-8').decode(new Uint8Array(ev.target.result));
+        const lines=text.split(/\r?\n/).filter(l=>l.trim());
+        const headers=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+        rows=lines.slice(1).map(l=>{
+          const vals=l.split(',').map(v=>v.trim().replace(/^"|"$/g,''));
+          const obj={}; headers.forEach((h,i)=>obj[h]=vals[i]||''); return obj;
+        });
+      }else{
+        const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array',cellDates:true});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+        rows=rows.map(r=>{const nr={};Object.keys(r).forEach(k=>{const v=r[k];nr[k]=v instanceof Date?v.toISOString().slice(0,10):v});return nr});
+      }
+      
+      if(!rows.length){ alert('데이터가 없습니다.'); return; }
+      
+      // 필수 컬럼 체크
+      if(!('금형번호' in rows[0])){
+        alert('⚠️ 필수 컬럼 "금형번호"가 없습니다.\n\n📥 금형 일괄 다운로드로 받은 양식 형식을 확인하세요.');
+        return;
+      }
+      
+      // merge 저장 (금형번호 기준 — 있으면 갱신, 없으면 추가)
+      const existing=getMolds();
+      const map=new Map(existing.map(m=>[m['금형번호'],m]));
+      let add=0, upd=0, skip=0;
+      rows.forEach(r=>{
+        const no=String(r['금형번호']||'').trim();
+        if(!no){ skip++; return; }
+        // 필수값 체크
+        if(!r['금형명'] || !r['고객사']){ skip++; return; }
+        const clean={
+          '금형번호':no,
+          '금형명':String(r['금형명']||'').trim(),
+          '고객사':String(r['고객사']||'').trim(),
+          '품번':String(r['품번']||'').trim(),
+          '보관위치':String(r['보관위치']||'').trim(),
+          '비고':String(r['비고']||'').trim()
+        };
+        map.has(no)?upd++:add++;
+        map.set(no, clean);
+      });
+      
+      const merged=[...map.values()];
+      saveMolds(merged); // ✅ localStorage + 클라우드 동기화 모두 포함
+      
+      alert(`✅ 금형 일괄 업로드 완료\n\n신규 ${add}건, 업데이트 ${upd}건${skip?`, 건너뜀 ${skip}건(필수값 누락)`:''}\n총 ${merged.length}건`);
+      showToast('금형 일괄 업로드 완료');
+      refreshDashboard();
+    }catch(err){
+      alert('⚠️ 파일 읽기 오류:\n\n'+(err&&err.message?err.message:err));
+      console.error('[importMoldsExcel]', err);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
 /* ================================================================
    금형 이력카드
 ================================================================ */
@@ -2916,6 +3017,9 @@ function saveData(type){
       merged=[...map.values()];
     }
     localStorage.setItem(key,JSON.stringify(merged));
+    // ✅ 클라우드 동기화 추가 (기존엔 누락되어 업로드 탭 데이터가 동기화 안 됐음)
+    if(type==='mold') sbQueueUpload('mold_db_v2', merged);
+    else sbQueueUpload('repair_history_v2', merged);
     document.getElementById('result-'+type).innerHTML='<div class="result-box ok">✅ 저장 완료 — 신규 <b>'+addCnt+'</b>건, 업데이트 <b>'+updCnt+'</b>건 (총 <b>'+merged.length+'</b>건)</div>';
     btn.classList.remove('saving');btn.textContent='저장 완료 ✓';
     showToast((type==='mold'?'금형 DB':'수리이력')+' 저장 완료');
