@@ -442,6 +442,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
       <span class="set-group-toggle">▼</span>
     </div>
     <div class="set-group-body"><div class="set-group-body-inner">
+      <div class="set-item" onclick="openModal('moldRegister')">
+        <div class="set-left"><div class="set-icon">➕</div><div><div class="set-name">금형 신규 등록</div><div class="set-desc">개별 금형 직접 추가</div></div></div>
+        <div class="set-arrow">›</div>
+      </div>
       <div class="set-item" onclick="openModal('moldSearch')">
         <div class="set-left"><div class="set-icon">🔍</div><div><div class="set-name">금형 조회</div><div class="set-desc">금형번호 · 고객사별 검색</div></div></div>
         <div class="set-arrow">›</div>
@@ -1376,6 +1380,7 @@ function openModal(type, data){
     case 'repairRequestUrgent': renderRepairRequestForm(b,data,true); t.textContent='🔴 긴급 수리요청'; break;
     case 'repairList': renderRepairList(b); t.textContent='의뢰 목록'; break;
     case 'moldSearch': renderMoldSearch(b); t.textContent='금형 조회'; break;
+    case 'moldRegister': renderMoldRegisterForm(b,data); t.textContent=data&&data._key?'금형 정보 수정':'금형 신규 등록'; break;
     case 'moldCard': renderMoldCard(b,data); t.textContent='금형 이력카드'; break;
     case 'lifeManage': renderLifeManage(b); t.textContent='수명 관리'; break;
     case 'progressList': renderFilteredRepairs(b,'수리중'); t.textContent='진행현황'; break;
@@ -1815,6 +1820,97 @@ function deleteRepair(key){
 }
 
 /* ================================================================
+   금형 신규 등록 / 수정 폼
+================================================================ */
+function renderMoldRegisterForm(container, editData){
+  const d=editData||{};
+  const isEdit=!!(d&&d._key);
+  window._moldEditKey=isEdit?d._key:null;
+  
+  container.innerHTML=`
+    <div class="form-group">
+      <label class="form-label">금형번호 <span class="req-mark">*</span></label>
+      <input class="form-input" id="fm-moldNo" placeholder="예: 10DHA214A" value="${esc(d['금형번호']||'')}" ${isEdit?'readonly style="opacity:.6"':''}>
+    </div>
+    <div class="form-group">
+      <label class="form-label">금형명 <span class="req-mark">*</span></label>
+      <input class="form-input" id="fm-name" placeholder="예: BMW PL7" value="${esc(d['금형명']||'')}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">고객사 <span class="req-mark">*</span></label>
+      <input class="form-input" id="fm-customer" placeholder="예: SKF씰" value="${esc(d['고객사']||'')}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">품번</label>
+      <input class="form-input" id="fm-partNo" placeholder="예: 1869-621" value="${esc(d['품번']||'')}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">보관위치</label>
+      <input class="form-input" id="fm-location" placeholder="예: A동 3열" value="${esc(d['보관위치']||'')}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">비고</label>
+      <input class="form-input" id="fm-note" placeholder="비고사항" value="${esc(d['비고']||'')}">
+    </div>
+    <button class="btn-primary" style="margin-top:14px" onclick="submitMoldRegister()">${isEdit?'금형 정보 저장':'금형 등록'}</button>
+  `;
+}
+
+function submitMoldRegister(){
+  try{
+    const moldNo=document.getElementById('fm-moldNo')?.value?.trim();
+    const name=document.getElementById('fm-name')?.value?.trim();
+    const customer=document.getElementById('fm-customer')?.value?.trim();
+    
+    if(!moldNo||!name||!customer){
+      const missing=[];
+      if(!moldNo) missing.push('금형번호');
+      if(!name) missing.push('금형명');
+      if(!customer) missing.push('고객사');
+      alert('⚠️ 필수항목 누락\n\n다음 항목을 입력해주세요:\n• ' + missing.join('\n• '));
+      return;
+    }
+    
+    const row={
+      '금형번호':moldNo,
+      '금형명':name,
+      '고객사':customer,
+      '품번':document.getElementById('fm-partNo')?.value?.trim()||'',
+      '보관위치':document.getElementById('fm-location')?.value?.trim()||'',
+      '비고':document.getElementById('fm-note')?.value?.trim()||''
+    };
+    
+    const molds=getMolds();
+    const editKey=window._moldEditKey;
+    
+    if(editKey){
+      // 수정 모드: 금형번호로 매칭
+      const idx=molds.findIndex(m=>m['금형번호']===editKey);
+      if(idx>=0) molds[idx]=row;
+      else molds.push(row);
+    } else {
+      // 신규 등록: 중복 체크
+      const dup=molds.findIndex(m=>m['금형번호']===moldNo);
+      if(dup>=0){
+        const proceed=confirm(`⚠️ 이미 등록된 금형번호입니다.\n\n[${moldNo}]\n\n기존 정보를 덮어쓰시겠습니까?`);
+        if(!proceed) return;
+        molds[dup]=row;
+      } else {
+        molds.push(row);
+      }
+    }
+    
+    saveMolds(molds);
+    showToast(editKey?'금형 정보 수정 완료':'금형 등록 완료');
+    closeModal();
+    refreshDashboard();
+  }catch(e){
+    alert('⚠️ 금형 저장 중 오류:\n\n' + (e && e.message ? e.message : e));
+    console.error('[submitMoldRegister] 예외:', e);
+  }
+}
+
+/* ================================================================
    금형 조회
 ================================================================ */
 function renderMoldSearch(container){
@@ -1848,12 +1944,20 @@ function renderMoldDetail(container, data){
 
   container.innerHTML=`
     <div class="detail-card">${fields.map(k=>`<div class="detail-row"><div class="detail-key">${k}</div><div class="detail-val">${esc(String(data[k]||'-'))}</div></div>`).join('')}</div>
+    <button class="btn-primary" style="margin-top:10px;width:100%" onclick="editMoldByKey('${esc(data['금형번호']||'')}')">✏️ 금형 정보 수정</button>
     <div class="section-title" style="margin-top:12px">🔧 수리이력 (${repairs.length}건) · 누적비용 ${totalCost.toLocaleString()}원</div>
     ${repairs.length?repairs.sort((a,b)=>(b['수리일자']||'').localeCompare(a['수리일자']||'')).slice(0,20).map(r=>{
       const st=statusClass(r['상태']);
       return `<div class="repair-item"><div class="repair-dot ${st}"></div><div class="repair-info"><div class="repair-title">${esc(r['수리내용']||'')}</div><div class="repair-meta">${r['수리일자']||''} · ${r['수리유형']||''} · ${r['수리비용']?Number(r['수리비용']).toLocaleString()+'원':''}</div></div><div class="repair-status ${st}">${r['상태']||'대기'}</div></div>`;
     }).join(''):'<div style="font-size:12px;color:#5a5e72;padding:10px">수리이력 없음</div>'}
   `;
+}
+
+function editMoldByKey(moldNo){
+  const m=getMolds().find(x=>x['금형번호']===moldNo);
+  if(!m){ showToast('금형을 찾을 수 없습니다'); return; }
+  closeModal();
+  setTimeout(()=>openModal('moldRegister', Object.assign({}, m, {_key: moldNo})), 300);
 }
 
 /* ================================================================
