@@ -1225,11 +1225,18 @@ function sbConfigured(){ return !!(getSbUrl() && getSbKey()); }
 
 const _sbUploadTimers = {};
 const _sbStatus = {lastSync:null, lastError:null, syncing:false};
+const _sbPendingUploads = {}; // 🔒 업로드 대기/진행 중인 key 추적 (다운로드 충돌 방지)
 
 function sbQueueUpload(key, value){
   if(!sbConfigured()) return;
+  _sbPendingUploads[key]=true; // 이 key는 로컬이 최신 → 다운로드가 덮어쓰면 안 됨
   clearTimeout(_sbUploadTimers[key]);
   _sbUploadTimers[key]=setTimeout(()=>sbUpload(key,value),1000);
+}
+
+// 현재 업로드 대기/진행 중인 key가 하나라도 있는지
+function sbHasPendingUploads(){
+  return Object.keys(_sbPendingUploads).some(k=>_sbPendingUploads[k]);
 }
 
 async function sbUpload(key, value){
@@ -1257,11 +1264,13 @@ async function sbUpload(key, value){
     _sbStatus.lastSync=new Date();
     _sbStatus.lastError=null;
     _sbStatus.lastUploadSize=sizeMB;
+    delete _sbPendingUploads[key]; // ✅ 업로드 성공 → 이제 이 key는 다운로드 가능
     return {ok:true, sizeMB};
   }catch(e){
     _sbStatus.lastError=`[${key}] ${e.message}`;
     _sbStatus.lastErrorTime=new Date();
     console.warn('[Supabase upload]', key, sizeMB+'MB', e);
+    // 실패 시 pending 유지 (다음 기회에 재시도 위해 로컬 보호)
     return {ok:false, error:e.message, sizeMB};
   }finally{
     _sbStatus.syncing=false; updateSbStatusUI();
@@ -1281,9 +1290,15 @@ async function sbDownloadAll(){
       throw new Error(`HTTP ${res.status}: ${t}`);
     }
     const rows=await res.json();
-    let applied=0;
+    let applied=0, skipped=0;
     rows.forEach(r=>{
       const map=SB_KEY_MAP[r.key]; if(!map) return;
+      // 🔒 업로드 대기/진행 중인 key는 덮어쓰지 않음 (로컬이 최신이므로)
+      if(_sbPendingUploads[r.key]){
+        skipped++;
+        console.log('[Supabase download] 로컬 우선 - 건너뜀:', r.key);
+        return;
+      }
       if(r.value!=null){
         localStorage.setItem(map.ls, JSON.stringify(r.value));
         applied++;
@@ -1291,7 +1306,7 @@ async function sbDownloadAll(){
     });
     _sbStatus.lastSync=new Date();
     _sbStatus.lastError=null;
-    return {ok:true, applied:applied, total:rows.length};
+    return {ok:true, applied:applied, total:rows.length, skipped:skipped};
   }catch(e){
     _sbStatus.lastError=e.message;
     console.warn('[Supabase download]', e);
@@ -3112,11 +3127,15 @@ setInterval(async ()=>{
   if(!getCurrentUser()) return;
   const o=document.getElementById('alarmOverlay');
   if(o && o.classList.contains('show')) return;
+  // 🔒 업로드 대기/진행 중이면 이번 폴링은 건너뜀 (내 변경사항 보호)
+  if(sbHasPendingUploads()){
+    console.log('[Supabase 폴링] 업로드 대기 중 - 다운로드 건너뜀');
+    return;
+  }
   try{
     const beforeRepair=localStorage.getItem('repairHistory')||'[]';
     const res=await sbDownloadAll();
     if(res.ok){
-      // 다운로드 후 마이그레이션 (다른 기기가 옛 구조로 올렸을 수 있음)
       migrateRepairPhotos();
       const afterRepair=localStorage.getItem('repairHistory')||'[]';
       if(beforeRepair!==afterRepair){
