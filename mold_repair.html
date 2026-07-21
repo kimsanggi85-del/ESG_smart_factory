@@ -320,7 +320,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
 <!-- ===== 헤더 ===== -->
 <div class="hdr" style="position:relative">
   <a class="hdr-back" href="javascript:history.back()">‹</a>
-  <div class="hdr-title">금형 수리관리 <span style="font-size:11px;font-weight:700;color:#a78bfa;-webkit-text-fill-color:#a78bfa;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);padding:2px 8px;border-radius:8px;margin-left:4px;vertical-align:middle;letter-spacing:0">v2.3</span></div>
+  <div class="hdr-title">금형 수리관리 <span style="font-size:11px;font-weight:700;color:#a78bfa;-webkit-text-fill-color:#a78bfa;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);padding:2px 8px;border-radius:8px;margin-left:4px;vertical-align:middle;letter-spacing:0">v2.4</span></div>
   <div class="hdr-sub">Mold Repair Management System</div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('dashboard')">📊 대시보드</button>
@@ -545,7 +545,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
   </div>
 </div>
 
-<div class="footer">금형 수리관리 시스템 v2.3 (Merge Sync)<br>ESG Smart Factory</div>
+<div class="footer">금형 수리관리 시스템 v2.4 (Merge Sync Fix)<br>ESG Smart Factory</div>
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -703,9 +703,12 @@ function saveRepairs(d){
       if(t>cutoff) repairs.push(r);
     });
 
-    localStorage.setItem('repairHistory', JSON.stringify(repairs));
+    // 🔄 v2.4: 저장 시에도 중복 제거 (병합 버그로 생긴 기존 중복도 자동 정리)
+    const finalRepairs=_dedupRepairs(repairs);
+
+    localStorage.setItem('repairHistory', JSON.stringify(finalRepairs));
     localStorage.setItem('repairPhotos', JSON.stringify(photos));
-    sbQueueUpload('repair_history_v2', repairs);
+    sbQueueUpload('repair_history_v2', finalRepairs);
     sbQueueUpload('repair_photos_v1', photos);
     return true;
   } catch(e){
@@ -1381,27 +1384,47 @@ async function sbUpload(key, value){
   }
 }
 
-/* 🔄 v2.3: 레코드 단위 병합
-   - keyFn으로 같은 레코드 식별, _updatedAt 최신 승
-   - _id가 없는 옛 레코드는 내용 기반 키(repairKey 등)로 매칭 */
-function _mergeRecordArrays(localArr, cloudArr, keyFn){
+/* 🔄 v2.4: 레코드 단위 병합 (중복 생성 버그 수정)
+   - keyFns 배열의 모든 키로 클라우드를 인덱싱, 로컬은 순서대로 매칭 시도
+   - v2.3 버그: _id가 있는 클라우드 레코드는 _id로만 인덱싱되어,
+     같은 레코드에 다른 _id를 부여받은 기기와 매칭 실패 → 중복 폭증
+   - 수정: _id 매칭 실패 시 내용 키(repairKey)로 반드시 재시도 */
+function _mergeRecordArrays(localArr, cloudArr, keyFns){
   const out=[]; const usedCloud=new Set();
   const cIdx=new Map();
   (cloudArr||[]).forEach((r,i)=>{
-    const k=keyFn(r); if(k && !cIdx.has(k)) cIdx.set(k,i);
-    if(r._id && !cIdx.has(r._id)) cIdx.set(r._id,i);
+    keyFns.forEach(f=>{ const k=f(r); if(k && !cIdx.has(k)) cIdx.set(k,i); });
   });
   (localArr||[]).forEach(l=>{
-    const k=keyFn(l);
-    const ci=(k && cIdx.has(k))?cIdx.get(k):-1;
+    let ci=-1;
+    for(const f of keyFns){ const k=f(l); if(k && cIdx.has(k)){ ci=cIdx.get(k); break; } }
     if(ci<0){ out.push(l); return; } // 로컬에만 존재 → 보존
-    usedCloud.add(ci);
     const c=cloudArr[ci];
     const lt=l._updatedAt||'', ct=c._updatedAt||'';
+    if(usedCloud.has(ci)){ // 같은 클라우드 레코드에 이미 매칭됨 → 로컬 중복 → 최신이면 교체
+      const prev=out.findIndex(o=>{ for(const f of keyFns){ const k=f(o); if(k && cIdx.get(k)===ci) return true; } return false; });
+      if(prev>=0 && lt>(out[prev]._updatedAt||'')) out[prev]=(lt>=ct?l:c);
+      return;
+    }
+    usedCloud.add(ci);
     out.push(lt>=ct?l:c); // 최신 수정본 승
   });
   (cloudArr||[]).forEach((c,i)=>{ if(!usedCloud.has(i)) out.push(c); }); // 클라우드에만 존재 → 추가
   return out;
+}
+
+/* 🔄 v2.4: 수리이력 중복 제거 — 같은 (금형번호|수리일자|수리내용)은 최신 1건만 유지 */
+function _dedupRepairs(arr){
+  const best=new Map(); const order=[];
+  (arr||[]).forEach(r=>{
+    const k=repairKey(r);
+    if(!k || k==='||'){ order.push({solo:r}); return; }
+    if(!best.has(k)){ best.set(k,r); order.push({key:k}); return; }
+    const b=best.get(k);
+    const rt=r._updatedAt||'', bt=b._updatedAt||'';
+    if(rt>bt || (rt===bt && r._id && !b._id)) best.set(k,r);
+  });
+  return order.map(o=>o.solo!==undefined?o.solo:best.get(o.key));
 }
 
 /* 🔄 v2.3: 미전송 데이터 경고 배너 (20초 이상 클라우드 전송 실패 시) */
@@ -1455,9 +1478,9 @@ async function sbDownloadAll(){
       const localRaw=localStorage.getItem(map.ls);
       const local=localRaw?JSON.parse(localRaw):null;
       if(r.key==='repair_history_v2'){
-        merged=_mergeRecordArrays(local||[], r.value, x=>x._id||repairKey(x));
+        merged=_dedupRepairs(_mergeRecordArrays(local||[], r.value, [x=>x._id||'', x=>repairKey(x)]));
       }else if(r.key==='mold_db_v2'){
-        merged=_mergeRecordArrays(local||[], r.value, x=>x['금형번호']||x._id||'');
+        merged=_mergeRecordArrays(local||[], r.value, [x=>x['금형번호']||'', x=>x._id||'']);
       }else if(r.key==='repair_photos_v1'){
         merged=Object.assign({}, r.value, local||{}); // 로컬에만 있는 사진 보존
       }else{
@@ -3269,6 +3292,16 @@ setTimeout(()=>{ if(typeof startAlarmLoop==='function') startAlarmLoop(); }, 150
   console.log('[Supabase] 자동 동기화 시작...');
   // 다운로드 전에도 한 번 마이그레이션 (로컬 데이터 정리)
   migrateRepairPhotos();
+  /* 🔄 v2.4: 시작 시 로컬 중복 자동 정리 (v2.3 병합 버그로 생긴 중복 제거) */
+  try{
+    const rawArr=getRepairsRaw();
+    const deduped=_dedupRepairs(rawArr);
+    if(deduped.length<rawArr.length){
+      console.log('[v2.4] 로컬 중복 정리:', rawArr.length, '→', deduped.length);
+      localStorage.setItem('repairHistory', JSON.stringify(deduped));
+      markDirty('repair_history_v2');
+    }
+  }catch(e){ console.warn('[v2.4 dedup]', e); }
   const hadDirty=hasDirty(); // 🔄 v2.3: 지난 세션에서 전송 못 한 데이터 여부
   const before={
     mold:JSON.stringify(getMolds()),
