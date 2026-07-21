@@ -320,7 +320,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
 <!-- ===== 헤더 ===== -->
 <div class="hdr" style="position:relative">
   <a class="hdr-back" href="javascript:history.back()">‹</a>
-  <div class="hdr-title">금형 수리관리 <span style="font-size:11px;font-weight:700;color:#a78bfa;-webkit-text-fill-color:#a78bfa;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);padding:2px 8px;border-radius:8px;margin-left:4px;vertical-align:middle;letter-spacing:0">v2.4</span></div>
+  <div class="hdr-title">금형 수리관리 <span style="font-size:11px;font-weight:700;color:#a78bfa;-webkit-text-fill-color:#a78bfa;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);padding:2px 8px;border-radius:8px;margin-left:4px;vertical-align:middle;letter-spacing:0">v2.5</span></div>
   <div class="hdr-sub">Mold Repair Management System</div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('dashboard')">📊 대시보드</button>
@@ -545,7 +545,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
   </div>
 </div>
 
-<div class="footer">금형 수리관리 시스템 v2.4 (Merge Sync Fix)<br>ESG Smart Factory</div>
+<div class="footer">금형 수리관리 시스템 v2.5 (Stable Sync)<br>ESG Smart Factory</div>
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1778,6 +1778,10 @@ function submitRepairRequest(){
     if(isEditMode && editKey){
       const idx=repairs.findIndex(r=>repairKey(r)===editKey);
       if(idx>=0){
+        /* 🔄 v2.5: 수정 시 원본의 _id/_photo_id 유지
+           - _id가 바뀌면 병합 시 옛 버전과 연결이 끊겨 유령 레코드가 부활함 ("저장해도 초기화" 증상) */
+        if(repairs[idx]._id) row._id=repairs[idx]._id;
+        if(repairs[idx]._photo_id) row._photo_id=repairs[idx]._photo_id;
         repairs[idx]=row;
         console.log('[수정저장] 수정 성공 idx=', idx);
       }else{
@@ -2108,7 +2112,7 @@ function submitMoldRegister(){
     if(editKey){
       // 수정 모드: 금형번호로 매칭
       const idx=molds.findIndex(m=>m['금형번호']===editKey);
-      if(idx>=0) molds[idx]=row;
+      if(idx>=0){ if(molds[idx]._id) row._id=molds[idx]._id; molds[idx]=row; } // 🔄 v2.5: _id 유지
       else molds.push(row);
     } else {
       // 신규 등록: 중복 체크
@@ -2116,6 +2120,7 @@ function submitMoldRegister(){
       if(dup>=0){
         const proceed=confirm(`⚠️ 이미 등록된 금형번호입니다.\n\n[${moldNo}]\n\n기존 정보를 덮어쓰시겠습니까?`);
         if(!proceed) return;
+        if(molds[dup]._id) row._id=molds[dup]._id; // 🔄 v2.5: _id 유지
         molds[dup]=row;
       } else {
         molds.push(row);
