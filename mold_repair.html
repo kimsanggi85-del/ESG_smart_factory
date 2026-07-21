@@ -320,7 +320,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
 <!-- ===== 헤더 ===== -->
 <div class="hdr" style="position:relative">
   <a class="hdr-back" href="javascript:history.back()">‹</a>
-  <div class="hdr-title">금형 수리관리 <span style="font-size:11px;font-weight:700;color:#a78bfa;-webkit-text-fill-color:#a78bfa;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);padding:2px 8px;border-radius:8px;margin-left:4px;vertical-align:middle;letter-spacing:0">v2.2</span></div>
+  <div class="hdr-title">금형 수리관리 <span style="font-size:11px;font-weight:700;color:#a78bfa;-webkit-text-fill-color:#a78bfa;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);padding:2px 8px;border-radius:8px;margin-left:4px;vertical-align:middle;letter-spacing:0">v2.3</span></div>
   <div class="hdr-sub">Mold Repair Management System</div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('dashboard')">📊 대시보드</button>
@@ -545,7 +545,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
   </div>
 </div>
 
-<div class="footer">금형 수리관리 시스템 v2.2<br>ESG Smart Factory</div>
+<div class="footer">금형 수리관리 시스템 v2.3 (Merge Sync)<br>ESG Smart Factory</div>
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -554,7 +554,34 @@ body{font-family:'Noto Sans KR',sans-serif;background:#0f1117;color:#e8eaf0;min-
    데이터 레이어 (localStorage + Supabase 자동 동기화)
 ================================================================ */
 function getMolds(){ return JSON.parse(localStorage.getItem('moldDB')||'[]') }
-function saveMolds(d){ localStorage.setItem('moldDB',JSON.stringify(d)); sbQueueUpload('mold_db_v2',d); }
+
+/* 🔄 v2.3: 변경된 레코드에만 _updatedAt 스탬프 (병합 동기화용)
+   - 이전 저장본과 비교해서 내용이 바뀐 레코드만 시각 갱신
+   - 전체 스탬프하면 병합 시 다른 기기 수정분을 이겨버리므로 반드시 '변경분만' */
+function _stampChanged(newArr, oldArr, keyFn){
+  const now=new Date().toISOString();
+  const oldMap=new Map();
+  (oldArr||[]).forEach(r=>{ const k=keyFn(r); if(k) oldMap.set(k, JSON.stringify(_stripMeta(r))); });
+  newArr.forEach(r=>{
+    if(!r._id && !keyFn(r)) r._id=genRecId();
+    const k=keyFn(r);
+    const prev=k?oldMap.get(k):undefined;
+    const cur=JSON.stringify(_stripMeta(r));
+    if(prev===undefined || prev!==cur){ r._updatedAt=now; }
+    if(!r._updatedAt) r._updatedAt=now; // 옛 데이터 최초 스탬프
+  });
+  return newArr;
+}
+function _stripMeta(r){ const c=Object.assign({},r); delete c._updatedAt; return c; }
+function _stripRepairMeta(r){ const c=Object.assign({},r); delete c._updatedAt; delete c.before_img; delete c.after_img; return c; }
+function genRecId(){ return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+
+function saveMolds(d){
+  const old=JSON.parse(localStorage.getItem('moldDB')||'[]');
+  _stampChanged(d, old, m=>m['금형번호']||'');
+  localStorage.setItem('moldDB',JSON.stringify(d));
+  sbQueueUpload('mold_db_v2',d);
+}
 
 /* 🖼️ 사진 분리 저장 (2026-05-20 추가) — repairHistory(메타) + repairPhotos(사진) */
 function getRepairPhotos(){ 
@@ -597,9 +624,14 @@ function migrateRepairPhotos(){
 }
 
 // getRepairs: 화면 표시용으로 사진을 자동 합쳐서 반환 (기존 호출부 호환)
+function getRepairsRaw(){
+  try{ return JSON.parse(localStorage.getItem('repairHistory')||'[]'); }
+  catch(e){ return []; }
+}
 function getRepairs(){
   try{
-    const repairs=JSON.parse(localStorage.getItem('repairHistory')||'[]');
+    // 🔄 v2.3: 삭제된 건(_deleted tombstone)은 화면에서 제외
+    const repairs=getRepairsRaw().filter(r=>!r._deleted);
     const photos=getRepairPhotos();
     return repairs.map(r=>{
       if(r._photo_id && photos[r._photo_id]){
@@ -618,11 +650,26 @@ function getRepairs(){
 }
 
 // saveRepairs: 저장 시 사진을 자동으로 분리하여 별도 키에 저장
+// 🔄 v2.3: _id/_updatedAt 자동 부여(변경분만) + 삭제 tombstone 보존
 function saveRepairs(d){ 
   try {
     const repairs=[];
     const photos=getRepairPhotos();
-    
+    const oldRaw=getRepairsRaw();
+
+    // 변경된 레코드만 _updatedAt 갱신 (_id 없으면 생성)
+    d.forEach(r=>{ if(!r._id) r._id=genRecId(); });
+    const oldMap=new Map();
+    oldRaw.forEach(r=>{ const k=r._id||repairKey(r); oldMap.set(k, JSON.stringify(_stripRepairMeta(r))); });
+    const now=new Date().toISOString();
+    d.forEach(r=>{
+      const k=r._id||repairKey(r);
+      const prev=oldMap.get(k);
+      const cur=JSON.stringify(_stripRepairMeta(r));
+      if(prev===undefined || prev!==cur) r._updatedAt=now;
+      if(!r._updatedAt) r._updatedAt=now;
+    });
+
     d.forEach(r=>{
       const clean=Object.assign({}, r);
       const hasPhoto=r.before_img||r.after_img;
@@ -644,6 +691,18 @@ function saveRepairs(d){
       repairs.push(clean);
     });
     
+    // 🔒 v2.3: 화면에 안 보이는 삭제 tombstone은 저장 시 자동 보존
+    //   (tombstone이 사라지면 다른 기기 병합 시 삭제한 건이 부활함)
+    const keepIds=new Set(repairs.map(r=>r._id||repairKey(r)));
+    const cutoff=Date.now()-90*24*3600*1000; // 90일 지난 tombstone은 청소
+    oldRaw.forEach(r=>{
+      if(!r._deleted) return;
+      const k=r._id||repairKey(r);
+      if(keepIds.has(k)) return;
+      const t=r._updatedAt?new Date(r._updatedAt).getTime():Date.now();
+      if(t>cutoff) repairs.push(r);
+    });
+
     localStorage.setItem('repairHistory', JSON.stringify(repairs));
     localStorage.setItem('repairPhotos', JSON.stringify(photos));
     sbQueueUpload('repair_history_v2', repairs);
@@ -1224,15 +1283,56 @@ function getSbKey(){ return (localStorage.getItem('sbKey')||HARDCODED_SB_KEY||''
 function sbConfigured(){ return !!(getSbUrl() && getSbKey()); }
 
 const _sbUploadTimers = {};
+const _sbUploadQueue = {}; // 🔄 v2.3: 대기 중인 업로드 값 보관 (즉시 전송용)
 const _sbStatus = {lastSync:null, lastError:null, syncing:false};
 const _sbPendingUploads = {}; // 🔒 업로드 대기/진행 중인 key 추적 (다운로드 충돌 방지)
 
+/* 🔄 v2.3: 더티 플래그를 localStorage에 영속화
+   - 저장 후 앱을 닫아 업로드가 못 나가도, 다음 접속 때 감지해서 병합 업로드
+   - 이전 버전의 "폰에서 등록했는데 다른 기기에 안 뜸" 문제의 핵심 안전망 */
+function _getDirty(){ try{return JSON.parse(localStorage.getItem('sbDirtyKeys')||'{}')}catch(e){return{}} }
+function _setDirty(o){ try{localStorage.setItem('sbDirtyKeys', JSON.stringify(o))}catch(e){} }
+function markDirty(key){ const d=_getDirty(); d[key]=Date.now(); _setDirty(d); }
+function clearDirty(key, atTime){
+  const d=_getDirty();
+  if(atTime!==undefined && d[key]!==atTime) return; // 업로드 중 새 수정 발생 → dirty 유지
+  delete d[key]; _setDirty(d);
+}
+function hasDirty(){ return Object.keys(_getDirty()).length>0; }
+
 function sbQueueUpload(key, value){
+  markDirty(key); // 오프라인이어도 기록 → 다음 접속 시 복구
   if(!sbConfigured()) return;
   _sbPendingUploads[key]=true; // 이 key는 로컬이 최신 → 다운로드가 덮어쓰면 안 됨
+  _sbUploadQueue[key]=value;
   clearTimeout(_sbUploadTimers[key]);
-  _sbUploadTimers[key]=setTimeout(()=>sbUpload(key,value),1000);
+  _sbUploadTimers[key]=setTimeout(()=>{ delete _sbUploadQueue[key]; sbUpload(key,value); },1000);
+  updateSyncBanner();
 }
+
+/* 🔄 v2.3: 화면 이탈(앱 전환/닫기) 시 대기 중인 업로드 즉시 발사
+   - 모바일에서 저장 직후 화면을 꺼도 데이터가 전송되도록 keepalive 사용 */
+function flushPendingUploads(){
+  if(!sbConfigured()) return;
+  const url=getSbUrl(), apikey=getSbKey();
+  Object.keys(_sbUploadQueue).forEach(key=>{
+    clearTimeout(_sbUploadTimers[key]);
+    const value=_sbUploadQueue[key];
+    delete _sbUploadQueue[key];
+    const body=JSON.stringify({key:key, value:value});
+    try{
+      fetch(`${url}/rest/v1/${SB_TABLE}?on_conflict=key`,{
+        method:'POST',
+        headers:{'apikey':apikey,'Authorization':`Bearer ${apikey}`,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+        body:body,
+        keepalive: body.length<60000 // keepalive는 64KB 제한, 큰 건은 일반 전송 시도
+      }).then(res=>{ if(res.ok){ clearDirty(key); delete _sbPendingUploads[key]; } }).catch(()=>{});
+    }catch(e){}
+    // 실패해도 dirty 플래그가 남아 다음 접속 때 자동 복구됨
+  });
+}
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') flushPendingUploads(); });
+window.addEventListener('pagehide', flushPendingUploads);
 
 // 현재 업로드 대기/진행 중인 key가 하나라도 있는지
 function sbHasPendingUploads(){
@@ -1241,6 +1341,7 @@ function sbHasPendingUploads(){
 
 async function sbUpload(key, value){
   if(!sbConfigured()) return {ok:false, error:'not_configured'};
+  const dirtyAt=_getDirty()[key]; // 이 시점의 dirty 타임스탬프 기억
   const url=getSbUrl(), apikey=getSbKey();
   const bodyStr=JSON.stringify({key:key, value:value});
   const sizeMB=(bodyStr.length/1024/1024).toFixed(2);
@@ -1265,17 +1366,61 @@ async function sbUpload(key, value){
     _sbStatus.lastError=null;
     _sbStatus.lastUploadSize=sizeMB;
     delete _sbPendingUploads[key]; // ✅ 업로드 성공 → 이제 이 key는 다운로드 가능
+    clearDirty(key, dirtyAt); // 🔄 v2.3: 업로드 중 새 수정이 없었을 때만 dirty 해제
+    updateSyncBanner();
     return {ok:true, sizeMB};
   }catch(e){
     _sbStatus.lastError=`[${key}] ${e.message}`;
     _sbStatus.lastErrorTime=new Date();
     console.warn('[Supabase upload]', key, sizeMB+'MB', e);
-    // 실패 시 pending 유지 (다음 기회에 재시도 위해 로컬 보호)
+    // 실패 시 pending + dirty 유지 (다음 기회에 재시도 위해 로컬 보호)
+    updateSyncBanner();
     return {ok:false, error:e.message, sizeMB};
   }finally{
     _sbStatus.syncing=false; updateSbStatusUI();
   }
 }
+
+/* 🔄 v2.3: 레코드 단위 병합
+   - keyFn으로 같은 레코드 식별, _updatedAt 최신 승
+   - _id가 없는 옛 레코드는 내용 기반 키(repairKey 등)로 매칭 */
+function _mergeRecordArrays(localArr, cloudArr, keyFn){
+  const out=[]; const usedCloud=new Set();
+  const cIdx=new Map();
+  (cloudArr||[]).forEach((r,i)=>{
+    const k=keyFn(r); if(k && !cIdx.has(k)) cIdx.set(k,i);
+    if(r._id && !cIdx.has(r._id)) cIdx.set(r._id,i);
+  });
+  (localArr||[]).forEach(l=>{
+    const k=keyFn(l);
+    const ci=(k && cIdx.has(k))?cIdx.get(k):-1;
+    if(ci<0){ out.push(l); return; } // 로컬에만 존재 → 보존
+    usedCloud.add(ci);
+    const c=cloudArr[ci];
+    const lt=l._updatedAt||'', ct=c._updatedAt||'';
+    out.push(lt>=ct?l:c); // 최신 수정본 승
+  });
+  (cloudArr||[]).forEach((c,i)=>{ if(!usedCloud.has(i)) out.push(c); }); // 클라우드에만 존재 → 추가
+  return out;
+}
+
+/* 🔄 v2.3: 미전송 데이터 경고 배너 (20초 이상 클라우드 전송 실패 시) */
+function updateSyncBanner(){
+  let el=document.getElementById('syncWarnBanner');
+  const d=_getDirty();
+  const stale=Object.values(d).some(t=>Date.now()-t>20000);
+  if(!stale){ if(el) el.style.display='none'; return; }
+  if(!el){
+    el=document.createElement('div');
+    el.id='syncWarnBanner';
+    el.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:#78350f;color:#fde68a;font-size:12px;font-weight:600;text-align:center;padding:7px 10px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)';
+    el.onclick=async ()=>{ el.textContent='⏳ 재전송 중...'; const r=await sbUploadAll(); updateSyncBanner(); if(r.ok) showToast('클라우드 전송 완료'); };
+    document.body.appendChild(el);
+  }
+  el.textContent='⚠️ 클라우드에 미전송 데이터가 있습니다 — 인터넷 연결 확인 후 여기를 눌러 재전송';
+  el.style.display='block';
+}
+setInterval(updateSyncBanner, 15000);
 
 async function sbDownloadAll(){
   if(!sbConfigured()) return {ok:false, reason:'not_configured'};
@@ -1291,6 +1436,7 @@ async function sbDownloadAll(){
     }
     const rows=await res.json();
     let applied=0, skipped=0;
+    const reupload=[]; // 병합 결과가 클라우드와 다르면 재업로드할 key
     rows.forEach(r=>{
       const map=SB_KEY_MAP[r.key]; if(!map) return;
       // 🔒 업로드 대기/진행 중인 key는 덮어쓰지 않음 (로컬이 최신이므로)
@@ -1299,14 +1445,35 @@ async function sbDownloadAll(){
         console.log('[Supabase download] 로컬 우선 - 건너뜀:', r.key);
         return;
       }
-      if(r.value!=null){
-        localStorage.setItem(map.ls, JSON.stringify(r.value));
-        applied++;
+      if(r.value==null) return;
+
+      /* 🔄 v2.3: 통째 덮어쓰기 → 레코드 단위 병합
+         - 양쪽에 있는 레코드: _updatedAt이 최신인 쪽 유지
+         - 로컬에만 있는 레코드: 보존 (이전 버전에서 소실되던 케이스)
+         - 클라우드에만 있는 레코드: 추가 */
+      let merged;
+      const localRaw=localStorage.getItem(map.ls);
+      const local=localRaw?JSON.parse(localRaw):null;
+      if(r.key==='repair_history_v2'){
+        merged=_mergeRecordArrays(local||[], r.value, x=>x._id||repairKey(x));
+      }else if(r.key==='mold_db_v2'){
+        merged=_mergeRecordArrays(local||[], r.value, x=>x['금형번호']||x._id||'');
+      }else if(r.key==='repair_photos_v1'){
+        merged=Object.assign({}, r.value, local||{}); // 로컬에만 있는 사진 보존
+      }else{
+        merged=r.value; // vendors/repair_types/user_pins: 소규모 → 클라우드 기준
       }
+      const mergedStr=JSON.stringify(merged);
+      localStorage.setItem(map.ls, mergedStr);
+      applied++;
+      // 병합으로 클라우드에 없는 로컬 데이터가 살아남았으면 → 클라우드에도 반영
+      if(mergedStr!==JSON.stringify(r.value)) reupload.push({key:r.key, value:merged});
     });
     _sbStatus.lastSync=new Date();
     _sbStatus.lastError=null;
-    return {ok:true, applied:applied, total:rows.length, skipped:skipped};
+    // 재업로드 (병합 결과 전파)
+    reupload.forEach(u=>{ console.log('[Supabase 병합] 로컬 데이터 재업로드:', u.key); sbQueueUpload(u.key, u.value); });
+    return {ok:true, applied:applied, total:rows.length, skipped:skipped, merged:reupload.length};
   }catch(e){
     _sbStatus.lastError=e.message;
     console.warn('[Supabase download]', e);
@@ -1830,8 +1997,16 @@ function advanceRepairStage(key, nextState){
 
 function deleteRepair(key){
   if(!confirm('이 수리이력을 삭제하시겠습니까?')) return;
-  const repairs=getRepairs().filter(r=>repairKey(r)!==key);
-  saveRepairs(repairs);
+  // 🔄 v2.3: 실제 제거 대신 tombstone 마킹 → 다른 기기 병합 시 부활 방지
+  const raw=getRepairsRaw();
+  const target=raw.find(r=>!r._deleted && repairKey(r)===key);
+  if(target){
+    target._deleted=true;
+    target._updatedAt=new Date().toISOString();
+    if(!target._id) target._id=genRecId();
+    localStorage.setItem('repairHistory', JSON.stringify(raw));
+    sbQueueUpload('repair_history_v2', raw);
+  }
   showToast('삭제 완료');
   closeModal();
   refreshDashboard();
@@ -3094,6 +3269,7 @@ setTimeout(()=>{ if(typeof startAlarmLoop==='function') startAlarmLoop(); }, 150
   console.log('[Supabase] 자동 동기화 시작...');
   // 다운로드 전에도 한 번 마이그레이션 (로컬 데이터 정리)
   migrateRepairPhotos();
+  const hadDirty=hasDirty(); // 🔄 v2.3: 지난 세션에서 전송 못 한 데이터 여부
   const before={
     mold:JSON.stringify(getMolds()),
     repair:JSON.stringify(getRepairs()),
@@ -3118,7 +3294,19 @@ setTimeout(()=>{ if(typeof startAlarmLoop==='function') startAlarmLoop(); }, 150
       if(typeof checkAndShowAlarm==='function') checkAndShowAlarm();
     }
   }
+  /* 🔄 v2.3: 지난 세션 미전송분 자동 복구
+     - 병합 다운로드가 로컬 데이터를 보호했으므로, 남은 dirty 키를 클라우드로 전송 */
+  if(hadDirty || hasDirty()){
+    console.log('[Supabase] 미전송 데이터 복구 업로드 시작');
+    const dirtyKeys=Object.keys(_getDirty());
+    for(const key of dirtyKeys){
+      const map=SB_KEY_MAP[key]; if(!map){ clearDirty(key); continue; }
+      const v=JSON.parse(localStorage.getItem(map.ls)||JSON.stringify(map.default));
+      await sbUpload(key, v);
+    }
+  }
   updateSbStatusUI();
+  updateSyncBanner();
 })();
 
 /* ===== 🔔 60초마다 Supabase 폴링 (다른 PC에서 등록한 신규건 감지) ===== */
